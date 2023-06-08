@@ -1,13 +1,12 @@
 {
   "name": "vite-template-redux",
   "private": true,
-  "version": "0.0.13",
+  "version": "0.0.14",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "start": "vite",
     "build": "tsc && vite build",
-    "postinstall": "vite preview",
     "preview": "vite preview",
     "test": "vitest",
     "format": "prettier --write .",
