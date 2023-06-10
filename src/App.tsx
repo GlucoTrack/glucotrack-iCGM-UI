@@ -1,26 +1,30 @@
-import logo from "./logo.svg"
-import { Counter } from "./features/counter/Counter"
-import "./App.css"
+import React, { useMemo } from "react"
+import { BrowserRouter, Route, Routes } from "react-router-dom"
+import { Box, CssBaseline, ThemeProvider } from "@mui/material"
+import { createTheme, responsiveFontSizes } from "@mui/material/styles"
+
+import themeSettings from "@/theme/themeSettings"
+import Navbar from "@/components/Navbar"
 
 function App() {
+  let theme = useMemo(() => createTheme(themeSettings), [])
+  theme = responsiveFontSizes(theme)
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <Counter />
-        <span>
-          <span>Home </span>
-          <a
-            className="App-link"
-            href="https://reactjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React
-          </a>
-        </span>
-      </header>
-    </div>
+    <React.StrictMode>
+      <BrowserRouter>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <Box height="100%" width="100%" padding="1rem 2rem 4rem 2rem">
+            <Navbar />
+            <Routes>
+              <Route path="/" element={<div>Home</div>} />
+              <Route path="/Devices" element={<div>Devices</div>} />
+            </Routes>
+          </Box>
+        </ThemeProvider>
+      </BrowserRouter>
+    </React.StrictMode>
   )
 }
 
