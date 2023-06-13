@@ -20,8 +20,10 @@ import ListItemIcon from "@mui/material/ListItemIcon"
 import ListItemText from "@mui/material/ListItemText"
 import ShowChartOutlinedIcon from "@mui/icons-material/ShowChartOutlined"
 
-import logo from "../images/dark-bg.png"
-import FlexBetweenCenter from "./FlexBetween"
+import logoDarkMode from "@/images/dark-bg.png"
+import logoLightMode from "@/images/light-bg.png"
+import FlexBetweenCenter from "@/components/FlexBetween"
+import Header from "@/components/Header"
 
 const drawerWidth = 240
 
@@ -77,6 +79,7 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 export default function PersistentDrawerLeft() {
   const theme = useTheme()
   const [open, setOpen] = React.useState(false)
+  const [selectedIndex, setSelectedIndex] = React.useState(0)
 
   const handleDrawerOpen = () => {
     setOpen(true)
@@ -84,6 +87,13 @@ export default function PersistentDrawerLeft() {
 
   const handleDrawerClose = () => {
     setOpen(false)
+  }
+
+  const handleListItemClick = (
+    event: React.MouseEvent<HTMLDivElement, MouseEvent>,
+    index: number,
+  ) => {
+    setSelectedIndex(index)
   }
 
   return (
@@ -99,7 +109,13 @@ export default function PersistentDrawerLeft() {
           >
             <MenuIcon />
           </IconButton>
-          <img src={logo} alt="logo" height={40} />
+          <img
+            src={theme.palette.mode === "dark" ? logoDarkMode : logoLightMode}
+            alt={
+              theme.palette.mode === "dark" ? "logoDarkMode" : "logoLightMode"
+            }
+            height={40}
+          />
         </Toolbar>
       </AppBar>
       <Drawer
@@ -128,7 +144,10 @@ export default function PersistentDrawerLeft() {
         <List>
           {["Home"].map((text) => (
             <ListItem key={text} disablePadding>
-              <ListItemButton>
+              <ListItemButton
+                onClick={(event) => handleListItemClick(event, 0)}
+                selected={selectedIndex === 0}
+              >
                 <ListItemIcon>
                   <HomeOutlinedIcon />
                 </ListItemIcon>
@@ -141,7 +160,10 @@ export default function PersistentDrawerLeft() {
         <List>
           {["Devices", "Groups", "Measurements"].map((text, index) => (
             <ListItem key={text} disablePadding>
-              <ListItemButton>
+              <ListItemButton
+                onClick={(event) => handleListItemClick(event, index + 1)}
+                selected={selectedIndex === index + 1}
+              >
                 <ListItemIcon>
                   {index === 0 ? (
                     <DeviceThermostatOutlinedIcon />
@@ -160,7 +182,10 @@ export default function PersistentDrawerLeft() {
         <List>
           {["Users"].map((text, index) => (
             <ListItem key={text} disablePadding>
-              <ListItemButton>
+              <ListItemButton
+                onClick={(event) => handleListItemClick(event, index + 4)}
+                selected={selectedIndex === index + 4}
+              >
                 <ListItemIcon>
                   <GroupOutlinedIcon />
                 </ListItemIcon>
@@ -172,8 +197,8 @@ export default function PersistentDrawerLeft() {
       </Drawer>
       <Main open={open}>
         <DrawerHeader />
-        <Typography paragraph>Heading</Typography>
-        <Typography paragraph>Subheading</Typography>
+        {/* <Header title="Title Test" /> */}
+        {/* <Typography paragraph>Subheading</Typography> */}
       </Main>
     </FlexBetweenCenter>
   )
