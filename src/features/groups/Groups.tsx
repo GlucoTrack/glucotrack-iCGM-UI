@@ -5,7 +5,7 @@ import { useGetGroupsQuery } from "../api/apiSlice"
 
 const Groups = () => {
   const { data, status, isFetching, isLoading, isSuccess, isError, error } =
-    useGetGroupsQuery()
+    useGetGroupsQuery({})
 
   let content
   if (isFetching) {
