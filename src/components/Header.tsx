@@ -1,9 +1,10 @@
-import { Box } from "@mui/material"
+import { Box, Typography } from "@mui/material"
 
-const Header = (title: string) => {
+const Header = ({ title, subtitle }) => {
   return (
-    <Box>
-      <h1>{title}</h1>
+    <Box my={"1.5rem"}>
+      <Typography variant="h4">{title}</Typography>
+      <Typography>{subtitle}</Typography>
     </Box>
   )
 }

@@ -1,7 +1,7 @@
-import React from "react"
+import Header from "@/components/Header"
 
 const Users = () => {
-  return <div>Users</div>
+  return <Header title="Users" subtitle="Future user management page..." />
 }
 
 export default Users
