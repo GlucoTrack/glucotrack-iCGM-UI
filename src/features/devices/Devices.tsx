@@ -6,7 +6,7 @@ import { Box } from "@mui/material"
 
 const Devices = () => {
   const { data, status, isFetching, isLoading, isSuccess, isError, error } =
-    useGetDevicesQuery()
+    useGetDevicesQuery({})
 
   let content
   if (isFetching) {
