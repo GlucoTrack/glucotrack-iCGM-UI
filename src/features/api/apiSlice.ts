@@ -4,7 +4,8 @@ export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
     //TODO baseUrl => environment variable
-    baseUrl: "https://stg-icgm.herokuapp.com/api/v1/",
+    // baseUrl: "https://stg-icgm.herokuapp.com/api/v1/",
+    baseUrl: import.meta.env.VITE_API_BASE_URL,
   }),
   //TODO will need to add Tags in general and per endpoint
   endpoints: (builder) => ({

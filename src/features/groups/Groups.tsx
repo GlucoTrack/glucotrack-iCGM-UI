@@ -2,6 +2,7 @@ import Header from "@/components/Header"
 import { Box } from "@mui/material"
 import { DataGrid, GridToolbar } from "@mui/x-data-grid"
 import { useGetGroupsQuery } from "../api/apiSlice"
+import Action from "@/components/Action"
 
 const Groups = () => {
   const { data, status, isFetching, isLoading, isSuccess, isError, error } =
@@ -26,16 +27,19 @@ const Groups = () => {
             { field: "groupDescription", headerName: "Description", flex: 2 },
             { field: "deviceNames", headerName: "Devices", flex: 2 },
           ]}
+          checkboxSelection={true}
         />
       </Box>
     )
   }
 
   return (
-    <main>
-      <Header title="Groups" subtitle={`List of groups: ${status}`} />
+    <Box>
+      <Header title="Groups" subtitle={`List of groups: ${status}`}>
+        <Action type="Create" />
+      </Header>
       {content}
-    </main>
+    </Box>
   )
 }
 
