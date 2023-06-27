@@ -6,7 +6,13 @@ import { DataGrid, GridToolbar } from "@mui/x-data-grid"
 
 const Measurements = () => {
   const { data, status, isFetching, isLoading, isSuccess, isError, error } =
-    useGetAveragesAndStdsQuery("lab020 lab021")
+    useGetAveragesAndStdsQuery({
+      deviceNames: "lab020 lab021 lab022",
+      startDate: "2023-04-10",
+      endDate: "2023-04-11",
+      startTime: "23:29:00",
+      endTime: "23:59:59",
+    })
 
   let content
   if (isFetching) {

@@ -12,8 +12,8 @@ export const apiSlice = createApi({
       query: () => "device/read",
     }),
     getAveragesAndStds: builder.query({
-      query: (deviceNames) =>
-        `measurements/readAveragesAndStdsByDayAndDeviceNames/${deviceNames}?startDate=2023-04-10&endDate=2023-04-12&startTime=23%3A29%3A00&endTime=23%3A59%3A59`,
+      query: ({ deviceNames, startDate, endDate, startTime, endTime }) =>
+        `measurements/readAveragesAndStdsByDayAndDeviceNames/${deviceNames}?startDate=${startDate}&endDate=${endDate}&startTime=${startTime}&endTime=${endTime}`,
     }),
     getGroups: builder.query({
       query: () => "groups/read",
