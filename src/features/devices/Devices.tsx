@@ -3,6 +3,7 @@ import { useGetDevicesQuery } from "@/features/api/apiSlice"
 import Header from "@/components/Header"
 import { DataGrid, GridToolbar } from "@mui/x-data-grid"
 import { Box } from "@mui/material"
+import Action from "@/components/Action"
 
 const Devices = () => {
   const { data, status, isFetching, isLoading, isSuccess, isError, error } =
@@ -46,16 +47,19 @@ const Devices = () => {
             { field: "enzyme", headerName: "Enzyme", flex: 0.5 },
             { field: "testStation", headerName: "Station", flex: 0.5 },
           ]}
+          checkboxSelection={true}
         />
       </Box>
     )
   }
 
   return (
-    <main>
-      <Header title="Devices" subtitle={`List of devices: ${status}`} />
+    <Box>
+      <Header title="Devices" subtitle={`List of devices: ${status}`}>
+        <Action type="Create" />
+      </Header>
       {content}
-    </main>
+    </Box>
   )
 }
 

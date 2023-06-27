@@ -7,7 +7,6 @@ import { DataGrid, GridToolbar } from "@mui/x-data-grid"
 const Measurements = () => {
   const { data, status, isFetching, isLoading, isSuccess, isError, error } =
     useGetAveragesAndStdsQuery("lab020 lab021")
-  console.log("🚀 ~ file: Measurements.tsx:10 ~ Measurements ~ data:", data)
 
   let content
   if (isFetching) {
@@ -17,6 +16,18 @@ const Measurements = () => {
   } else if (isError) {
     content = <p>Error: {JSON.stringify(error)}</p>
   } else if (isSuccess) {
+    console.log(
+      "🚀 ~ file: Measurements.tsx:10 ~ Measurements ~ data:",
+      data.averagesAndStds,
+    )
+
+    const columns = [
+      { field: "name", headerName: "Name" },
+      { field: "date", headerName: "Name" },
+    ]
+
+    const rows = []
+
     content = (
       <Box height={"75vh"}>
         <DataGrid
@@ -25,21 +36,32 @@ const Measurements = () => {
           getRowId={(row) => row.name}
           columns={[
             { field: "name", headerName: "Name" },
-            { field: "statistics", headerName: "Statistics" },
+            {
+              field: "statistics",
+              headerName: "Date",
+              renderCell: (params) => (
+                <ul>
+                  {params.value.map((value: any, index: number) => (
+                    <li key={index}>{value.date}</li>
+                  ))}
+                </ul>
+              ),
+            },
           ]}
+          checkboxSelection={true}
         />
       </Box>
     )
   }
 
   return (
-    <main>
+    <Box>
       <Header
         title="Measurements"
         subtitle={`Queried measurements: ${status}`}
       />
       {content}
-    </main>
+    </Box>
   )
 }
 
