@@ -120,15 +120,15 @@ const Sidebar: React.FC<SidebarProps> = ({
             <Divider />
 
             <List>
-              {navItems.map(({ text, icon }) => {
+              {navItems.map(({ text, icon }, index) => {
                 if (!icon) {
-                  return <Divider />
+                  return <Divider key={index} />
                 }
 
                 const lcText = text.toLowerCase()
 
                 return (
-                  <ListItem key={text} disablePadding>
+                  <ListItem key={index} disablePadding>
                     <ListItemButton
                       onClick={() => {
                         navigate(`/${lcText}`)

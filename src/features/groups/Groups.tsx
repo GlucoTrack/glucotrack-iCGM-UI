@@ -1,8 +1,8 @@
 import Header from "@/components/Header"
 import { Box } from "@mui/material"
 import { DataGrid, GridToolbar } from "@mui/x-data-grid"
-import { useGetGroupsQuery } from "../api/apiSlice"
-import Action from "@/components/Action"
+import { useGetGroupsQuery } from "@/features/api/apiSlice"
+import Action from "@/components/HeaderAction"
 
 const Groups = () => {
   const { data, status, isFetching, isLoading, isSuccess, isError, error } =
@@ -36,7 +36,7 @@ const Groups = () => {
   return (
     <Box>
       <Header title="Groups" subtitle={`List of groups: ${status}`}>
-        <Action type="Create" />
+        <Action action="Add" url="/groups/add" />
       </Header>
       {content}
     </Box>
