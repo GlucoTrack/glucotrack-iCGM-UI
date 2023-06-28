@@ -1,12 +1,12 @@
 import { Box } from "@mui/material"
 import Header from "@/components/Header"
-import Action from "@/components/Action"
+import Action from "@/components/HeaderAction"
 
 const Users = () => {
   return (
     <Box>
       <Header title="Users" subtitle="Future user management page...">
-        <Action type="Create" />
+        <Action action="Add" url="/users/add" />
       </Header>
     </Box>
   )

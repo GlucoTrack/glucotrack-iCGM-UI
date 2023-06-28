@@ -7,7 +7,9 @@ import themeSettings from "@/theme/themeSettings"
 import Layout from "@/features/layout/Layout"
 import Home from "@/features/home/Home"
 import Devices from "@/features/devices/Devices"
+import AddDevice from "./features/devices/AddDevice"
 import Groups from "@/features/groups/Groups"
+import AddGroup from "./features/groups/AddGroup"
 import Measurements from "@/features/measurements/Measurements"
 import Users from "@/features/users/Users"
 import New from "@/features/new/New"
@@ -28,7 +30,9 @@ function App() {
               <Route path="/" element={<Navigate to="/home" replace />} />
               <Route path="/home" element={<Home />} />
               <Route path="/devices" element={<Devices />} />
+              <Route path="/devices/add" element={<AddDevice />} />
               <Route path="/groups" element={<Groups />} />
+              <Route path="/groups/add" element={<AddGroup />} />
               <Route path="/measurements" element={<Measurements />} />
               <Route path="/users" element={<Users />} />
               <Route path="/new" element={<New />} />

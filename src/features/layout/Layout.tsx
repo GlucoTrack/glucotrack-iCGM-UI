@@ -34,8 +34,8 @@ const Layout = () => {
         <Box height="100%" width="100%" px="1.5rem" overflow="auto">
           <Outlet />
         </Box>
-        <Footer />
       </Box>
+      <Footer />
     </Box>
   )
 }
