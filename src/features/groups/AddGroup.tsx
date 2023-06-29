@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Box, Button, TextField } from "@mui/material"
+import { Box, Button, TextField, useTheme } from "@mui/material"
 import Header from "@/components/Header"
 import { useAddGroupMutation } from "@/features/api/apiSlice"
 
@@ -18,6 +18,7 @@ const initialValues: FormValues = {
 
 const AddGroup: React.FC = () => {
   const navigate = useNavigate()
+  const theme = useTheme()
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
   const [addGroup, { isLoading, isError, error, isSuccess }] =
     useAddGroupMutation()
@@ -37,29 +38,40 @@ const AddGroup: React.FC = () => {
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
     if (canSave) {
       try {
-        e.preventDefault()
         await addGroup(formValues)
-        setFormValues(initialValues)
-        // navigate("/groups")
       } catch (error: any) {
         console.error(error)
       }
     }
   }
 
+  const handleMutationSuccess = () => {
+    setTimeout(() => {
+      setFormValues(initialValues)
+      navigate("/groups")
+    }, 0)
+  }
+
   const handleCancel = () => {
     navigate("/groups")
   }
 
-  let content
+  let content = null
   if (isLoading) {
     content = <h3>Loading...</h3>
   } else if (isError) {
-    content = <p>{JSON.stringify(error)}</p>
+    const errorMessageString = JSON.stringify(error)
+    const errorMessageParsed = JSON.parse(errorMessageString)
+    content = (
+      <p style={{ color: theme.palette.error.main }}>
+        {JSON.stringify(errorMessageParsed.data.message)}
+      </p>
+    )
   } else if (isSuccess) {
-    navigate("/groups")
+    handleMutationSuccess()
   }
 
   return (
@@ -99,9 +111,9 @@ const AddGroup: React.FC = () => {
           fullWidth
           margin="normal"
         />
+        {content}
 
         <Box mt={2} display={"flex"} justifyContent={"flex-start"} gap={2}>
-          {content}
           <Button variant="outlined" color="secondary" onClick={handleCancel}>
             Cancel
           </Button>

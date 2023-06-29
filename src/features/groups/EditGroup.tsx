@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
-import { Box, Button, TextField } from "@mui/material"
+import { Box, Button, TextField, useTheme } from "@mui/material"
 import Header from "@/components/Header"
-import { useEditGroupMutation } from "@/features/api/apiSlice"
+import {
+  useDeleteGroupMutation,
+  useEditGroupMutation,
+} from "@/features/api/apiSlice"
 import { RootState } from "@/store/store"
 import { resetGroup } from "./groupsSlice"
 
@@ -20,12 +23,33 @@ const initialValues: FormValues = {
 }
 
 const EditGroup: React.FC = () => {
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const theme = useTheme()
+
   const { groupId } = useParams<Record<string, string>>()
   const { groupName, groupDescription, deviceNames } = useSelector(
     (state: RootState) => state.groups,
   )
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
+  const [
+    editGroup,
+    {
+      isLoading: isEditingGroup,
+      isError: isEditError,
+      error: editError,
+      isSuccess: isEditSuccess,
+    },
+  ] = useEditGroupMutation()
+  const [
+    deleteGroup,
+    {
+      isLoading: isDeletingGroup,
+      isError: isDeleteError,
+      error: deleteError,
+      isSuccess: isDeleteSuccess,
+    },
+  ] = useDeleteGroupMutation()
+
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
 
   useEffect(() => {
@@ -36,14 +60,14 @@ const EditGroup: React.FC = () => {
     })
   }, [groupName, groupDescription, deviceNames])
 
-  const [editGroup, { isLoading, isError, error, isSuccess }] =
-    useEditGroupMutation()
   const canSave =
     [
       formValues.groupName,
       formValues.groupDescription,
       formValues.deviceNames,
-    ].every(Boolean) && !isLoading
+    ].every(Boolean) &&
+    !isEditingGroup &&
+    !isDeletingGroup
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -51,6 +75,13 @@ const EditGroup: React.FC = () => {
       ...prevValues,
       [name]: value,
     }))
+  }
+
+  const handleCancel = () => {
+    setTimeout(() => {
+      dispatch(resetGroup())
+      navigate("/groups")
+    }, 0)
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -64,13 +95,6 @@ const EditGroup: React.FC = () => {
     }
   }
 
-  const handleCancel = () => {
-    setTimeout(() => {
-      dispatch(resetGroup())
-      navigate("/groups")
-    }, 0)
-  }
-
   const handleMutationSuccess = () => {
     setTimeout(() => {
       dispatch(resetGroup())
@@ -78,17 +102,33 @@ const EditGroup: React.FC = () => {
     }, 0)
   }
 
-  let content
-  if (isLoading) {
+  const handleDelete = async () => {
+    try {
+      await deleteGroup(groupId)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  let content = null
+  if (isEditingGroup || isDeletingGroup) {
     content = <h3>Loading...</h3>
-  } else if (isError) {
-    content = <p>{JSON.stringify(error)}</p>
-  } else if (isSuccess) {
+  } else if (isEditError || isDeleteError) {
+    const errorMessageString = isEditError
+      ? JSON.stringify(editError)
+      : JSON.stringify(deleteError)
+    const errorMessageParsed = JSON.parse(errorMessageString)
+    content = (
+      <p style={{ color: theme.palette.error.main }}>
+        {errorMessageParsed.data.message}
+      </p>
+    )
+  } else if (isEditSuccess || isDeleteSuccess) {
     handleMutationSuccess()
   }
 
   return (
-    <>
+    <Box>
       <Header
         title="Edit a group"
         subtitle="(compete each field below to edit a group)"
@@ -124,18 +164,24 @@ const EditGroup: React.FC = () => {
           fullWidth
           margin="normal"
         />
+        {content}
 
-        <Box mt={2} display={"flex"} justifyContent={"flex-start"} gap={2}>
-          {content}
-          <Button variant="outlined" color="secondary" onClick={handleCancel}>
-            Cancel
-          </Button>
-          <Button type="submit" variant="contained" color="primary">
-            Submit
+        <Box mt={2} display="flex" justifyContent="space-between">
+          <Box display="flex" justifyContent="flex-start" gap={2}>
+            <Button variant="outlined" color="secondary" onClick={handleCancel}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="contained" color="primary">
+              Submit
+            </Button>
+          </Box>
+
+          <Button variant="outlined" color="error" onClick={handleDelete}>
+            Delete
           </Button>
         </Box>
       </form>
-    </>
+    </Box>
   )
 }
 
