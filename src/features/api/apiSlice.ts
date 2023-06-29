@@ -34,6 +34,13 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["Groups"],
     }),
+    deleteGroup: builder.mutation({
+      query: (groupId) => ({
+        url: `groups/delete/${groupId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Groups"],
+    }),
     //*MEASUREMENTS
     getAveragesAndStds: builder.query({
       query: (args) => {
@@ -53,4 +60,5 @@ export const {
   useAddGroupMutation,
   useGetGroupsQuery,
   useEditGroupMutation,
+  useDeleteGroupMutation,
 } = apiSlice
