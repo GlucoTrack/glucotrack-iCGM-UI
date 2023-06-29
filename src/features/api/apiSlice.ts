@@ -6,14 +6,14 @@ export const apiSlice = createApi({
     baseUrl: import.meta.env.VITE_API_BASE_URL,
   }),
   tagTypes: ["Devices", "Groups", "AveragesAndStds"],
-  //TODO will need to add Tags in general and per endpoint
   endpoints: (builder) => ({
     //TODO maybe separate per feature with injectEndpoints
+    //*DEVICES
     getDevices: builder.query({
       query: () => "device/read",
       providesTags: ["Devices"],
     }),
-
+    //*GROUPS
     addGroup: builder.mutation({
       query: (groupData) => ({
         url: "groups/create",
@@ -22,11 +22,19 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["Groups"],
     }),
-
     getGroups: builder.query({
       query: () => "groups/read",
       providesTags: ["Groups"],
     }),
+    editGroup: builder.mutation({
+      query: ({ groupId, ...groupData }) => ({
+        url: `groups/updateByGroupId/${groupId}`,
+        method: "PATCH",
+        body: groupData,
+      }),
+      invalidatesTags: ["Groups"],
+    }),
+    //*MEASUREMENTS
     getAveragesAndStds: builder.query({
       query: (args) => {
         const { deviceNames, startDate, endDate, startTime, endTime } = args
@@ -44,4 +52,5 @@ export const {
   useGetAveragesAndStdsQuery,
   useAddGroupMutation,
   useGetGroupsQuery,
+  useEditGroupMutation,
 } = apiSlice
