@@ -7,11 +7,46 @@ export const apiSlice = createApi({
   }),
   tagTypes: ["Devices", "Groups", "AveragesAndStds"],
   endpoints: (builder) => ({
-    //TODO maybe separate per feature with injectEndpoints
+    //TODO maybe code split per feature
     //*DEVICES
+    addDevice: builder.mutation({
+      query: (deviceData) => ({
+        url: "device/create",
+        method: "POST",
+        body: deviceData,
+      }),
+      invalidatesTags: ["Devices"],
+    }),
     getDevices: builder.query({
       query: () => "device/read",
       providesTags: ["Devices"],
+    }),
+    getDevice: builder.query({
+      query: (deviceId) => ({
+        url: `device/read/${deviceId}`,
+      }),
+      providesTags: ["Devices"],
+    }),
+    editDevice: builder.mutation({
+      query: ({ deviceId, ...deviceData }) => ({
+        url: `device/updateDeviceId/${deviceId}`,
+        method: "PATCH",
+        body: deviceData,
+      }),
+      invalidatesTags: (result, error, arg) => [
+        { type: "Devices", id: arg },
+        "Devices",
+      ],
+    }),
+    deleteDevice: builder.mutation({
+      query: (deviceId) => ({
+        url: `device/delete/${deviceId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, arg) => [
+        { type: "Devices", id: arg },
+        "Devices",
+      ],
     }),
     //*GROUPS
     addGroup: builder.mutation({
@@ -55,7 +90,11 @@ export const apiSlice = createApi({
 })
 
 export const {
+  useAddDeviceMutation,
   useGetDevicesQuery,
+  useGetDeviceQuery,
+  useEditDeviceMutation,
+  useDeleteDeviceMutation,
   useGetAveragesAndStdsQuery,
   useAddGroupMutation,
   useGetGroupsQuery,

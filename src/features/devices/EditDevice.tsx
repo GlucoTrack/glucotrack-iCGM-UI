@@ -1,8 +1,12 @@
 import Header from "@/components/Header"
 import { Box, Button, TextField, useTheme } from "@mui/material"
-import React, { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { useAddDeviceMutation } from "../api/apiSlice"
+import React, { useEffect, useState } from "react"
+import { useNavigate, useParams } from "react-router-dom"
+import {
+  useDeleteDeviceMutation,
+  useEditDeviceMutation,
+  useGetDeviceQuery,
+} from "@/features/api/apiSlice"
 
 interface FormValues {
   macAddress: string
@@ -48,12 +52,116 @@ const initialValues: FormValues = {
   testStation: 0,
 }
 
-const AddDevice: React.FC = () => {
+const EditDevice: React.FC = () => {
   const navigate = useNavigate()
   const theme = useTheme()
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
-  const [addDevice, { isLoading, isError, error, isSuccess }] =
-    useAddDeviceMutation()
+
+  const { deviceId } = useParams<Record<string, string>>()
+
+  const {
+    data: getDeviceData,
+    // status: getDeviceStatus,
+    isFetching: getDeviceIsFetching,
+    isLoading: getDeviceIsLoading,
+    isSuccess: getDeviceIsSuccess,
+    isError: getDeviceIsError,
+    error: getDeviceError,
+  } = useGetDeviceQuery(deviceId)
+
+  const [
+    deleteDevice,
+    {
+      isLoading: isDeletingDevice,
+      isError: isDeleteError,
+      error: deleteError,
+      isSuccess: isDeleteSuccess,
+    },
+  ] = useDeleteDeviceMutation()
+
+  const [
+    editDevice,
+    {
+      isLoading: isEditingDevice,
+      isError: isEditError,
+      error: editError,
+      isSuccess: isEditSuccess,
+    },
+  ] = useEditDeviceMutation()
+
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString)
+    const formattedDate = date.toISOString().slice(0, 16) // Format: "yyyy-MM-ddThh:mm"
+    return formattedDate
+  }
+
+  useEffect(() => {
+    if (getDeviceData) {
+      const {
+        macAddress,
+        deviceName,
+        password,
+        baseUri,
+        jwtToken,
+        jwtRefreshToken,
+        rtc,
+        sessionStartTime,
+        sessionEndTime,
+        measurementInterval,
+        transmitDelay,
+        checkParametersInterval,
+        pstatVoltage,
+        pstatTIA,
+        glm,
+        coat,
+        onTest,
+        enzyme,
+        testStation,
+      } = getDeviceData.device
+
+      setFormValues({
+        macAddress,
+        deviceName,
+        password,
+        baseUri,
+        jwtToken,
+        jwtRefreshToken,
+        rtc: formatDate(rtc),
+        sessionStartTime: formatDate(sessionStartTime),
+        sessionEndTime: formatDate(sessionEndTime),
+        measurementInterval,
+        transmitDelay,
+        checkParametersInterval,
+        pstatVoltage,
+        pstatTIA,
+        glm,
+        coat: formatDate(coat),
+        onTest: formatDate(onTest),
+        enzyme,
+        testStation,
+      })
+    }
+  }, [getDeviceData])
+
+  let getDeviceContent: JSX.Element | null = null
+  if (getDeviceIsFetching) {
+    getDeviceContent = <h3>Fetching...</h3>
+  } else if (getDeviceIsLoading) {
+    getDeviceContent = <h3>Loading...</h3>
+  } else if (getDeviceIsError) {
+    console.log("getDeviceError:", getDeviceError)
+
+    const errorMessageString = JSON.stringify(getDeviceError)
+    const errorMessageParsed = JSON.parse(errorMessageString)
+    getDeviceContent = (
+      <p style={{ color: theme.palette.error.main }}>
+        {errorMessageParsed.data.message}
+      </p>
+    )
+  } else if (getDeviceIsSuccess && getDeviceData) {
+    getDeviceContent = null
+  }
+
   const canSave =
     [
       formValues.macAddress,
@@ -76,7 +184,9 @@ const AddDevice: React.FC = () => {
       formValues.enzyme,
       formValues.testStation,
     ].every((value) => value !== undefined && value !== null && value !== "") &&
-    !isLoading
+    !getDeviceIsLoading &&
+    !isDeletingDevice &&
+    !isEditingDevice
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -86,11 +196,15 @@ const AddDevice: React.FC = () => {
     }))
   }
 
+  const handleCancel = () => {
+    navigate("/devices")
+  }
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (canSave) {
       try {
-        await addDevice(formValues)
+        await editDevice({ deviceId, ...formValues })
       } catch (error: any) {
         console.error(error)
       }
@@ -99,46 +213,55 @@ const AddDevice: React.FC = () => {
 
   const handleMutationSuccess = () => {
     setTimeout(() => {
-      setFormValues(initialValues)
       navigate("/devices")
     }, 0)
   }
 
-  const handleCancel = () => {
-    navigate("/devices")
+  const handleDelete = async () => {
+    try {
+      await deleteDevice(deviceId)
+    } catch (error: any) {
+      console.error(error)
+    }
   }
 
   let content: JSX.Element | null = null
-  if (isLoading) {
+  if (isEditingDevice || isDeletingDevice) {
     content = <h3>Loading...</h3>
-  } else if (isError) {
-    const errorMessageString = JSON.stringify(error)
+  } else if (isEditError || isDeleteError) {
+    const errorMessageString = isEditError
+      ? JSON.stringify(editError)
+      : JSON.stringify(deleteError)
     const errorMessageParsed = JSON.parse(errorMessageString)
     content = (
       <p style={{ color: theme.palette.error.main }}>
-        {JSON.stringify(errorMessageParsed.data.message)}
+        {errorMessageParsed.data.message}
       </p>
     )
-  } else if (isSuccess) {
+  } else if (isEditSuccess || isDeleteSuccess) {
     handleMutationSuccess()
   }
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header
-        title="Add a new device"
-        subtitle="(add multiple devices by separating Device Names with a space)"
+        title="Edit a device"
+        subtitle="(complete all fields to edit a device)"
       />
+      {getDeviceContent}
       <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">
         <form onSubmit={handleSubmit}>
           <TextField
             name="deviceName"
-            label="Device Name(s)"
+            label="Device Name"
             value={formValues.deviceName}
             onChange={handleChange}
             required
             fullWidth
             margin="normal"
+            InputLabelProps={{
+              shrink: formValues.deviceName !== "",
+            }}
           />
           <TextField
             name="macAddress"
@@ -150,6 +273,9 @@ const AddDevice: React.FC = () => {
             fullWidth
             margin="normal"
             disabled
+            InputLabelProps={{
+              shrink: formValues.macAddress !== "",
+            }}
           />
           <TextField
             name="password"
@@ -161,6 +287,9 @@ const AddDevice: React.FC = () => {
             fullWidth
             margin="normal"
             disabled
+            InputLabelProps={{
+              shrink: formValues.password !== "",
+            }}
           />
           <TextField
             name="baseUri"
@@ -171,6 +300,9 @@ const AddDevice: React.FC = () => {
             fullWidth
             margin="normal"
             disabled
+            InputLabelProps={{
+              shrink: formValues.baseUri !== "",
+            }}
           />
           <TextField
             name="jwtToken"
@@ -182,6 +314,9 @@ const AddDevice: React.FC = () => {
             fullWidth
             margin="normal"
             disabled
+            InputLabelProps={{
+              shrink: formValues.jwtToken !== "",
+            }}
           />
           <TextField
             name="jwtRefreshToken"
@@ -193,6 +328,9 @@ const AddDevice: React.FC = () => {
             fullWidth
             margin="normal"
             disabled
+            InputLabelProps={{
+              shrink: formValues.jwtRefreshToken !== "",
+            }}
           />
           <TextField
             name="rtc"
@@ -205,7 +343,7 @@ const AddDevice: React.FC = () => {
             margin="normal"
             disabled
             InputLabelProps={{
-              shrink: true,
+              shrink: formValues.rtc !== undefined && formValues.rtc !== null,
             }}
           />
           <TextField
@@ -217,6 +355,9 @@ const AddDevice: React.FC = () => {
             required
             fullWidth
             margin="normal"
+            InputLabelProps={{
+              shrink: Boolean(formValues.measurementInterval),
+            }}
           />
           <TextField
             name="transmitDelay"
@@ -227,6 +368,11 @@ const AddDevice: React.FC = () => {
             required
             fullWidth
             margin="normal"
+            InputLabelProps={{
+              shrink:
+                formValues.transmitDelay !== undefined &&
+                formValues.transmitDelay !== null,
+            }}
           />
           <TextField
             name="checkParametersInterval"
@@ -237,6 +383,11 @@ const AddDevice: React.FC = () => {
             required
             fullWidth
             margin="normal"
+            InputLabelProps={{
+              shrink:
+                formValues.checkParametersInterval !== undefined &&
+                formValues.checkParametersInterval !== null,
+            }}
           />
           <TextField
             name="pstatVoltage"
@@ -247,6 +398,11 @@ const AddDevice: React.FC = () => {
             required
             fullWidth
             margin="normal"
+            InputLabelProps={{
+              shrink:
+                formValues.pstatVoltage !== undefined &&
+                formValues.pstatVoltage !== null,
+            }}
           />
           <TextField
             name="pstatTIA"
@@ -257,6 +413,11 @@ const AddDevice: React.FC = () => {
             required
             fullWidth
             margin="normal"
+            InputLabelProps={{
+              shrink:
+                formValues.pstatTIA !== undefined &&
+                formValues.pstatTIA !== null,
+            }}
           />
           <TextField
             name="glm"
@@ -267,6 +428,9 @@ const AddDevice: React.FC = () => {
             required
             fullWidth
             margin="normal"
+            InputLabelProps={{
+              shrink: formValues.glm !== undefined && formValues.glm !== null,
+            }}
           />
           <TextField
             name="coat"
@@ -278,7 +442,7 @@ const AddDevice: React.FC = () => {
             fullWidth
             margin="normal"
             InputLabelProps={{
-              shrink: true,
+              shrink: formValues.coat !== undefined && formValues.coat !== null,
             }}
           />
           <TextField
@@ -291,7 +455,8 @@ const AddDevice: React.FC = () => {
             fullWidth
             margin="normal"
             InputLabelProps={{
-              shrink: true,
+              shrink:
+                formValues.onTest !== undefined && formValues.onTest !== null,
             }}
           />
           <TextField
@@ -303,6 +468,10 @@ const AddDevice: React.FC = () => {
             required
             fullWidth
             margin="normal"
+            InputLabelProps={{
+              shrink:
+                formValues.enzyme !== undefined && formValues.enzyme !== null,
+            }}
           />
           <TextField
             name="testStation"
@@ -313,20 +482,36 @@ const AddDevice: React.FC = () => {
             required
             fullWidth
             margin="normal"
+            InputLabelProps={{
+              shrink:
+                formValues.testStation !== undefined &&
+                formValues.testStation !== null,
+            }}
           />
           {content}
-          <Box mt={2} display={"flex"} justifyContent={"flex-start"} gap={2}>
-            <Button variant="outlined" color="secondary" onClick={handleCancel}>
-              Cancel
+
+          <Box mt={2} display="flex" justifyContent="space-between">
+            <Box display="flex" justifyContent="flex-start" gap={2}>
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={handleCancel}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" variant="contained" color="primary">
+                Submit
+              </Button>
+            </Box>
+
+            <Button variant="outlined" color="error" onClick={handleDelete}>
+              Delete
             </Button>
-            <Button type="submit" variant="contained" color="primary">
-              Submit
-            </Button>
-          </Box>{" "}
+          </Box>
         </form>
       </Box>
     </Box>
   )
 }
 
-export default AddDevice
+export default EditDevice

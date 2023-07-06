@@ -59,7 +59,7 @@ const AddGroup: React.FC = () => {
     navigate("/groups")
   }
 
-  let content = null
+  let content: JSX.Element | null = null
   if (isLoading) {
     content = <h3>Loading...</h3>
   } else if (isError) {
@@ -75,54 +75,56 @@ const AddGroup: React.FC = () => {
   }
 
   return (
-    <>
+    <Box display="flex" flexDirection="column" height="85vh">
       <Header
         title="Add a new group"
         subtitle="(add multiple devices by separating Device Names with a space)"
       />
-      <form onSubmit={handleSubmit}>
-        <TextField
-          id="groupName"
-          name="groupName"
-          label="Group Name"
-          value={formValues.groupName}
-          onChange={handleChange}
-          required
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          id="groupDescription"
-          name="groupDescription"
-          label="Group Description"
-          value={formValues.groupDescription}
-          onChange={handleChange}
-          required
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          id="deviceNames"
-          name="deviceNames"
-          label="Device Names"
-          value={formValues.deviceNames}
-          onChange={handleChange}
-          required
-          fullWidth
-          margin="normal"
-        />
-        {content}
+      <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">
+        <form onSubmit={handleSubmit}>
+          <TextField
+            id="groupName"
+            name="groupName"
+            label="Group Name"
+            value={formValues.groupName}
+            onChange={handleChange}
+            required
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            id="groupDescription"
+            name="groupDescription"
+            label="Group Description"
+            value={formValues.groupDescription}
+            onChange={handleChange}
+            required
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            id="deviceNames"
+            name="deviceNames"
+            label="Device Names"
+            value={formValues.deviceNames}
+            onChange={handleChange}
+            required
+            fullWidth
+            margin="normal"
+          />
+          {content}
 
-        <Box mt={2} display={"flex"} justifyContent={"flex-start"} gap={2}>
-          <Button variant="outlined" color="secondary" onClick={handleCancel}>
-            Cancel
-          </Button>
-          <Button type="submit" variant="contained" color="primary">
-            Submit
-          </Button>
-        </Box>
-      </form>
-    </>
+          <Box mt={2} display={"flex"} justifyContent={"flex-start"} gap={2}>
+            <Button variant="outlined" color="secondary" onClick={handleCancel}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="contained" color="primary">
+              Submit
+            </Button>
+          </Box>
+        </form>
+      </Box>
+    </Box>
   )
 }
 
