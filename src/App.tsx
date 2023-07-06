@@ -8,6 +8,7 @@ import Layout from "@/features/layout/Layout"
 import Home from "@/features/home/Home"
 import Devices from "@/features/devices/Devices"
 import AddDevice from "./features/devices/AddDevice"
+import EditDevice from "./features/devices/EditDevice"
 import Groups from "@/features/groups/Groups"
 import AddGroup from "./features/groups/AddGroup"
 import EditGroup from "@/features/groups/EditGroup"
@@ -32,6 +33,7 @@ function App() {
               <Route path="/home" element={<Home />} />
               <Route path="/devices" element={<Devices />} />
               <Route path="/devices/add" element={<AddDevice />} />
+              <Route path="/devices/edit/:deviceId" element={<EditDevice />} />
               <Route path="groups" element={<Groups />} />
               <Route path="/groups/add" element={<AddGroup />} />
               <Route path="/groups/edit/:groupId" element={<EditGroup />} />

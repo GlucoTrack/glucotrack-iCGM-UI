@@ -1,27 +1,17 @@
 import { useNavigate } from "react-router-dom"
-import { Box, IconButton } from "@mui/material"
+import { Box } from "@mui/material"
 import { DataGrid, GridCellParams, GridToolbar } from "@mui/x-data-grid"
-import { DeleteOutlined } from "@mui/icons-material"
 
 import Header from "@/components/Header"
 import Action from "@/components/HeaderAction"
-import {
-  useDeleteGroupMutation,
-  useGetGroupsQuery,
-} from "@/features/api/apiSlice"
+import { useGetGroupsQuery } from "@/features/api/apiSlice"
 import { useDispatch } from "react-redux"
 import { setGroup } from "@/features/groups/groupsSlice"
-
-interface Group {
-  _id: string
-  groupName: string
-  groupDescription: string
-  deviceNames: string
-}
+import Group from "@/interfaces/Group"
 
 const Groups: React.FC = () => {
-  const navigate = useNavigate()
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const {
     data,
     status: getGroupStatus,
@@ -31,54 +21,34 @@ const Groups: React.FC = () => {
     isError: isErrorGroups,
     error: getGroupsError,
   } = useGetGroupsQuery({})
-  const [
-    deleteGroup,
-    { isLoading: isDeletingGroup, isError: isDeleteError, error: deleteError },
-  ] = useDeleteGroupMutation()
 
   const handleCellClick = (params: GridCellParams) => {
-    if (
-      params.field === "groupName" ||
-      params.field === "groupDescription" ||
-      params.field === "deviceNames"
-    ) {
-      const {
-        _id: groupId,
+    const {
+      _id: groupId,
+      groupName,
+      groupDescription,
+      deviceNames,
+    } = params.row
+    const deviceNamesString = deviceNames.join(" ")
+
+    dispatch(
+      setGroup({
         groupName,
         groupDescription,
-        deviceNames,
-      } = params.row
-      const deviceNamesString = deviceNames.join(" ")
-
-      dispatch(
-        setGroup({
-          groupName,
-          groupDescription,
-          deviceNames: deviceNamesString,
-        }),
-      )
-      navigate(`edit/${groupId}`)
-    }
-  }
-
-  const handleDeleteClick = async (groupId: string) => {
-    try {
-      await deleteGroup(groupId)
-    } catch (error) {
-      console.error(error)
-    }
+        deviceNames: deviceNamesString,
+      }),
+    )
+    navigate(`edit/${groupId}`)
   }
 
   let content: JSX.Element | null = null
 
   if (isFetchingGroups) {
     content = <h3>Fetching...</h3>
-  } else if (isLoadingGroups || isDeletingGroup) {
+  } else if (isLoadingGroups) {
     content = <h3>Loading...</h3>
-  } else if (isErrorGroups || isDeleteError) {
-    content = (
-      <p>{JSON.stringify(isErrorGroups ? getGroupsError : deleteError)}</p>
-    )
+  } else if (isErrorGroups) {
+    content = <p>{JSON.stringify(getGroupsError)}</p>
   } else if (isSuccessGroups) {
     const columns = [
       { field: "groupName", headerName: "Name", flex: 1 },
@@ -100,7 +70,7 @@ const Groups: React.FC = () => {
   }
 
   return (
-    <Box>
+    <Box display="flex" flexDirection="column" height="85vh">
       <Header title="Groups" subtitle={`List of groups: ${getGroupStatus}`}>
         <Action action="Add" url="add" />
       </Header>

@@ -26,6 +26,7 @@ const EditGroup: React.FC = () => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const theme = useTheme()
+  const [formValues, setFormValues] = useState<FormValues>(initialValues)
 
   const { groupId } = useParams<Record<string, string>>()
   const { groupName, groupDescription, deviceNames } = useSelector(
@@ -49,8 +50,6 @@ const EditGroup: React.FC = () => {
       isSuccess: isDeleteSuccess,
     },
   ] = useDeleteGroupMutation()
-
-  const [formValues, setFormValues] = useState<FormValues>(initialValues)
 
   useEffect(() => {
     setFormValues({
@@ -105,12 +104,12 @@ const EditGroup: React.FC = () => {
   const handleDelete = async () => {
     try {
       await deleteGroup(groupId)
-    } catch (error) {
+    } catch (error: any) {
       console.error(error)
     }
   }
 
-  let content = null
+  let content: JSX.Element | null = null
   if (isEditingGroup || isDeletingGroup) {
     content = <h3>Loading...</h3>
   } else if (isEditError || isDeleteError) {
@@ -128,59 +127,65 @@ const EditGroup: React.FC = () => {
   }
 
   return (
-    <Box>
+    <Box display="flex" flexDirection="column" height="85vh">
       <Header
         title="Edit a group"
         subtitle="(compete each field below to edit a group)"
       />
-      <form onSubmit={handleSubmit}>
-        <TextField
-          id="groupName"
-          name="groupName"
-          label="Group Name"
-          value={formValues.groupName}
-          onChange={handleChange}
-          required
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          id="groupDescription"
-          name="groupDescription"
-          label="Group Description"
-          value={formValues.groupDescription}
-          onChange={handleChange}
-          required
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          id="deviceNames"
-          name="deviceNames"
-          label="Device Names"
-          value={formValues.deviceNames}
-          onChange={handleChange}
-          required
-          fullWidth
-          margin="normal"
-        />
-        {content}
+      <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">
+        <form onSubmit={handleSubmit}>
+          <TextField
+            id="groupName"
+            name="groupName"
+            label="Group Name"
+            value={formValues.groupName}
+            onChange={handleChange}
+            required
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            id="groupDescription"
+            name="groupDescription"
+            label="Group Description"
+            value={formValues.groupDescription}
+            onChange={handleChange}
+            required
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            id="deviceNames"
+            name="deviceNames"
+            label="Device Names"
+            value={formValues.deviceNames}
+            onChange={handleChange}
+            required
+            fullWidth
+            margin="normal"
+          />
+          {content}
 
-        <Box mt={2} display="flex" justifyContent="space-between">
-          <Box display="flex" justifyContent="flex-start" gap={2}>
-            <Button variant="outlined" color="secondary" onClick={handleCancel}>
-              Cancel
-            </Button>
-            <Button type="submit" variant="contained" color="primary">
-              Submit
+          <Box mt={2} display="flex" justifyContent="space-between">
+            <Box display="flex" justifyContent="flex-start" gap={2}>
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={handleCancel}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" variant="contained" color="primary">
+                Submit
+              </Button>
+            </Box>
+
+            <Button variant="outlined" color="error" onClick={handleDelete}>
+              Delete
             </Button>
           </Box>
-
-          <Button variant="outlined" color="error" onClick={handleDelete}>
-            Delete
-          </Button>
-        </Box>
-      </form>
+        </form>
+      </Box>
     </Box>
   )
 }

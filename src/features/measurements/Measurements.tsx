@@ -14,7 +14,7 @@ const Measurements = () => {
       endTime: "23:59:59",
     })
 
-  let content
+  let content: JSX.Element | null = null
   if (isFetching) {
     content = <h3>Fetching...</h3>
   } else if (isLoading) {
