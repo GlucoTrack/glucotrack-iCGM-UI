@@ -1,6 +1,8 @@
 import { Autocomplete, Box, Button, TextField, useTheme } from "@mui/material"
 import React, { useState } from "react"
 import { useGetDevicesQuery, useGetGroupsQuery } from "../api/apiSlice"
+import Group from "@/interfaces/Group"
+import Device from "@/interfaces/Device"
 
 const MeasurementForm: React.FC = () => {
   const theme = useTheme()
@@ -41,7 +43,7 @@ const MeasurementForm: React.FC = () => {
   } else if (deviceIsError) {
     deviceContent = <p>{JSON.stringify(deviceError)}</p>
   } else if (deviceIsSuccess) {
-    deviceNames = deviceData.devices.map((device) => {
+    deviceNames = deviceData.devices.map((device: Device) => {
       return device.deviceName
     })
   }
@@ -55,7 +57,7 @@ const MeasurementForm: React.FC = () => {
   } else if (groupIsError) {
     groupContent = <p>{JSON.stringify(groupError)}</p>
   } else if (groupIsSuccess) {
-    groupNames = groupData.groups.map((group) => {
+    groupNames = groupData.groups.map((group: Group) => {
       return group.groupName
     })
   }
