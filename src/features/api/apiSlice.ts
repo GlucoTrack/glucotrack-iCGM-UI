@@ -5,7 +5,7 @@ export const apiSlice = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: import.meta.env.VITE_API_BASE_URL,
   }),
-  tagTypes: ["Devices", "Groups", "AveragesAndStds"],
+  tagTypes: ["Devices", "Groups", "Measurements", "AveragesAndStds"],
   endpoints: (builder) => ({
     //TODO maybe code split per feature
     //*DEVICES
@@ -77,6 +77,16 @@ export const apiSlice = createApi({
       invalidatesTags: ["Groups"],
     }),
     //*MEASUREMENTS
+    getMeasurementsByDeviceName: builder.query({
+      query: (args) => {
+        //TODO adjust endpoint to accept array of deviceNames (vs. deviceName string)
+        const { deviceName, startDate, endDate, startTime, endTime } = args
+        return {
+          url: `measurements/readDeviceName/${deviceName}?startDate=${startDate}&endDate=${endDate}&startTime=${startTime}&endTime=${endTime}`,
+        }
+      },
+      providesTags: ["Measurements"],
+    }),
     getAveragesAndStds: builder.query({
       query: (args) => {
         const { deviceNames, startDate, endDate, startTime, endTime } = args
@@ -95,9 +105,10 @@ export const {
   useGetDeviceQuery,
   useEditDeviceMutation,
   useDeleteDeviceMutation,
-  useGetAveragesAndStdsQuery,
   useAddGroupMutation,
   useGetGroupsQuery,
   useEditGroupMutation,
   useDeleteGroupMutation,
+  useGetMeasurementsByDeviceNameQuery,
+  useGetAveragesAndStdsQuery,
 } = apiSlice

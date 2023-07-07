@@ -3,8 +3,9 @@ import { Box } from "@mui/material"
 import React from "react"
 import { useGetAveragesAndStdsQuery } from "@/features/api/apiSlice"
 import { DataGrid, GridToolbar } from "@mui/x-data-grid"
+import MeasurementForm from "./MeasurementForm"
 
-const Measurements = () => {
+const Measurements: React.FC = () => {
   const { data, status, isFetching, isLoading, isSuccess, isError, error } =
     useGetAveragesAndStdsQuery({
       deviceNames: "lab020 lab021 lab022",
@@ -27,12 +28,12 @@ const Measurements = () => {
       data.averagesAndStds,
     )
 
-    const columns = [
-      { field: "name", headerName: "Name" },
-      { field: "date", headerName: "Name" },
-    ]
+    // const columns = [
+    //   { field: "name", headerName: "Name" },
+    //   { field: "date", headerName: "Name" },
+    // ]
 
-    const rows = []
+    // const rows = []
 
     content = (
       <Box height={"75vh"}>
@@ -54,18 +55,18 @@ const Measurements = () => {
               ),
             },
           ]}
-          checkboxSelection={true}
         />
       </Box>
     )
   }
 
   return (
-    <Box>
+    <Box display="flex" flexDirection="column" height="85vh">
       <Header
         title="Measurements"
         subtitle={`Queried measurements: ${status}`}
       />
+      <MeasurementForm />
       {content}
     </Box>
   )
