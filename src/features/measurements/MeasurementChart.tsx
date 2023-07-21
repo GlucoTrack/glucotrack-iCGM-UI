@@ -44,15 +44,15 @@ const MeasurementChart = () => {
   }, [deviceNames, getRandomColor])
 
   const deviceNamesString: string = deviceNames.join(",")
-  const groupName: string = useAppSelector(
-    (state) => state.measurements.groupName,
-  )
+  // const groupName: string = useAppSelector(
+  //   (state) => state.measurements.groupName,
+  // )
   const startTime: string = useAppSelector(
     (state) => state.measurements.startTime,
   )
   const endTime: string = useAppSelector((state) => state.measurements.endTime)
 
-  const { data, status, isFetching, isLoading, isSuccess, isError, error } =
+  const { data, isFetching, isLoading, isSuccess, isError, error } =
     useGetMeasurementsByDeviceNamesQuery({
       deviceNames: deviceNamesString,
       startTime: startTime,
