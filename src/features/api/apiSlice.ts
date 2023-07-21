@@ -77,12 +77,11 @@ export const apiSlice = createApi({
       invalidatesTags: ["Groups"],
     }),
     //*MEASUREMENTS
-    getMeasurementsByDeviceName: builder.query({
+    getMeasurementsByDeviceNames: builder.query({
       query: (args) => {
-        //TODO adjust endpoint to accept array of deviceNames (vs. deviceName string)
-        const { deviceName, startDate, endDate, startTime, endTime } = args
+        const { deviceNames, startTime, endTime } = args
         return {
-          url: `measurements/readDeviceName/${deviceName}?startDate=${startDate}&endDate=${endDate}&startTime=${startTime}&endTime=${endTime}`,
+          url: `measurements/readDeviceNames/${deviceNames}?startTime=${startTime}&endTime=${endTime}`,
         }
       },
       providesTags: ["Measurements"],
@@ -109,6 +108,6 @@ export const {
   useGetGroupsQuery,
   useEditGroupMutation,
   useDeleteGroupMutation,
-  useGetMeasurementsByDeviceNameQuery,
+  useGetMeasurementsByDeviceNamesQuery,
   useGetAveragesAndStdsQuery,
 } = apiSlice
