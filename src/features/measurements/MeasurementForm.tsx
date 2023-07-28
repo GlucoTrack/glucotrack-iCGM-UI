@@ -11,12 +11,13 @@ const MeasurementForm: React.FC = () => {
   const theme = useTheme()
   const [errorMessage, setErrorMessage] = useState("")
   const [formValues, setFormValues] = useState({
-    // deviceNames: null as string[] | null,
-    // groupName: "",
+    deviceNames: null as string[] | null,
+    groupName: "",
     // startTime: "",
     // endTime: "",
-    deviceNames: ["lab053", "lab055", "lab052"],
-    groupName: "",
+    //* REMOVE below after testing and keep above
+    // deviceNames: ["lab053", "lab055", "lab052"],
+    // groupName: "",
     startTime: "2023-06-13T23:51",
     endTime: "2023-06-13T23:59",
   })
@@ -56,7 +57,7 @@ const MeasurementForm: React.FC = () => {
   }
 
   let groupContent: JSX.Element | null = null
-  let groupNames: string[] = []
+  let groupName: string[] = []
   if (groupIsFetching) {
     groupContent = <h3>Fetching group...</h3>
   } else if (groupIsLoading) {
@@ -64,7 +65,7 @@ const MeasurementForm: React.FC = () => {
   } else if (groupIsError) {
     groupContent = <p>{JSON.stringify(groupError)}</p>
   } else if (groupIsSuccess) {
-    groupNames = groupData.groups.map((group: Group) => {
+    groupName = groupData.groups.map((group: Group) => {
       return group.groupName
     })
   }
@@ -78,6 +79,13 @@ const MeasurementForm: React.FC = () => {
         return {
           ...prevFormValues,
           deviceNames: value !== null ? (value as string[]) : [],
+          groupName: "",
+        }
+      } else if (field === "groupName") {
+        return {
+          ...prevFormValues,
+          [field]: value !== null ? (value as string) : "",
+          deviceNames: [],
         }
       } else {
         return {
@@ -92,11 +100,13 @@ const MeasurementForm: React.FC = () => {
     event.preventDefault()
 
     const { deviceNames, groupName, startTime, endTime } = formValues
+    let deviceNamesFromGroup: string[] = []
+
     if (
       (deviceNames && deviceNames.length > 0 && groupName) ||
       ((!deviceNames || deviceNames.length === 0) && !groupName)
     ) {
-      setErrorMessage("Please select either a Device Name(s) OR a Group Name")
+      setErrorMessage("Please select either Device Name(s) OR Group Name")
       return
     }
 
@@ -105,15 +115,35 @@ const MeasurementForm: React.FC = () => {
       return
     }
 
+    if (groupName) {
+      const groupObject = groupData.groups.find(
+        (group: Group) => group.groupName === groupName,
+      )
+      if (groupObject) {
+        deviceNamesFromGroup = groupObject.deviceNames
+      } else {
+        throw new Error(`${groupName} not found.`)
+      }
+    }
+
     if (
-      ((deviceNames && deviceNames.length > 0) || groupName) &&
+      ((deviceNames && deviceNames.length > 0) ||
+        (deviceNamesFromGroup && deviceNamesFromGroup.length > 0)) &&
       startTime &&
       endTime
     ) {
       try {
+        console.log(`deviceNames:`, deviceNames)
+        console.log(`deviceNamesFromGroup:`, deviceNamesFromGroup)
+
         dispatch(
           setFilter({
-            deviceNames: deviceNames ? deviceNames : [],
+            deviceNames:
+              deviceNamesFromGroup.length > 0
+                ? deviceNamesFromGroup
+                : deviceNames && deviceNames.length > 0
+                ? deviceNames
+                : [],
             groupName: groupName ? groupName : "",
             startTime,
             endTime,
@@ -148,7 +178,7 @@ const MeasurementForm: React.FC = () => {
         <p style={{ margin: 0 }}>OR</p>
         <Autocomplete
           loading={groupIsLoading || groupIsFetching}
-          options={groupNames ? groupNames : []}
+          options={groupName ? groupName : []}
           value={formValues.groupName === "" ? null : formValues.groupName}
           onChange={(event, newValue) => {
             handleInputChange("groupName", newValue !== null ? newValue : "")
@@ -157,7 +187,6 @@ const MeasurementForm: React.FC = () => {
             <TextField {...params} label="Group Name" fullWidth />
           )}
           style={{ flex: 1, margin: "0 1rem" }}
-          disabled
         />
         <TextField
           label="Start Time"
