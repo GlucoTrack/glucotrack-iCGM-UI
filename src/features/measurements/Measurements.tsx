@@ -25,7 +25,7 @@ const Measurements: React.FC = () => {
         endTime && (
           <>
             <MeasurementChart />
-            <MeasurementGrid />
+            {/* <MeasurementGrid /> */}
           </>
         )}
     </Box>
