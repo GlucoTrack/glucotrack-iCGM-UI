@@ -6,20 +6,22 @@ import { useAddUserMutation } from "../api/apiSlice"
 
 interface FormValues {
   username: string
+  password: string
   firstName: string
   lastName: string
   email: string
-  countryCode: number
+  //countryCode: number
   phone: string
   role: string
 }
 
 const initialValues: FormValues = {
   username: "",
+  password: "",
   firstName: "",
   lastName: "",
   email: "",
-  countryCode: 0,
+  //countryCode: 0,
   phone: "",
   role: "",
 }
@@ -33,10 +35,11 @@ const AddUser: React.FC = () => {
   const canSave =
     [
       formValues.username,
+      formValues.password,
       formValues.firstName,
       formValues.lastName,
       formValues.email,
-      formValues.countryCode,
+      //formValues.countryCode,
       formValues.phone,
       formValues.role,
     ].every((value) => value !== undefined && value !== null && value !== "") &&
@@ -64,7 +67,7 @@ const AddUser: React.FC = () => {
   const handleMutationSuccess = () => {
     setTimeout(() => {
       setFormValues(initialValues)
-      navigate("/devices")
+      navigate("/users")                  // is this the error?
     }, 0)
   }
 
@@ -90,13 +93,23 @@ const AddUser: React.FC = () => {
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header
-        title="Add a new User" subtitle={""}      />
+        title="Add a new User" subtitle={""}      
+      />
       <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">
         <form onSubmit={handleSubmit}>
           <TextField
             name="username"
             label="User Name"
             value={formValues.username}
+            onChange={handleChange}
+            required
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            name="password"
+            label="Password"
+            value={formValues.password}
             onChange={handleChange}
             required
             fullWidth
@@ -130,16 +143,6 @@ const AddUser: React.FC = () => {
             margin="normal"
           />
           <TextField
-            name="countryCode"
-            label="Country Code"
-            type="number"
-            value={formValues.countryCode}
-            onChange={handleChange}
-            required
-            fullWidth
-            margin="normal"
-          />
-          <TextField
             name="phone"
             label="Phone Numer"
             value={formValues.phone}
@@ -164,3 +167,17 @@ const AddUser: React.FC = () => {
 }
 
 export default AddUser
+
+/*
+          { <TextField
+            name="countryCode"
+            label="Country Code"
+            type="number"
+            value={formValues.countryCode}
+            onChange={handleChange}
+            required
+            fullWidth
+            margin="normal"
+          /> }
+
+*/

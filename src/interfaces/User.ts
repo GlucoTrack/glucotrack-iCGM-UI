@@ -1,14 +1,15 @@
 export default interface User {
   _id: string
   username: string
+  password: string
   firstName: string
   lastName: string
   email: string
-  countryCode: number
+  //countryCode: number
   phone: string
   role: string
-  createDateTime: string
-  createdBy: string
-  updateDateTime: string
-  updatedBy: string
+  //createDateTime: string
+  //createdBy: string
+  //updateDateTime: string
+  //updatedBy: string
 }
