@@ -5,7 +5,7 @@ export const apiSlice = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: import.meta.env.VITE_API_BASE_URL,
   }),
-  tagTypes: ["Devices", "Groups", "Measurements", "AveragesAndStds"],
+  tagTypes: ["Devices", "Groups", "Measurements", "AveragesAndStds", "Users"],
   endpoints: (builder) => ({
     //TODO maybe code split per feature
     //*DEVICES
@@ -95,6 +95,14 @@ export const apiSlice = createApi({
       },
       providesTags: ["AveragesAndStds"],
     }),
+    addUser: builder.mutation({
+      query: (userData) => ({
+        url: "users/create",
+        method: "POST",
+        body: userData,
+      }),
+      invalidatesTags: ["Users"],
+    }),
   }),
 })
 
@@ -110,4 +118,5 @@ export const {
   useDeleteGroupMutation,
   useGetMeasurementsByDeviceNamesQuery,
   useGetAveragesAndStdsQuery,
+  useAddUserMutation,
 } = apiSlice

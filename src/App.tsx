@@ -8,6 +8,7 @@ import Layout from "@/features/layout/Layout"
 import Home from "@/features/home/Home"
 import Devices from "@/features/devices/Devices"
 import AddDevice from "./features/devices/AddDevice"
+import AddUser from "./features/users/AddUser"
 import EditDevice from "./features/devices/EditDevice"
 import Groups from "@/features/groups/Groups"
 import AddGroup from "./features/groups/AddGroup"
@@ -39,6 +40,7 @@ function App() {
               <Route path="/groups/edit/:groupId" element={<EditGroup />} />
               <Route path="/measurements" element={<Measurements />} />
               <Route path="/users" element={<Users />} />
+              <Route path="/users/add" element={<AddUser />} />
               <Route path="/new" element={<New />} />
             </Route>
           </Routes>
