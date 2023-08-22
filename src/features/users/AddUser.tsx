@@ -1,8 +1,11 @@
 import Header from "@/components/Header"
 import { Box, Button, TextField, useTheme } from "@mui/material"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAddUserMutation } from "../api/apiSlice"
+import 'react-phone-number-input/style.css'
+import PhoneInput from 'react-phone-number-input'
+import { E164Number } from 'libphonenumber-js/core'
 
 interface FormValues {
   username: string
@@ -12,6 +15,8 @@ interface FormValues {
   countryCode: number
   phone: string
   role: string
+  createdBy: string
+  updatedBy: string
 }
 
 const initialValues: FormValues = {
@@ -19,9 +24,11 @@ const initialValues: FormValues = {
   firstName: "",
   lastName: "",
   email: "",
-  countryCode: 0,
+  countryCode: 1,
   phone: "",
-  role: "",
+  role: "Administrator",
+  createdBy: "Admin",
+  updatedBy: "Admin",
 }
 
 const AddUser: React.FC = () => {
@@ -39,8 +46,17 @@ const AddUser: React.FC = () => {
       formValues.countryCode,
       formValues.phone,
       formValues.role,
+      formValues.createdBy,
+      formValues.updatedBy,
     ].every((value) => value !== undefined && value !== null && value !== "") &&
     !isLoading
+
+  const [countryValue, setValue] = useState<E164Number>();
+
+  useEffect(() => {
+    console.log(countryValue);
+    //formValues.countryCode = parseInt(countryValue!.toString().slice(1, 3));
+  }, [countryValue]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -90,7 +106,7 @@ const AddUser: React.FC = () => {
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header
-        title="Add a new User" subtitle={""}      />
+        title="Add a new User" subtitle={""} />
       <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">
         <form onSubmit={handleSubmit}>
           <TextField
@@ -138,6 +154,13 @@ const AddUser: React.FC = () => {
             required
             fullWidth
             margin="normal"
+          />
+          <PhoneInput
+            international
+            defaultCountry="US"
+            placeholder ="Enter phone number"
+            value={countryValue}
+            onChange={setValue}
           />
           <TextField
             name="phone"

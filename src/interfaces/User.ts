@@ -1,5 +1,4 @@
 export default interface User {
-  _id: string
   username: string
   firstName: string
   lastName: string
@@ -7,8 +6,6 @@ export default interface User {
   countryCode: number
   phone: string
   role: string
-  createDateTime: string
   createdBy: string
-  updateDateTime: string
   updatedBy: string
 }
