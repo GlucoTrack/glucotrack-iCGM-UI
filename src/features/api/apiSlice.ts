@@ -95,6 +95,9 @@ export const apiSlice = createApi({
       },
       providesTags: ["AveragesAndStds"],
     }),
+
+    //*USERS
+
     addUser: builder.mutation({
       query: (userData) => ({
         url: "users/create",
@@ -103,6 +106,11 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["Users"],
     }),
+    getUsers: builder.query({
+      query: () => "users/read",
+      providesTags: ["Users"],
+    }),
+
   }),
 })
 
@@ -119,4 +127,5 @@ export const {
   useGetMeasurementsByDeviceNamesQuery,
   useGetAveragesAndStdsQuery,
   useAddUserMutation,
+  useGetUsersQuery
 } = apiSlice

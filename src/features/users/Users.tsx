@@ -10,12 +10,11 @@ import { useGetUsersQuery } from "@/features/api/apiSlice"
 
 const Users = () => {
   const navigate = useNavigate()
-  const { data, status, isFetching, isLoading, isSuccess, isError, error } =
-    useGetUsersQuery({})
+  const { data, status, isFetching, isLoading, isSuccess, isError, error } = useGetUsersQuery({})
 
   const handleCellClick = (params: GridCellParams) => {
     const { _id: userId } = params.row
-    navigate(`edit/${userId}`)
+    //navigate(`edit/${userId}`)
   }
 
   let content: JSX.Element | null = null
@@ -40,7 +39,7 @@ const Users = () => {
       <Box flexGrow={1} overflow="auto" width="100%">
         <DataGrid<User>
           slots={{ toolbar: GridToolbar }}
-          rows={data.devices}
+          rows={data.users}
           getRowId={(row) => row._id}
           columns={columns}
           onCellClick={handleCellClick}

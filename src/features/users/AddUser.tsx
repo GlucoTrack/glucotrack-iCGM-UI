@@ -17,7 +17,7 @@ interface FormValues {
 
 const initialValues: FormValues = {
   username: "",
-  password: "",
+  password: "abcd1234*",
   firstName: "",
   lastName: "",
   email: "",
@@ -30,8 +30,7 @@ const AddUser: React.FC = () => {
   const navigate = useNavigate()
   const theme = useTheme()
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
-  const [addUser, { isLoading, isError, error, isSuccess }] =
-    useAddUserMutation()
+  const [addUser, { isLoading, isError, error, isSuccess }] = useAddUserMutation()
   const canSave =
     [
       formValues.username,
@@ -54,6 +53,14 @@ const AddUser: React.FC = () => {
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+
+    console.log('handleSubmit is triggered')
+    console.log(`Form Values: ${formValues.username}, ${formValues.password}, ${formValues.firstName},${formValues.lastName},
+    ${formValues.email},${formValues.phone},${formValues.role}`)
+
+    console.log(`Is loading?: ${isLoading}`)
+    console.log(`Can save is: ${canSave}`)
+
     e.preventDefault()
     if (canSave) {
       try {
@@ -72,6 +79,7 @@ const AddUser: React.FC = () => {
   }
 
   const handleCancel = () => {
+    console.log('handleCancel is triggered')
     navigate("/users")
   }
 
@@ -109,11 +117,13 @@ const AddUser: React.FC = () => {
           <TextField
             name="password"
             label="Password"
+            type="password"
             value={formValues.password}
             onChange={handleChange}
             required
             fullWidth
             margin="normal"
+            disabled
           />
           <TextField
             name="firstName"
@@ -146,6 +156,15 @@ const AddUser: React.FC = () => {
             name="phone"
             label="Phone Numer"
             value={formValues.phone}
+            onChange={handleChange}
+            required
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            name="role"
+            label="Role"
+            value={formValues.role}
             onChange={handleChange}
             required
             fullWidth
