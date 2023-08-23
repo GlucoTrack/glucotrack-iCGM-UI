@@ -12,7 +12,6 @@ interface FormValues {
   firstName: string
   lastName: string
   email: string
-  countryCode: number
   phone: string
   role: string
   createdBy: string
@@ -24,8 +23,7 @@ const initialValues: FormValues = {
   firstName: "",
   lastName: "",
   email: "",
-  countryCode: 1,
-  phone: "",
+  phone: "+1",
   role: "Administrator",
   createdBy: "Admin",
   updatedBy: "Admin",
@@ -43,7 +41,6 @@ const AddUser: React.FC = () => {
       formValues.firstName,
       formValues.lastName,
       formValues.email,
-      formValues.countryCode,
       formValues.phone,
       formValues.role,
       formValues.createdBy,
@@ -54,8 +51,14 @@ const AddUser: React.FC = () => {
   const [countryValue, setValue] = useState<E164Number>();
 
   useEffect(() => {
-    console.log(countryValue);
-    //formValues.countryCode = parseInt(countryValue!.toString().slice(1, 3));
+      console.log(countryValue)
+      if (!(countryValue === undefined))
+      {
+        formValues.phone = countryValue!.toString();
+      }else
+      {
+        formValues.phone = "+1";
+      }
   }, [countryValue]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -145,31 +148,11 @@ const AddUser: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          <TextField
-            name="countryCode"
-            label="Country Code"
-            type="number"
-            value={formValues.countryCode}
-            onChange={handleChange}
-            required
-            fullWidth
-            margin="normal"
-          />
           <PhoneInput
-            international
             defaultCountry="US"
             placeholder ="Enter phone number"
             value={countryValue}
             onChange={setValue}
-          />
-          <TextField
-            name="phone"
-            label="Phone Numer"
-            value={formValues.phone}
-            onChange={handleChange}
-            required
-            fullWidth
-            margin="normal"
           />
           {content}
           <Box mt={2} display={"flex"} justifyContent={"flex-start"} gap={2}>

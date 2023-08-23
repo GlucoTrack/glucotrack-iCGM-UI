@@ -103,6 +103,14 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["Users"],
     }),
+    resetPassword: builder.mutation({
+      query: (passwordData) => ({
+        url: "users/resetPassword",
+        method: "POST",
+        body: passwordData,
+      }),
+      invalidatesTags: ["Users"],
+    }),    
   }),
 })
 
@@ -119,4 +127,5 @@ export const {
   useGetMeasurementsByDeviceNamesQuery,
   useGetAveragesAndStdsQuery,
   useAddUserMutation,
+  useResetPasswordMutation,
 } = apiSlice
