@@ -75,12 +75,16 @@ const Groups: React.FC = () => {
 
   // // Role-based access control (RBAC):
   // //
-  // if (!authenticateRoleGroupsInfo(role)) {
-  //   return <p>Forbidden access - no permission to perform action</p>;
-  // }
+  if (!authenticateRoleGroupsInfo(role)) {
+    return <p>Forbidden access - no permission to perform action</p>;
+  }
   
   return (
     <Box display="flex" flexDirection="column" height="85vh">
+      <p>
+        Welcome, {username}. <br></br>
+        Role: {role}
+      </p>
       <Header title="Groups" subtitle={`List of groups: ${getGroupStatus}`}>
         <Action action="Add" url="add" />
       </Header>

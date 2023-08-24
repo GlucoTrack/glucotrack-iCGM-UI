@@ -55,17 +55,21 @@ const Users = () => {
 
   // Role-based access control (RBAC):
   //
-  // if (!authenticateRoleUsersInfo(role)) {
-  //   return <p>Forbidden access - no permission to perform action</p>;
-  // }
+  if (!authenticateRoleUsersInfo(role)) {
+    return <p>Forbidden access - no permission to perform action</p>;
+  }
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
+      <p>
+        Welcome, {username}. <br></br>
+        Role: {role}
+      </p>
       <Header title="Users" subtitle={`List of registered users: ${status}`}>
         <Action action="Add" url="/users/add" />
       </Header>
       {content}
-      <p>Welcome, {username}. Role: {role}</p>
+      
     </Box>
   )
 }

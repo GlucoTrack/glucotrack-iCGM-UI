@@ -81,9 +81,9 @@ const AddGroup: React.FC = () => {
 
   // // Role-based access control (RBAC):
   // //
-  // if (!authenticateRoleAddGroup(role)) {
-  //   return <p>Forbidden access - no permission to perform action</p>;
-  // }
+  if (!authenticateRoleAddGroup(role)) {
+    return <p>Forbidden access - no permission to perform action</p>;
+  }
   
 
   return (

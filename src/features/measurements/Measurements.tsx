@@ -18,12 +18,16 @@ const Measurements: React.FC = () => {
 
   // // Role-based access control (RBAC):
   // //
-  // if (!authenticateRoleMeasurementsInfo(role)) {
-  //   return <p>Forbidden access - no permission to perform action</p>;
-  // }
+  if (!authenticateRoleMeasurementsInfo(role)) {
+    return <p>Forbidden access - no permission to perform action</p>;
+  }
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
+      <p>
+        Welcome, {username}. <br></br>
+        Role: {role}
+      </p>
       <Header
         title="Measurements"
         // subtitle={`Queried measurements: ${status}`}

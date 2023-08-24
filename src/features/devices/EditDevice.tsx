@@ -248,9 +248,9 @@ const EditDevice: React.FC = () => {
 
   // Role-based access control (RBAC):
   //
-  // if (!authenticateRoleEditDevice(role)) {
-  //   return <p>Forbidden access - no permission to perform action</p>;
-  // }
+  if (!authenticateRoleEditDevice(role)) {
+    return <p>Forbidden access - no permission to perform action</p>;
+  }
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">

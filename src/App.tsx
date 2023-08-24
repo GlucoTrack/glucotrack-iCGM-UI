@@ -35,7 +35,8 @@ function App() {
           <Box height="100%" width="100%">
             <Routes>
               <Route element={<Layout />}>
-                <Route path="/" element={<Navigate to="/home" replace />} />
+                {/* <Route path="/" element={<Navigate to="/home" replace />} /> */}
+                <Route path="/" element={<Login />} />
                 <Route path="/home" element={<Home />} />
                 <Route path="/devices" element={<Devices />} />
                 <Route path="/devices/add" element={<AddDevice />} />

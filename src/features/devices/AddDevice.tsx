@@ -129,9 +129,9 @@ const AddDevice: React.FC = () => {
 
   // Role-based access control (RBAC):
   //
-  // if (!authenticateRoleAddDevice(role)) {
-  //   return <p>Forbidden access - no permission to perform action</p>;
-  // }
+  if (!authenticateRoleAddDevice(role)) {
+    return <p>Forbidden access - no permission to perform action</p>;
+  }
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">

@@ -132,9 +132,9 @@ const EditGroup: React.FC = () => {
 
   // // Role-based access control (RBAC):
   // //
-  // if (!authenticateRoleEditGroup(role)) {
-  //   return <p>Forbidden access - no permission to perform action</p>;
-  // }
+  if (!authenticateRoleEditGroup(role)) {
+    return <p>Forbidden access - no permission to perform action</p>;
+  }
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
