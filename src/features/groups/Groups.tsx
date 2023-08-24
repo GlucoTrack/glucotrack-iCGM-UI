@@ -9,7 +9,11 @@ import { useDispatch } from "react-redux"
 import { setGroup } from "@/features/groups/groupsSlice"
 import Group from "@/interfaces/Group"
 
+import { useAuth } from '../context/authContext';
+import { authenticateRoleGroupsInfo } from '../../hooks/useRoleAuth';
+
 const Groups: React.FC = () => {
+  const { role, username } = useAuth();
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const {
@@ -69,6 +73,12 @@ const Groups: React.FC = () => {
     )
   }
 
+  // // Role-based access control (RBAC):
+  // //
+  // if (!authenticateRoleGroupsInfo(role)) {
+  //   return <p>Forbidden access - no permission to perform action</p>;
+  // }
+  
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header title="Groups" subtitle={`List of groups: ${getGroupStatus}`}>

@@ -1,48 +1,67 @@
 import Header from "@/components/Header"
 import { Box, Button, TextField, useTheme } from "@mui/material"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAddUserMutation } from "../api/apiSlice"
+import 'react-phone-number-input/style.css'
+import PhoneInput from 'react-phone-number-input'
+import { E164Number } from 'libphonenumber-js/core'
+
+import { useAuth } from '../context/authContext';
+import { authenticateRoleAddUser } from '../../hooks/useRoleAuth';
 
 interface FormValues {
   username: string
-  password: string
   firstName: string
   lastName: string
   email: string
-  //countryCode: number
   phone: string
   role: string
+  createdBy: string
+  updatedBy: string
 }
 
 const initialValues: FormValues = {
   username: "",
-  password: "abcd1234*",
   firstName: "",
   lastName: "",
   email: "",
-  //countryCode: 0,
-  phone: "",
-  role: "",
+  phone: "+1",
+  role: "Administrator",
+  createdBy: "Admin",
+  updatedBy: "Admin",
 }
 
 const AddUser: React.FC = () => {
+  const { role, username } = useAuth();
   const navigate = useNavigate()
   const theme = useTheme()
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
-  const [addUser, { isLoading, isError, error, isSuccess }] = useAddUserMutation()
+  const [addUser, { isLoading, isError, error, isSuccess }] = 
+    useAddUserMutation()
   const canSave =
     [
       formValues.username,
-      formValues.password,
       formValues.firstName,
       formValues.lastName,
       formValues.email,
-      //formValues.countryCode,
       formValues.phone,
       formValues.role,
+      formValues.createdBy,
+      formValues.updatedBy,
     ].every((value) => value !== undefined && value !== null && value !== "") &&
     !isLoading
+
+    const [countryValue, setValue] = useState<E164Number>();
+
+  useEffect(() => {
+    console.log(countryValue)
+    if (!(countryValue === undefined)) {
+      formValues.phone = countryValue!.toString();
+    } else {
+      formValues.phone = "+1";
+    }
+  }, [countryValue]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -53,14 +72,6 @@ const AddUser: React.FC = () => {
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-
-    console.log('handleSubmit is triggered')
-    console.log(`Form Values: ${formValues.username}, ${formValues.password}, ${formValues.firstName},${formValues.lastName},
-    ${formValues.email},${formValues.phone},${formValues.role}`)
-
-    console.log(`Is loading?: ${isLoading}`)
-    console.log(`Can save is: ${canSave}`)
-
     e.preventDefault()
     if (canSave) {
       try {
@@ -74,12 +85,11 @@ const AddUser: React.FC = () => {
   const handleMutationSuccess = () => {
     setTimeout(() => {
       setFormValues(initialValues)
-      navigate("/users")                  // is this the error?
+      navigate("/users")  
     }, 0)
   }
 
   const handleCancel = () => {
-    console.log('handleCancel is triggered')
     navigate("/users")
   }
 
@@ -98,11 +108,18 @@ const AddUser: React.FC = () => {
     handleMutationSuccess()
   }
 
+
+  // // Role-based access control (RBAC):
+  // //
+  // if (!authenticateRoleAddUser(role)) {
+  //   return <p>Forbidden access - no permission to perform action</p>;
+  // }
+  
+
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header
-        title="Add a new User" subtitle={""}      
-      />
+        title="Add a new User" subtitle={""} />
       <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">
         <form onSubmit={handleSubmit}>
           <TextField
@@ -113,17 +130,6 @@ const AddUser: React.FC = () => {
             required
             fullWidth
             margin="normal"
-          />
-          <TextField
-            name="password"
-            label="Password"
-            type="password"
-            value={formValues.password}
-            onChange={handleChange}
-            required
-            fullWidth
-            margin="normal"
-            disabled
           />
           <TextField
             name="firstName"
@@ -152,23 +158,11 @@ const AddUser: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          <TextField
-            name="phone"
-            label="Phone Numer"
-            value={formValues.phone}
-            onChange={handleChange}
-            required
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            name="role"
-            label="Role"
-            value={formValues.role}
-            onChange={handleChange}
-            required
-            fullWidth
-            margin="normal"
+          <PhoneInput
+            defaultCountry="US"
+            placeholder ="Enter phone number"
+            value={countryValue}
+            onChange={setValue}
           />
           {content}
           <Box mt={2} display={"flex"} justifyContent={"flex-start"} gap={2}>
@@ -186,17 +180,3 @@ const AddUser: React.FC = () => {
 }
 
 export default AddUser
-
-/*
-          { <TextField
-            name="countryCode"
-            label="Country Code"
-            type="number"
-            value={formValues.countryCode}
-            onChange={handleChange}
-            required
-            fullWidth
-            margin="normal"
-          /> }
-
-*/

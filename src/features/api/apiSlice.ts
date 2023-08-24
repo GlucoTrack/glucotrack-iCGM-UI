@@ -97,7 +97,6 @@ export const apiSlice = createApi({
     }),
 
     //*USERS
-
     addUser: builder.mutation({
       query: (userData) => ({
         url: "users/create",
@@ -106,10 +105,53 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["Users"],
     }),
+    getUserById: builder.query({
+      query: (userId) => ({
+        url: `users/readById/${userId}`,
+      }),
+      providesTags: ["Users"],
+    }),
+    getUserByName: builder.query({
+      query: (userame) => ({
+        url: `users/readByUsername/${userame}`,
+      }),
+      providesTags: ["Users"],
+    }),
     getUsers: builder.query({
       query: () => "users/read",
       providesTags: ["Users"],
     }),
+    editUser: builder.mutation({
+      query: ({ userame, ...userData }) => ({
+        url: `users/updateByUsername/${userame}`,
+        method: "PATCH",
+        body: userData,
+      }),
+      invalidatesTags: (result, error, arg) => [
+        { type: "Users", id: arg },
+        "Users",
+      ],
+    }),
+
+    // Login
+    resetPassword: builder.mutation({
+      query: (passwordData) => ({
+        url: "users/resetPassword",
+        method: "POST",
+        body: passwordData,
+      }),
+      invalidatesTags: ["Users"],
+    }),  
+    loginUser: builder.mutation({
+      query: (userData) => ({
+        url: "users/login",
+        method: "POST",
+        body: userData,
+      }),
+      invalidatesTags: ["Users"],
+    }),
+
+
 
   }),
 })
@@ -127,5 +169,10 @@ export const {
   useGetMeasurementsByDeviceNamesQuery,
   useGetAveragesAndStdsQuery,
   useAddUserMutation,
-  useGetUsersQuery
+  useGetUserByIdQuery,
+  useGetUserByNameQuery,
+  useGetUsersQuery,
+  useEditUserMutation,
+  useResetPasswordMutation,
+  useLoginUserMutation
 } = apiSlice

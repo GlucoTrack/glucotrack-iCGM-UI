@@ -8,13 +8,17 @@ import Action from "@/components/HeaderAction"
 import User from "@/interfaces/User"
 import { useGetUsersQuery } from "@/features/api/apiSlice"
 
+import { useAuth } from '../context/authContext';
+import { authenticateRoleUsersInfo } from '../../hooks/useRoleAuth';
+
 const Users = () => {
+  const { role, username } = useAuth();
   const navigate = useNavigate()
   const { data, status, isFetching, isLoading, isSuccess, isError, error } = useGetUsersQuery({})
 
   const handleCellClick = (params: GridCellParams) => {
     const { _id: userId } = params.row
-    //navigate(`edit/${userId}`)
+    navigate(`edit/${userId}`)
   }
 
   let content: JSX.Element | null = null
@@ -26,27 +30,34 @@ const Users = () => {
     content = <p>{JSON.stringify(error)}</p>
   } else if (isSuccess) {
     const columns = [
-      { field: "_id", headerName: "ID", flex: 1 },
-      { field: "username", headerName: "Name", flex: 0.5 },
-      { field: "password", headerName: "Start", flex: 1 },
-      { field: "firstName", headerName: "End", flex: 1 },
-      { field: "lastName", headerName: "End", flex: 1 },
-      { field: "email", headerName: "End", flex: 1 },
-      { field: "phone", headerName: "End", flex: 1 },
-      { field: "role", headerName: "End", flex: 1 },
+      // { field: "_id", headerName: "ID", flex: 1 },
+      { field: "username", headerName: "Username", flex: 0.5 },
+      { field: "firstName", headerName: "First name", flex: 1 },
+      { field: "lastName", headerName: "Last name", flex: 1 },
+      { field: "email", headerName: "email", flex: 1 },
+      { field: "phone", headerName: "Phone", flex: 1 },
+      { field: "role", headerName: "Role", flex: 1 },
+      // { field: "createdBy", headerName: "Created by", flex: 1 },
+      // { field: "updatedBy", headerName: "Updated by", flex: 1 },
     ]
     content = (
       <Box flexGrow={1} overflow="auto" width="100%">
         <DataGrid<User>
           slots={{ toolbar: GridToolbar }}
           rows={data.users}
-          getRowId={(row) => row._id}
+          getRowId={(row) => row._id} 
           columns={columns}
           onCellClick={handleCellClick}
         />
       </Box>
     )
   }
+
+  // // Role-based access control (RBAC):
+  // //
+  // if (!authenticateRoleUsersInfo(role)) {
+  //   return <p>Forbidden access - no permission to perform action</p>;
+  // }
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
