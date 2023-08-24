@@ -6,6 +6,7 @@ import { useAddUserMutation } from "../api/apiSlice"
 import 'react-phone-number-input/style.css'
 import PhoneInput from 'react-phone-number-input'
 import { E164Number } from 'libphonenumber-js/core'
+import sendResetPasswordEmail from "@/components/Email"
 
 interface FormValues {
   username: string
@@ -33,7 +34,8 @@ const AddUser: React.FC = () => {
   const navigate = useNavigate()
   const theme = useTheme()
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
-  const [addUser, { isLoading, isError, error, isSuccess }] =
+  const [passwordToken, setPasswordToken] = useState<String>('')
+  const [addUser, { isLoading, isError, error, isSuccess, data }] =
     useAddUserMutation()
   const canSave =
     [
@@ -51,15 +53,19 @@ const AddUser: React.FC = () => {
   const [countryValue, setValue] = useState<E164Number>();
 
   useEffect(() => {
-      console.log(countryValue)
-      if (!(countryValue === undefined))
-      {
-        formValues.phone = countryValue!.toString();
-      }else
-      {
-        formValues.phone = "+1";
-      }
-  }, [countryValue]);
+    if (!(countryValue === undefined)) {
+      formValues.phone = countryValue!.toString();
+    } else {
+      formValues.phone = "+1";
+    }
+  }, [countryValue])
+
+  useEffect(() => {
+    if (!(passwordToken === ''))
+    {
+      sendResetPasswordEmail(passwordToken, formValues.username, formValues.email)
+    }
+  }, [passwordToken])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -74,6 +80,8 @@ const AddUser: React.FC = () => {
     if (canSave) {
       try {
         await addUser(formValues)
+        // const resultUser = await addUser(formValues).unwrap()
+        // setPasswordToken(resultUser["jwtToken"])
       } catch (error: any) {
         console.error(error)
       }
@@ -83,7 +91,7 @@ const AddUser: React.FC = () => {
   const handleMutationSuccess = () => {
     setTimeout(() => {
       setFormValues(initialValues)
-      navigate("/devices")
+      navigate("/users")
     }, 0)
   }
 
@@ -92,19 +100,25 @@ const AddUser: React.FC = () => {
   }
 
   let content: JSX.Element | null = null
-  if (isLoading) {
-    content = <h3>Loading...</h3>
-  } else if (isError) {
-    const errorMessageString = JSON.stringify(error)
-    const errorMessageParsed = JSON.parse(errorMessageString)
-    content = (
-      <p style={{ color: theme.palette.error.main }}>
-        {JSON.stringify(errorMessageParsed.data.message)}
-      </p>
-    )
-  } else if (isSuccess) {
-    handleMutationSuccess()
-  }
+
+  useEffect(() => {
+    if (isLoading) {
+      content = <h3>Loading...</h3>
+    } else if (isError) {
+      const errorMessageString = JSON.stringify(error)
+      const errorMessageParsed = JSON.parse(errorMessageString)
+      content = (
+        <p style={{ color: theme.palette.error.main }}>
+          {JSON.stringify(errorMessageParsed.data.message)}
+        </p>
+      )
+    } else if (isSuccess) {
+      console.log(data.jwtToken)
+      setPasswordToken(data.jwtToken)
+      handleMutationSuccess()
+
+    }
+  }, [isLoading, isError, isSuccess])
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
@@ -150,7 +164,7 @@ const AddUser: React.FC = () => {
           />
           <PhoneInput
             defaultCountry="US"
-            placeholder ="Enter phone number"
+            placeholder="Enter phone number"
             value={countryValue}
             onChange={setValue}
           />

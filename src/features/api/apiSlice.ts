@@ -101,7 +101,9 @@ export const apiSlice = createApi({
         method: "POST",
         body: userData,
       }),
-      invalidatesTags: ["Users"],
+      invalidatesTags: [
+        "Users"
+      ],
     }),
     resetPassword: builder.mutation({
       query: (passwordData) => ({

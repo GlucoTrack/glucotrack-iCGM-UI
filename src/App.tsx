@@ -17,7 +17,7 @@ import Measurements from "@/features/measurements/Measurements"
 import Users from "@/features/users/Users"
 import New from "@/features/new/New"
 import { useAppSelector } from "@/hooks/useStore"
-import ResetPassword from "./features/users/ResetPassword"
+import ResetPassword from "./features/users/ResetPassword2"
 
 function App() {
   const mode = useAppSelector((state) => state.navbar.mode)
@@ -42,7 +42,8 @@ function App() {
               <Route path="/measurements" element={<Measurements />} />
               <Route path="/users" element={<Users />} />
               <Route path="/users/add" element={<AddUser />} />
-              <Route path="/users/resetpassword" element={<ResetPassword />} />
+              {/* <Route path="/users/resetpassword/:token/:userName/:email" element={<ResetPassword />} /> */}
+              <Route path="/users/resetpassword/:token/:user/:email" element={<ResetPassword />} />
               <Route path="/new" element={<New />} />
             </Route>
           </Routes>
