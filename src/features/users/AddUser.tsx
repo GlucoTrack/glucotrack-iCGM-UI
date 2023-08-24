@@ -111,9 +111,9 @@ const AddUser: React.FC = () => {
 
   // // Role-based access control (RBAC):
   // //
-  // if (!authenticateRoleAddUser(role)) {
-  //   return <p>Forbidden access - no permission to perform action</p>;
-  // }
+  if (!authenticateRoleAddUser(role)) {
+    return <p>Forbidden access - No permission to perform action</p>;
+  }
   
 
   return (

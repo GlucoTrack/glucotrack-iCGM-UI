@@ -31,10 +31,13 @@ const Login: React.FC = () => {
   //const history = useHistory();
   //const [usernameInput, setUsernameInput] = useState('');
   //const [password, setPassword] = useState('');
-  
+
   const [credentials, setCredentials] = useState<Credentials>(initialValues)
   const [error, setError] = useState('');
-  const { setRole, setUsername } = useAuth();
+  const { role, setRole, username, setUsername } = useAuth();
+
+  console.log('Role :', role);
+  console.log('Username :', username);
 
   const [loginResponse, { data, isLoading, isError, isSuccess }] = useLoginUserMutation()
 
@@ -49,38 +52,58 @@ const Login: React.FC = () => {
     }))
   }
 
-  const handleLogin = async ( ) => {
+  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
 
-    // The Role could be set if the API returned a user object (with a role field) -> (decoded) token should contain [ username & role ]
+    event.preventDefault();
 
     try {
+
       // Call API function to validate login:
       //
-      //const response = await useLoginUserMutation(credentials);
       await loginResponse(credentials);
-      
-      if (isSuccess) {
-        
-        const decodedToken = jwtDecode(data) as DecodedToken;
-        
-        // set credentials in internal state: username & role
-        
-        setUsername(decodedToken.username);  // --> should be Global !
-        setRole(decodedToken.role);
-        //const user = await apiLogin(credentials);
-        
-        // Successful login, navigate to home
-        //history.push('/home');
-        handleMutationSuccess;
+      //const response = await useLoginUserMutation(credentials);
 
-      } else {
-        setError('Invalid credentials');
-      }
+      // if (isSuccess) {  
+      //   const decodedToken = jwtDecode(data) as DecodedToken;
+      //   // set credentials in internal state: username & role
+      //   setUsername(decodedToken.username);  // --> should be Global !
+      //   setRole(decodedToken.role);
+      //   //const user = await apiLogin(credentials);
+      //   // Successful login, navigate to home
+      //   //history.push('/home');
+      //   handleMutationSuccess;
+      // } else {
+      //   setError('Invalid credentials');
+      // }
+
     } catch (error) {
       setError('An error occurred during login');
     }
     
   };
+
+
+  // Handles the aftermath of the validation of credentials by the back-end:
+  //
+  useEffect(() => {
+    if (isSuccess) {
+
+      // (decoded) token should contain [ username & role ]
+      const decodedToken = jwtDecode(data.token) as DecodedToken;
+
+      console.log('DecodedToken username: ', decodedToken.username);
+      console.log('DecodedToken role: ', decodedToken.role);
+
+      setUsername(decodedToken.username);
+      setRole(decodedToken.role);
+
+      handleMutationSuccess();    // navigate 'home'
+
+    } else if (isError) {
+      setError('Invalid credentials');
+    }
+  }, [isSuccess, isError, data]);
+
 
   const handleMutationSuccess = () => {
     setTimeout(() => {
@@ -90,7 +113,7 @@ const Login: React.FC = () => {
   }
 
   const handleCancel = () => {
-   // navigate("/home")
+   setCredentials(initialValues);
   }
 
 

@@ -15,7 +15,7 @@ import AddGroup from "./features/groups/AddGroup"
 import EditGroup from "@/features/groups/EditGroup"
 import Measurements from "@/features/measurements/Measurements"
 import Users from "@/features/users/Users"
-//import EditUser from "@/features/users/EditUser"
+import EditUser from "@/features/users/EditUser"
 import New from "@/features/new/New"
 import { useAppSelector } from "@/hooks/useStore"
 import ResetPassword from "./features/users/ResetPassword"
@@ -48,7 +48,7 @@ function App() {
                 <Route path="/users/add" element={<AddUser />} />
                 <Route path="/users/resetpassword" element={<ResetPassword />} />
                 <Route path="/users/login" element={<Login />} />
-                {/* <Route path="/users/edit" element={<EditUser />} /> */}
+                <Route path="/users/edit/:userId" element={<EditUser />} />
                 <Route path="/new" element={<New />} />
               </Route>
             </Routes>
