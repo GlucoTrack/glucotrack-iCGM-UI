@@ -116,6 +116,7 @@ const AddUser: React.FC = () => {
         </p>
       )
     } else if (isSuccess) {
+      setPasswordToken(data.jwtToken)
       handleMutationSuccess()
     }
   }, [isLoading, isError, isSuccess])
