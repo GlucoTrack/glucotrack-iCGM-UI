@@ -4,6 +4,9 @@ import { Box, Button, TextField, useTheme } from "@mui/material"
 import Header from "@/components/Header"
 import { useAddGroupMutation } from "@/features/api/apiSlice"
 
+import { useAuth } from '../context/authContext';
+import { authenticateRoleAddGroup } from '../../hooks/useRoleAuth';
+
 interface FormValues {
   groupName: string
   groupDescription: string
@@ -17,6 +20,7 @@ const initialValues: FormValues = {
 }
 
 const AddGroup: React.FC = () => {
+  const { role, username } = useAuth();
   const navigate = useNavigate()
   const theme = useTheme()
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
@@ -73,6 +77,14 @@ const AddGroup: React.FC = () => {
   } else if (isSuccess) {
     handleMutationSuccess()
   }
+
+
+  // // Role-based access control (RBAC):
+  // //
+  if (!authenticateRoleAddGroup(role)) {
+    return <p>Forbidden access - no permission to perform action</p>;
+  }
+  
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">

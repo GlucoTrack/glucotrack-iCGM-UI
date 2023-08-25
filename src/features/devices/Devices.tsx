@@ -8,7 +8,11 @@ import HeaderAction from "@/components/HeaderAction"
 import Device from "@/interfaces/Device"
 import { useGetDevicesQuery } from "@/features/api/apiSlice"
 
+import { useAuth } from '../context/authContext';
+import { authenticateRoleDevicesInfo } from '../../hooks/useRoleAuth';
+
 const Devices = () => {
+  const { role, username } = useAuth();
   const navigate = useNavigate()
   const { data, status, isFetching, isLoading, isSuccess, isError, error } =
     useGetDevicesQuery({})
@@ -63,8 +67,18 @@ const Devices = () => {
     )
   }
 
+  // Role-based access control (RBAC):
+  //
+  if (!authenticateRoleDevicesInfo(role)) {
+    return <p>Forbidden access - no permission to perform action</p>;
+  }
+
   return (
     <Box display="flex" flexDirection="column" height="85vh">
+      <p>
+        Welcome, {username}. <br></br>
+        Role: {role}
+      </p>
       <Header title="Devices" subtitle={`List of devices: ${status}`}>
         <HeaderAction action="Add" url="/devices/add" />
       </Header>

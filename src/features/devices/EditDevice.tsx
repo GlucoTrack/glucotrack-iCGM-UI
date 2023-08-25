@@ -8,6 +8,9 @@ import {
   useGetDeviceQuery,
 } from "@/features/api/apiSlice"
 
+import { useAuth } from '../context/authContext';
+import { authenticateRoleEditDevice } from '../../hooks/useRoleAuth';
+
 interface FormValues {
   macAddress: string
   deviceName: string
@@ -53,6 +56,7 @@ const initialValues: FormValues = {
 }
 
 const EditDevice: React.FC = () => {
+  const { role, username } = useAuth();
   const navigate = useNavigate()
   const theme = useTheme()
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
@@ -240,6 +244,12 @@ const EditDevice: React.FC = () => {
     )
   } else if (isEditSuccess || isDeleteSuccess) {
     handleMutationSuccess()
+  }
+
+  // Role-based access control (RBAC):
+  //
+  if (!authenticateRoleEditDevice(role)) {
+    return <p>Forbidden access - no permission to perform action</p>;
   }
 
   return (

@@ -4,6 +4,9 @@ import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAddDeviceMutation } from "../api/apiSlice"
 
+import { useAuth } from '../context/authContext';
+import { authenticateRoleAddDevice} from '../../hooks/useRoleAuth';
+
 interface FormValues {
   macAddress: string
   deviceName: string
@@ -49,6 +52,7 @@ const initialValues: FormValues = {
 }
 
 const AddDevice: React.FC = () => {
+  const { role, username } = useAuth();
   const navigate = useNavigate()
   const theme = useTheme()
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
@@ -121,6 +125,12 @@ const AddDevice: React.FC = () => {
     )
   } else if (isSuccess) {
     handleMutationSuccess()
+  }
+
+  // Role-based access control (RBAC):
+  //
+  if (!authenticateRoleAddDevice(role)) {
+    return <p>Forbidden access - no permission to perform action</p>;
   }
 
   return (
