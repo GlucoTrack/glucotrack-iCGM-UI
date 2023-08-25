@@ -14,6 +14,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<string>('');
   const [username, setUsername] = useState<string>('');
 
+  // const logout = () => {
+  //   setRole('');
+  //   setUsername('');
+  // };
+
   return (
     <AuthContext.Provider value={{ role, setRole, username, setUsername }}>
       {children}
@@ -28,6 +33,8 @@ export function useAuth() {
   }
   return context;
 }
+
+
 
 
 

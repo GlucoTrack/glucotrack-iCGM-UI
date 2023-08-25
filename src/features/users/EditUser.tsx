@@ -46,6 +46,8 @@ const EditUser: React.FC = () => {
 
   const { userId } = useParams<Record<string, string>>()
 
+  console.log(`[Edit User]: The user Id from params is: ${userId}`)
+
   const {
     data: getUserData,
     // status: getUserStatus,
