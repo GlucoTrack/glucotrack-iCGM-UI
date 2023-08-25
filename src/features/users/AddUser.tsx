@@ -1,8 +1,10 @@
 import Header from "@/components/Header"
 import { Box, Button, TextField, useTheme } from "@mui/material"
-import React, { useEffect, useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAddUserMutation } from "../api/apiSlice"
+import { useAuth } from '../context/authContext';
+import { authenticateRoleAddUser } from '../../hooks/useRoleAuth';
 import 'react-phone-number-input/style.css'
 import PhoneInput from 'react-phone-number-input'
 import { E164Number } from 'libphonenumber-js/core'
@@ -31,6 +33,7 @@ const initialValues: FormValues = {
 }
 
 const AddUser: React.FC = () => {
+  const { role, username } = useAuth();
   const navigate = useNavigate()
   const theme = useTheme()
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
@@ -113,13 +116,18 @@ const AddUser: React.FC = () => {
         </p>
       )
     } else if (isSuccess) {
-      console.log(data.jwtToken)
-      setPasswordToken(data.jwtToken)
       handleMutationSuccess()
-
     }
   }, [isLoading, isError, isSuccess])
 
+
+  // // Role-based access control (RBAC):
+  // //
+  if (!authenticateRoleAddUser(role)) {
+    return <p>Forbidden access - No permission to perform action</p>;
+  }
+
+  
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header

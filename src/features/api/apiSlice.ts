@@ -95,6 +95,8 @@ export const apiSlice = createApi({
       },
       providesTags: ["AveragesAndStds"],
     }),
+
+    //*USERS
     addUser: builder.mutation({
       query: (userData) => ({
         url: "users/create",
@@ -105,6 +107,45 @@ export const apiSlice = createApi({
         "Users"
       ],
     }),
+    getUserById: builder.query({
+      query: (userId) => ({
+        url: `users/readById/${userId}`,
+      }),
+      providesTags: ["Users"],
+    }),
+    getUserByName: builder.query({
+      query: (userame) => ({
+        url: `users/readByUsername/${userame}`,
+      }),
+      providesTags: ["Users"],
+    }),
+    getUsers: builder.query({
+      query: () => "users/read",
+      providesTags: ["Users"],
+    }),
+    editUser: builder.mutation({
+      query: ({ userId, ...userData }) => ({
+        url: `users/updateByUserId/${userId}`,
+        method: "PATCH",
+        body: userData,
+      }),
+      invalidatesTags: (result, error, arg) => [
+        { type: "Users", id: arg },
+        "Users",
+      ],
+    }),
+    deleteUser: builder.mutation({
+      query: (userId) => ({
+        url: `users/delete/${userId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, arg) => [
+        { type: "Users", id: arg },
+        "Users",
+      ],
+    }),
+
+    // Login
     resetPassword: builder.mutation({
       query: (passwordData) => ({
         url: "users/resetPassword",
@@ -112,7 +153,18 @@ export const apiSlice = createApi({
         body: passwordData,
       }),
       invalidatesTags: ["Users"],
-    }),    
+    }),  
+    loginUser: builder.mutation({
+      query: (userData) => ({
+        url: "users/login",
+        method: "POST",
+        body: userData,
+      }),
+      invalidatesTags: ["Users"],
+    }),
+
+
+
   }),
 })
 
@@ -129,5 +181,11 @@ export const {
   useGetMeasurementsByDeviceNamesQuery,
   useGetAveragesAndStdsQuery,
   useAddUserMutation,
+  useGetUserByIdQuery,
+  useGetUserByNameQuery,
+  useGetUsersQuery,
+  useEditUserMutation,
+  useDeleteUserMutation,
   useResetPasswordMutation,
+  useLoginUserMutation
 } = apiSlice

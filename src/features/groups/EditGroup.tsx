@@ -10,6 +10,9 @@ import {
 import { RootState } from "@/store/store"
 import { resetGroup } from "./groupsSlice"
 
+import { useAuth } from '../context/authContext';
+import { authenticateRoleEditGroup } from '../../hooks/useRoleAuth';
+
 interface FormValues {
   groupName: string
   groupDescription: string
@@ -23,6 +26,7 @@ const initialValues: FormValues = {
 }
 
 const EditGroup: React.FC = () => {
+  const { role, username } = useAuth();
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const theme = useTheme()
@@ -124,6 +128,12 @@ const EditGroup: React.FC = () => {
     )
   } else if (isEditSuccess || isDeleteSuccess) {
     handleMutationSuccess()
+  }
+
+  // // Role-based access control (RBAC):
+  // //
+  if (!authenticateRoleEditGroup(role)) {
+    return <p>Forbidden access - no permission to perform action</p>;
   }
 
   return (
