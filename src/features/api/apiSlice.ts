@@ -162,6 +162,13 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["Users"],
     }),
+    validateToken: builder.mutation({
+      query: (tokenInfo) => ({
+        url: `users/validate/${tokenInfo.token}/${tokenInfo.eMail}/${tokenInfo.username}`,
+        method: "GET",
+      }),
+      invalidatesTags: ["Users"],
+    }),
 
 
 
@@ -187,5 +194,6 @@ export const {
   useEditUserMutation,
   useDeleteUserMutation,
   useResetPasswordMutation,
-  useLoginUserMutation
+  useLoginUserMutation,
+  useValidateTokenMutation
 } = apiSlice

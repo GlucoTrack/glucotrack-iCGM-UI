@@ -50,7 +50,7 @@ function App() {
                 <Route path="/users/resetpassword" element={<ResetPassword />} />
                 <Route path="/users/login" element={<Login />} />
                 <Route path="/users/edit/:userId" element={<EditUser />} />
-                <Route path="/users/resetpassword/:token/:user/:email" element={<ResetPassword />} />
+                <Route path="/users/resetpassword/:token/:email/:user" element={<ResetPassword />} />
                 <Route path="/new" element={<New />} />
               </Route>
             </Routes>

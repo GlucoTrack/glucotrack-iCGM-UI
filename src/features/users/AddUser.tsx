@@ -66,7 +66,7 @@ const AddUser: React.FC = () => {
   useEffect(() => {
     if (!(passwordToken === ''))
     {
-      sendResetPasswordEmail(passwordToken, formValues.username, formValues.email)
+      sendResetPasswordEmail(passwordToken, formValues.email, formValues.username)
     }
   }, [passwordToken])
 
@@ -83,8 +83,6 @@ const AddUser: React.FC = () => {
     if (canSave) {
       try {
         await addUser(formValues)
-        // const resultUser = await addUser(formValues).unwrap()
-        // setPasswordToken(resultUser["jwtToken"])
       } catch (error: any) {
         console.error(error)
       }

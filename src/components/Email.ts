@@ -1,7 +1,7 @@
-const sendResetPasswordEmail = (jwtToken: String, userName: String, userEmail: String) => 
+const sendResetPasswordEmail = (jwtToken: String, userEmail: String, userName: String) => 
 {
-    //userEmail = encodeURIComponent((userEmail as string))
-    const urlToConfirm = `${ window.location.origin }/users/resetpassword/${ jwtToken }/${ userName }/${ userEmail }`
+    userName = userName.replace('.', '**')
+    const urlToConfirm = `${ window.location.origin }/users/resetpassword/${ jwtToken }/${ userEmail }/${ userName }`
     //const urlToConfirm = `${ window.location.origin }/users/resetpassword/${ jwtToken }`
     console.log(encodeURI(urlToConfirm))
 }
