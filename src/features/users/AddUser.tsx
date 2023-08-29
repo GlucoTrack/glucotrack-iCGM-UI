@@ -8,7 +8,7 @@ import { authenticateRoleAddUser } from '../../hooks/useRoleAuth';
 import 'react-phone-number-input/style.css'
 import PhoneInput from 'react-phone-number-input'
 import { E164Number } from 'libphonenumber-js/core'
-import sendResetPasswordEmail from "@/components/Email"
+import sendResetPasswordEmail from "@/components/email/Email"
 
 interface FormValues {
   username: string
@@ -53,6 +53,13 @@ const AddUser: React.FC = () => {
     ].every((value) => value !== undefined && value !== null && value !== "") &&
     !isLoading
 
+    const canSendEmail =
+    [
+      passwordToken,
+      formValues.username,
+      formValues.email,
+    ].every((value) => value !== undefined && value !== null && value !== "")
+
   const [countryValue, setValue] = useState<E164Number>();
 
   useEffect(() => {
@@ -64,7 +71,7 @@ const AddUser: React.FC = () => {
   }, [countryValue])
 
   useEffect(() => {
-    if (!(passwordToken === ''))
+    if (canSendEmail)
     {
       sendResetPasswordEmail(passwordToken, formValues.email, formValues.username)
     }
