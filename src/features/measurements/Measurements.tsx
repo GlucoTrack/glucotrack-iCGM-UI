@@ -24,10 +24,6 @@ const Measurements: React.FC = () => {
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
-      <p>
-        Welcome, {username}. <br></br>
-        Role: {role}
-      </p>
       <Header
         title="Measurements"
         // subtitle={`Queried measurements: ${status}`}

@@ -1,8 +1,12 @@
 import React, { useContext } from 'react';
-//import { Menu, MenuItem, Button } from '@material-ui/core';
 import Menu from '@mui/material/Menu';    // from "@mui/material"
 import MenuItem from '@mui/material/MenuItem';
-import Button from '@mui/material/Button';
+import { Box, Button, Typography }  from '@mui/material';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import BadgeIcon from '@mui/icons-material/Badge';
+import LoginIcon from '@mui/icons-material/Login';
+import LogoutIcon from '@mui/icons-material/Logout';
+
 //import { useHistory } from 'react-router-dom';
 import { useNavigate } from "react-router-dom"
 
@@ -23,41 +27,69 @@ const UserOption: React.FC = () => {
     setAnchorEl(null);
   };
 
+  const handleAccount = () => {
+    navigate("/users/account");
+    handleClose();
+  }
+
   const handleLogin = () => {
     //history.push('/login');
-    navigate("/login")
+    navigate("/users/login")
     handleClose();
   };
 
   const handleLogout = () => {
-    //setAuth({ token: null, username: null, role: null });
+    
+    // Clear the currently stored credentials:
+    //
     setRole('');
     setUsername('');
+    //setAuth({ token: null, username: null, role: null });
 
-    //localStorage.removeItem('token'); //  wherever  token is stored
+    // ALso clear session token (wherever it is stored / TBD):
+    //
+    //localStorage.removeItem('token'); 
+
     handleClose();
-    //history.push('/login'); // redirect to login or home ...
-    navigate("/login")
+
+    // Redirect to 'Login' (or home ...):
+    //
+    navigate("/users/login")
+    //history.push('/login'); 
   };
 
   return (
-    <div>
-      <Button onClick={handleClick}>
-        {username || 'Guest'}
-      </Button>
-      <Menu
-        anchorEl={anchorEl}
-        keepMounted
-        open={Boolean(anchorEl)}
-        onClose={handleClose}
-      >
-        <MenuItem onClick={handleLogin} disabled={!!username}>
-          Login
-        </MenuItem>
-        <MenuItem onClick={handleLogout} disabled={!username}>
-          Logout
-        </MenuItem>
-      </Menu>
+    <div >
+      <Box display="flex" justifyContent="right">
+        <Button onClick={handleClick} style={{ marginTop: 8, marginRight: 10 }}>
+          <AccountCircleIcon fontSize="large" style={{ marginRight: 8 }} />
+          {username || 'User'}
+        </Button>
+        <Menu
+          anchorEl={anchorEl}
+          keepMounted
+          open={Boolean(anchorEl)}
+          onClose={handleClose}
+        >
+          <MenuItem onClick={handleAccount} disabled={!username}>
+            <BadgeIcon fontSize="medium" style={{ marginRight: 10 }} />
+            Account
+          </MenuItem>
+          <MenuItem onClick={handleLogin} disabled={!!username}>
+            Login
+            <LoginIcon fontSize="medium" style={{ marginLeft: 10 }} />
+          </MenuItem>
+          <MenuItem onClick={handleLogout} disabled={!username}>
+            Logout
+            <LogoutIcon fontSize="medium" style={{ marginLeft: 10 }} />
+          </MenuItem>
+        </Menu>
+      </Box>
+      <Box display="flex" justifyContent="right" style={{ marginRight: 12 }}>
+        {role && (
+          <Typography variant="body2"> {role} </Typography>
+        )}
+      </Box>
     </div>
   );
 };

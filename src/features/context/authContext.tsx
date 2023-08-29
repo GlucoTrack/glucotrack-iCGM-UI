@@ -33,38 +33,3 @@ export function useAuth() {
   }
   return context;
 }
-
-
-
-
-
-//    In Components:
-/*
-
-import { useAuth } from '../context/authContext';
-
-export function MyComponent() {
-  const { role, username } = useAuth();
-
-  // check if role is admin --> can call from 'useRole' hook... ('role' is parameter)
-
-  function authenticateAdminRole() {
-    return role === 'Administrator';
-  }
-
-  if (!authenticateAdminRole()) {
-    return <p>Forbidden access - no permission to perform action</p>;
-  }
-
-  return (
-    // Actual component content ...
-
-    <div>
-      <p>Welcome, {username}</p>
-      // Rest of component...
-    </div>
-    
-  );
-}
-
-*/

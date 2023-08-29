@@ -81,10 +81,6 @@ const Groups: React.FC = () => {
   
   return (
     <Box display="flex" flexDirection="column" height="85vh">
-      <p>
-        Welcome, {username}. <br></br>
-        Role: {role}
-      </p>
       <Header title="Groups" subtitle={`List of groups: ${getGroupStatus}`}>
         <Action action="Add" url="add" />
       </Header>

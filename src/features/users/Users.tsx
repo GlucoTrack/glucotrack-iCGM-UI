@@ -67,10 +67,6 @@ const Users = () => {
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
-      <p>
-        Welcome, {username}. <br></br>
-        Role: {role}
-      </p>
       <Header title="Users" subtitle={`List of registered users: ${status}`}>
         <Action action="Add" url="/users/add" />
       </Header>
