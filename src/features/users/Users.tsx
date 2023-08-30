@@ -11,6 +11,12 @@ import { useGetUsersQuery } from "@/features/api/apiSlice"
 import { useAuth } from '../context/authContext';
 import { authenticateRoleUsersInfo } from '../../hooks/useRoleAuth';
 
+// internal interface needed to avoid TypeScript check warning for the DataGrid
+//
+interface TableRow extends User {
+  _id: string;
+}
+
 const Users = () => {
   const { role, username } = useAuth();
   const navigate = useNavigate()
@@ -30,7 +36,7 @@ const Users = () => {
     content = <p>{JSON.stringify(error)}</p>
   } else if (isSuccess) {
     const columns = [
-      //{ field: "_id", headerName: "ID", flex: 1 },
+      { field: "_id", headerName: "ID", flex: 1 },
       { field: "username", headerName: "Username", flex: 0.5 },
       { field: "firstName", headerName: "First name", flex: 1 },
       { field: "lastName", headerName: "Last name", flex: 1 },
@@ -42,7 +48,7 @@ const Users = () => {
     ]
     content = (
       <Box flexGrow={1} overflow="auto" width="100%">
-        <DataGrid<User>
+        <DataGrid<TableRow>
           slots={{ toolbar: GridToolbar }}
           rows={data.users}
           getRowId={(row) => (row as UserWithId)._id} 
@@ -61,10 +67,6 @@ const Users = () => {
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
-      <p>
-        Welcome, {username}. <br></br>
-        Role: {role}
-      </p>
       <Header title="Users" subtitle={`List of registered users: ${status}`}>
         <Action action="Add" url="/users/add" />
       </Header>

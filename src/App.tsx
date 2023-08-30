@@ -20,6 +20,7 @@ import New from "@/features/new/New"
 import { useAppSelector } from "@/hooks/useStore"
 import ResetPassword from "./features/users/ResetPassword"
 import Login from "./features/users/Login"
+import Account from "./features/users/Account"
 import { AuthProvider } from './features/context/authContext';
 
 function App() {
@@ -34,9 +35,11 @@ function App() {
         <BrowserRouter>
           <Box height="100%" width="100%">
             <Routes>
+              <Route path="/" element={<Login />} />
+              <Route path="/users/login" element={<Login />} />
               <Route element={<Layout />}>
                 {/* <Route path="/" element={<Navigate to="/home" replace />} /> */}
-                <Route path="/" element={<Login />} />
+                {/* <Route path="/" element={<Login />} /> */}
                 <Route path="/home" element={<Home />} />
                 <Route path="/devices" element={<Devices />} />
                 <Route path="/devices/add" element={<AddDevice />} />
@@ -48,9 +51,10 @@ function App() {
                 <Route path="/users" element={<Users />} />
                 <Route path="/users/add" element={<AddUser />} />
                 <Route path="/users/resetpassword" element={<ResetPassword />} />
-                <Route path="/users/login" element={<Login />} />
+                {/* <Route path="/users/login" element={<Login />} /> */}
                 <Route path="/users/edit/:userId" element={<EditUser />} />
-                <Route path="/users/resetpassword/:token/:email/:user" element={<ResetPassword />} />
+                <Route path="/users/resetpassword/:token/:user/:email" element={<ResetPassword />} />
+                <Route path="/users/account" element={<Account />} />
                 <Route path="/new" element={<New />} />
               </Route>
             </Routes>

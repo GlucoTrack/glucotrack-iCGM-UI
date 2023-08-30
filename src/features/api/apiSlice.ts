@@ -1,9 +1,22 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
+const token = sessionStorage.getItem('token');
+//console.log ('Session JWT in API: ', token)
 
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
     baseUrl: import.meta.env.VITE_API_BASE_URL,
+    prepareHeaders: (headers, { getState }) => {
+      // Get token from session storage
+      const token = sessionStorage.getItem('token');
+      
+      // If the token exists, set it in the headers
+      if (token) {
+        headers.set('authorization', `Bearer ${token}`);
+      }
+
+      return headers;
+    },
   }),
   tagTypes: ["Devices", "Groups", "Measurements", "AveragesAndStds", "Users", "Email"],
   endpoints: (builder) => ({

@@ -9,6 +9,7 @@ import jwtDecode from 'jwt-decode';
 import { useLoginUserMutation } from "../api/apiSlice"
 
 import { useAuth } from '../context/authContext';
+import Navbar from '../navbar/Navbar';
 
 
 interface Credentials {
@@ -34,7 +35,11 @@ const Login: React.FC = () => {
 
   const [credentials, setCredentials] = useState<Credentials>(initialValues)
   const [error, setError] = useState('');
-  const { role, setRole, username, setUsername } = useAuth();
+  const { role, setRole, username, setUsername, sessionToken, setSessionToken } = useAuth();
+
+  // console.log('Token :', sessionToken);
+  console.log('Role :', role);
+  console.log('Username :', username);
 
   const [loginResponse, { data, isLoading, isError, isSuccess }] = useLoginUserMutation()
 
@@ -53,44 +58,43 @@ const Login: React.FC = () => {
     event.preventDefault();
 
     try {
-
       // Call API function to validate login:
-      //
       await loginResponse(credentials);
       //const response = await useLoginUserMutation(credentials);
-
-      // if (isSuccess) {  
-      //   const decodedToken = jwtDecode(data) as DecodedToken;
-      //   // set credentials in internal state: username & role
-      //   setUsername(decodedToken.username);  // --> should be Global !
-      //   setRole(decodedToken.role);
-      //   //const user = await apiLogin(credentials);
-      //   // Successful login, navigate to home
-      //   //history.push('/home');
-      //   handleMutationSuccess;
-      // } else {
-      //   setError('Invalid credentials');
-      // }
-
     } catch (error) {
       setError('An error occurred during login');
     }
-    
   };
-
 
   // Handles the aftermath of the validation of credentials by the back-end:
   //
   useEffect(() => {
     if (isSuccess) {
+
+      const token = data.token
+      console.log('Session JWT: ', token);
+
+      setSessionToken(data.token);
+      sessionStorage.setItem('token', token);  // localStorage
+
+      //const jwtFromSession = sessionStorage.getItem('token');
+      //console.log('Session JWT from local session storage: ', jwtFromSession);
+    
       // (decoded) token should contain [ username & role ]
-      const decodedToken = jwtDecode(data.token) as DecodedToken;
+      const decodedToken = jwtDecode(token) as DecodedToken;
 
-      console.log('DecodedToken username: ', decodedToken.username);
-      console.log('DecodedToken role: ', decodedToken.role);
+      // console.log('Decoded Token: ', decodedToken.toString());
+      // console.log('DecodedToken username: ', decodedToken.username);
+      // console.log('DecodedToken role: ', decodedToken.role);
 
-      setUsername(decodedToken.username);
-      setRole(decodedToken.role);
+      const accountUsername = decodedToken.username;
+      const accountRole = decodedToken.role;
+
+      setUsername(accountUsername);
+      sessionStorage.setItem('username', accountUsername);
+
+      setRole(accountRole);
+      sessionStorage.setItem('role', accountRole); 
 
       handleMutationSuccess();    // navigate 'home'
 
@@ -111,9 +115,14 @@ const Login: React.FC = () => {
    setCredentials(initialValues);
   }
 
+  // const emptyFunction = () => {
+  //   // no statements
+  // };
+
 
   return (
-    <Box display="flex" flexDirection="column" height="85vh">
+    <Box display="flex" flexDirection="column" height="85vh" style={{ marginTop: 30, marginLeft: 50 }}>
+      {/* <Navbar isSidebarOpen={false} setIsSidebarOpen={emptyFunction} /> */}
       <Header
         title="Login" subtitle={""} />
       <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">

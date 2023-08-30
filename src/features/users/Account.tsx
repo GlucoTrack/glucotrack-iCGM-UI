@@ -1,12 +1,10 @@
 import Header from "@/components/Header"
 import { Box, Button, TextField, useTheme } from "@mui/material"
 import React, { useEffect, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import {
   useEditUserMutation,
-  useGetUserByIdQuery,
   useGetUserByNameQuery,
-  useDeleteUserMutation,
 } from "@/features/api/apiSlice"
 
 import 'react-phone-number-input/style.css'
@@ -38,15 +36,11 @@ const initialValues: FormValues = {
   updatedBy: "Admin",
 }
 
-const EditUser: React.FC = () => {
+const Account: React.FC = () => {
   const { role, username } = useAuth();
   const navigate = useNavigate()
   const theme = useTheme()
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
-
-  const { userId } = useParams<Record<string, string>>()
-
-  //console.log(`[Edit User]: The user Id from params is: ${userId}`)
 
   const {
     data: getUserData,
@@ -56,17 +50,7 @@ const EditUser: React.FC = () => {
     isSuccess: getUserIsSuccess,
     isError: getUserIsError,
     error: getUserError,
-  } = useGetUserByIdQuery(userId)
-
-  const [
-    deleteUser,
-    {
-      isLoading: isDeletingUser,
-      isError: isDeleteError,
-      error: deleteError,
-      isSuccess: isDeleteSuccess,
-    },
-  ] = useDeleteUserMutation()
+  } = useGetUserByNameQuery(username)
 
   const [
     editUser,
@@ -143,7 +127,6 @@ const EditUser: React.FC = () => {
       formValues.updatedBy,
     ].every((value) => value !== undefined && value !== null && value !== "") &&
     !getUserIsLoading &&
-    !isDeletingUser &&
     !isEditingUser
 
   const [countryValue, setCountryValue] = useState<E164Number>();
@@ -166,14 +149,14 @@ const EditUser: React.FC = () => {
   }
 
   const handleCancel = () => {
-    navigate("/users")
+    navigate("/home")
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (canSave) {
       try {
-        await editUser({ userId, ...formValues })
+        // await editUser({ userId, ...formValues })
       } catch (error: any) {
         console.error(error)
       }
@@ -182,47 +165,39 @@ const EditUser: React.FC = () => {
 
   const handleMutationSuccess = () => {
     setTimeout(() => {
-      navigate("/users")
+      navigate("/home")
     }, 0)
-  }
-
-  const handleDelete = async () => {
-    try {
-      await deleteUser(userId)
-    } catch (error: any) {
-      console.error(error)
-    }
   }
 
 
   let content: JSX.Element | null = null
-  if (isEditingUser  || isDeletingUser ) {
+  if (isEditingUser ) {
     content = <h3>Loading...</h3>
-  } else if (isEditError || isDeleteError ) {
+  } else if (isEditError ) {
     const errorMessageString = isEditError
       ? JSON.stringify(editError)
-      : JSON.stringify(deleteError) 
+      : JSON.stringify(editError) 
     const errorMessageParsed = JSON.parse(errorMessageString)
     content = (
       <p style={{ color: theme.palette.error.main }}>
         {errorMessageParsed.data.message}
       </p>
     )
-  } else if (isEditSuccess || isDeleteSuccess ) {
+  } else if (isEditSuccess ) {
     handleMutationSuccess()
   }
 
   // Role-based access control (RBAC):
   //
-  if (!authenticateRoleEditUser(role)) {
+  if (!authenticateRoleEditUser(role)) {      // edit own!
     return <p>Forbidden access - no permission to perform action</p>;
   }
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header
-        title="Edit a device"
-        subtitle="(complete all fields to edit a device)"
+        title="Account Info"
+        subtitle="( fields to view your account information)"
       />
       {getUserContent}
       <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">
@@ -235,6 +210,7 @@ const EditUser: React.FC = () => {
             required
             fullWidth
             margin="normal"
+            disabled
           />
           <TextField
             name="firstName"
@@ -244,6 +220,7 @@ const EditUser: React.FC = () => {
             required
             fullWidth
             margin="normal"
+            disabled
           />
           <TextField
             name="lastName"
@@ -253,6 +230,7 @@ const EditUser: React.FC = () => {
             required
             fullWidth
             margin="normal"
+            disabled
           />
           <TextField
             name="email"
@@ -262,12 +240,14 @@ const EditUser: React.FC = () => {
             required
             fullWidth
             margin="normal"
+            disabled
           />
           <PhoneInput
             defaultCountry="US"
             placeholder ="Enter phone number"
             value={countryValue}
             onChange={setCountryValue}
+            disabled
           />
           {content}
 
@@ -280,14 +260,11 @@ const EditUser: React.FC = () => {
               >
                 Cancel
               </Button>
-              <Button type="submit" variant="contained" color="primary">
+              {/* <Button type="submit" variant="contained" color="primary">
                 Submit
-              </Button>
+              </Button> */}
             </Box>
 
-            <Button variant="outlined" color="error" onClick={handleDelete}>
-              Delete
-            </Button>
           </Box>
         </form>
       </Box>
@@ -295,4 +272,4 @@ const EditUser: React.FC = () => {
   )
 }
 
-export default EditUser
+export default Account
