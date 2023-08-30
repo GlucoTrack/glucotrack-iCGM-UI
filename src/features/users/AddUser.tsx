@@ -2,13 +2,12 @@ import Header from "@/components/Header"
 import { Box, Button, TextField, useTheme } from "@mui/material"
 import React, { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { useAddUserMutation } from "../api/apiSlice"
+import { useAddUserMutation, useForgotPasswordEmailMutation } from "../api/apiSlice"
 import { useAuth } from '../context/authContext';
 import { authenticateRoleAddUser } from '../../hooks/useRoleAuth';
 import 'react-phone-number-input/style.css'
 import PhoneInput from 'react-phone-number-input'
 import { E164Number } from 'libphonenumber-js/core'
-import sendResetPasswordEmail from "@/components/email/Email"
 
 interface FormValues {
   username: string
@@ -19,6 +18,12 @@ interface FormValues {
   role: string
   createdBy: string
   updatedBy: string
+}
+
+interface SendEmailFields {
+  token: string
+  email: string
+  username: string
 }
 
 const initialValues: FormValues = {
@@ -37,9 +42,21 @@ const AddUser: React.FC = () => {
   const navigate = useNavigate()
   const theme = useTheme()
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
-  const [passwordToken, setPasswordToken] = useState<String>('')
+  const [passwordToken, setPasswordToken] = useState<string>('')
   const [addUser, { isLoading, isError, error, isSuccess, data }] =
     useAddUserMutation()
+
+  const [
+      sendForgotPasswordEmail,
+      {
+          isLoading: isSendingEmail,
+          isError: isSendEmailError,
+          error: sendEmailError,
+          isSuccess: isSendEmailSuccess,
+          data: SendEmailData,
+      },
+  ] = useForgotPasswordEmailMutation()
+
   const canSave =
     [
       formValues.username,
@@ -73,7 +90,14 @@ const AddUser: React.FC = () => {
   useEffect(() => {
     if (canSendEmail)
     {
-      sendResetPasswordEmail(passwordToken, formValues.email, formValues.username)
+      const sendEmailFields: SendEmailFields = {
+          token: passwordToken,
+          email: formValues.email,
+          username: formValues.username,
+      }
+      sendPasswordEmail(sendEmailFields)
+      //sendForgotPasswordEmail(sendEmailFields)
+      //sendResetPasswordEmail(passwordToken, formValues.email, formValues.username)
     }
   }, [passwordToken])
 
@@ -94,6 +118,11 @@ const AddUser: React.FC = () => {
         console.error(error)
       }
     }
+  }
+
+  const sendPasswordEmail = async (emailOptions:SendEmailFields) => 
+  {
+      await sendForgotPasswordEmail(emailOptions)
   }
 
   const handleMutationSuccess = () => {
@@ -125,6 +154,31 @@ const AddUser: React.FC = () => {
       handleMutationSuccess()
     }
   }, [isLoading, isError, isSuccess])
+
+  useEffect(() => {
+    if (isSendingEmail) {
+      content = <h3>Loading...</h3>
+    } else if (isSendEmailError) {
+      const errorMessageString = JSON.stringify(sendEmailError)
+      const errorMessageParsed = JSON.parse(errorMessageString)
+      content = (
+        <p style={{ color: theme.palette.error.main }}>
+          {JSON.stringify(errorMessageParsed.data.message)}
+        </p>
+      )
+    } else if (isSendEmailSuccess) {
+      if (SendEmailData.toString() as boolean)
+      {
+        navigate("/users")
+      }else
+      {
+      content = (
+        <p style={{ color: theme.palette.error.main }}>
+          {`Error sending the reset passwword email to ${formValues.email}`}
+        </p>)
+      }
+    }
+  }, [isSendingEmail, isSendEmailError, isSendEmailSuccess])
 
 
   // // Role-based access control (RBAC):

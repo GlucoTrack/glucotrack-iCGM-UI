@@ -115,9 +115,6 @@ const ResetPassword: React.FC = () => {
         navigate("/")
     }
 
-
-
-
     const handleMutationVerificationSuccess = () => {
         setTimeout(() => {
             setFormValues(initialValues)

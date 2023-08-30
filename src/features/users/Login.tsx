@@ -36,9 +36,6 @@ const Login: React.FC = () => {
   const [error, setError] = useState('');
   const { role, setRole, username, setUsername } = useAuth();
 
-  console.log('Role :', role);
-  console.log('Username :', username);
-
   const [loginResponse, { data, isLoading, isError, isSuccess }] = useLoginUserMutation()
 
   const navigate = useNavigate()
@@ -53,7 +50,6 @@ const Login: React.FC = () => {
   }
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
-
     event.preventDefault();
 
     try {
@@ -87,7 +83,6 @@ const Login: React.FC = () => {
   //
   useEffect(() => {
     if (isSuccess) {
-
       // (decoded) token should contain [ username & role ]
       const decodedToken = jwtDecode(data.token) as DecodedToken;
 
@@ -154,7 +149,6 @@ const Login: React.FC = () => {
         {error && <p style={{ color: 'red' }}>{error}</p>}
       </Box>
     </Box>
-    
   );
   
 }
