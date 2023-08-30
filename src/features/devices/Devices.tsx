@@ -9,7 +9,7 @@ import Device from "@/interfaces/Device"
 import { useGetDevicesQuery } from "@/features/api/apiSlice"
 
 import { useAuth } from '../context/authContext';
-import { authenticateRoleDevicesInfo } from '../../hooks/useRoleAuth';
+import { authenticateRoleAddDevice, authenticateRoleDevicesInfo, authenticateRoleEditDevice } from '../../hooks/useRoleAuth';
 
 const Devices = () => {
   const { role, username } = useAuth();
@@ -19,7 +19,9 @@ const Devices = () => {
 
   const handleCellClick = (params: GridCellParams) => {
     const { _id: deviceId } = params.row
-    navigate(`edit/${deviceId}`)
+    if (editPermission) {
+      navigate(`edit/${deviceId}`)
+    }
   }
 
   let content: JSX.Element | null = null
@@ -73,10 +75,16 @@ const Devices = () => {
     return <p>Forbidden access - no permission to perform action</p>;
   }
 
+  // CREATE User:
+  const addPermission = authenticateRoleAddDevice(role);
+
+  // UPDATE User:
+  const editPermission = authenticateRoleEditDevice(role);
+
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header title="Devices" subtitle={`List of devices: ${status}`}>
-        <HeaderAction action="Add" url="/devices/add" />
+        {addPermission && <HeaderAction action="Add" url="/devices/add" /> }
       </Header>
       {content}
     </Box>

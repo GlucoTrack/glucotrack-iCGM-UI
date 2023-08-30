@@ -43,10 +43,12 @@ const UserOption: React.FC = () => {
     // Clear the currently stored credentials:
     //
     setRole('');
+    sessionStorage.removeItem('role');
     setUsername('');
-    setSessionToken('');
-
+    sessionStorage.removeItem('username');
+    
     // ALso clear session token (wherever it is stored / TBD):
+    setSessionToken('');
     sessionStorage.removeItem('token');
     //localStorage.removeItem('token'); 
 

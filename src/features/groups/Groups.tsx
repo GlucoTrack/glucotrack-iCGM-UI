@@ -10,7 +10,7 @@ import { setGroup } from "@/features/groups/groupsSlice"
 import Group from "@/interfaces/Group"
 
 import { useAuth } from '../context/authContext';
-import { authenticateRoleGroupsInfo } from '../../hooks/useRoleAuth';
+import { authenticateRoleAddGroup, authenticateRoleEditGroup, authenticateRoleGroupsInfo } from '../../hooks/useRoleAuth';
 
 const Groups: React.FC = () => {
   const { role, username } = useAuth();
@@ -42,7 +42,9 @@ const Groups: React.FC = () => {
         deviceNames: deviceNamesString,
       }),
     )
-    navigate(`edit/${groupId}`)
+    if (editPermission) {
+      navigate(`edit/${groupId}`)
+    }
   }
 
   let content: JSX.Element | null = null
@@ -78,11 +80,17 @@ const Groups: React.FC = () => {
   if (!authenticateRoleGroupsInfo(role)) {
     return <p>Forbidden access - no permission to perform action</p>;
   }
+
+  // CREATE Group:
+  const addPermission = authenticateRoleAddGroup(role);
+
+  // UPDATE Group:
+  const editPermission = authenticateRoleEditGroup(role);
   
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header title="Groups" subtitle={`List of groups: ${getGroupStatus}`}>
-        <Action action="Add" url="add" />
+        {addPermission && <Action action="Add" url="add" />}
       </Header>
       {content}
     </Box>

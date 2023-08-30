@@ -9,7 +9,7 @@ import {
 } from "@/features/api/apiSlice"
 
 import { useAuth } from '../context/authContext';
-import { authenticateRoleEditDevice } from '../../hooks/useRoleAuth';
+import { authenticateRoleDevicesDelete, authenticateRoleEditDevice } from '../../hooks/useRoleAuth';
 
 interface FormValues {
   macAddress: string
@@ -222,10 +222,12 @@ const EditDevice: React.FC = () => {
   }
 
   const handleDelete = async () => {
-    try {
-      await deleteDevice(deviceId)
-    } catch (error: any) {
-      console.error(error)
+    if (deletePermission) {
+      try {
+        await deleteDevice(deviceId)
+      } catch (error: any) {
+        console.error(error)
+      }
     }
   }
 
@@ -251,6 +253,9 @@ const EditDevice: React.FC = () => {
   if (!authenticateRoleEditDevice(role)) {
     return <p>Forbidden access - no permission to perform action</p>;
   }
+
+  // DELETE User:
+  const deletePermission = authenticateRoleDevicesDelete(role);
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
@@ -514,9 +519,11 @@ const EditDevice: React.FC = () => {
               </Button>
             </Box>
 
-            <Button variant="outlined" color="error" onClick={handleDelete}>
-              Delete
-            </Button>
+            {deletePermission &&
+              <Button variant="outlined" color="error" onClick={handleDelete}>
+                Delete
+              </Button>
+            }
           </Box>
         </form>
       </Box>

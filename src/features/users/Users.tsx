@@ -9,7 +9,8 @@ import User from "@/interfaces/User"
 import { useGetUsersQuery } from "@/features/api/apiSlice"
 
 import { useAuth } from '../context/authContext';
-import { authenticateRoleUsersInfo } from '../../hooks/useRoleAuth';
+import { authenticateRoleAddUser, authenticateRoleEditUser, authenticateRoleUsersInfo } from '../../hooks/useRoleAuth';
+import { access } from "fs"
 
 // internal interface needed to avoid TypeScript check warning for the DataGrid
 //
@@ -24,7 +25,9 @@ const Users = () => {
 
   const handleCellClick = (params: GridCellParams) => {
     const { _id: userId } = params.row
-    navigate(`edit/${userId}`)
+    if (editPermission) {
+      navigate(`edit/${userId}`)
+    }
   }
 
   let content: JSX.Element | null = null
@@ -36,7 +39,7 @@ const Users = () => {
     content = <p>{JSON.stringify(error)}</p>
   } else if (isSuccess) {
     const columns = [
-      { field: "_id", headerName: "ID", flex: 1 },
+      // { field: "_id", headerName: "ID", flex: 1 },
       { field: "username", headerName: "Username", flex: 0.5 },
       { field: "firstName", headerName: "First name", flex: 1 },
       { field: "lastName", headerName: "Last name", flex: 1 },
@@ -59,16 +62,24 @@ const Users = () => {
     )
   }
 
-  // Role-based access control (RBAC):
+
+  //    Role-based access control (RBAC):
   //
+  // View Users:
   if (!authenticateRoleUsersInfo(role)) {
     return <p>Forbidden access - no permission to perform action</p>;
   }
 
+  // CREATE User:
+  const addPermission = authenticateRoleAddUser(role);
+
+  // UPDATE User:
+  const editPermission = authenticateRoleEditUser(role);
+
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header title="Users" subtitle={`List of registered users: ${status}`}>
-        <Action action="Add" url="/users/add" />
+        {addPermission && <Action action="Add" url="/users/add" />}
       </Header>
       {content}
       

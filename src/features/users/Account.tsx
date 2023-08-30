@@ -52,8 +52,9 @@ const Account: React.FC = () => {
     error: getUserError,
   } = useGetUserByNameQuery(username)
 
+  // not used yet to edit, may be allowed to edit part of the user account oneself
   const [
-    editUser,
+    editUser,     
     {
       isLoading: isEditingUser,
       isError: isEditError,
@@ -61,12 +62,6 @@ const Account: React.FC = () => {
       isSuccess: isEditSuccess,
     },
   ] = useEditUserMutation()
-
-  // const formatDate = (dateString: string): string => {
-  //   const date = new Date(dateString)
-  //   const formattedDate = date.toISOString().slice(0, 16) // Format: "yyyy-MM-ddThh:mm"
-  //   return formattedDate
-  // }
 
   useEffect(() => {
     if (getUserData) {
@@ -189,15 +184,15 @@ const Account: React.FC = () => {
 
   // Role-based access control (RBAC):
   //
-  if (!authenticateRoleEditUser(role)) {      // edit own!
-    return <p>Forbidden access - no permission to perform action</p>;
-  }
+  // if (!authenticateRoleEditUser(role)) {      // edit own!
+  //   return <p>Forbidden access - no permission to perform action</p>;
+  // }
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header
         title="Account Info"
-        subtitle="( fields to view your account information)"
+        subtitle=""
       />
       {getUserContent}
       <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">
