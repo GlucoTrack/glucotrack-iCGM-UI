@@ -58,7 +58,7 @@ const AddUser: React.FC = () => {
       passwordToken,
       formValues.username,
       formValues.email,
-    ].every((value) => value !== undefined && value !== null && value !== "")
+    ].every((value) => value !== undefined && value !== null && value !== "") && isSuccess
 
   const [countryValue, setValue] = useState<E164Number>();
 

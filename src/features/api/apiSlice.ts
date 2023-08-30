@@ -5,7 +5,7 @@ export const apiSlice = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: import.meta.env.VITE_API_BASE_URL,
   }),
-  tagTypes: ["Devices", "Groups", "Measurements", "AveragesAndStds", "Users"],
+  tagTypes: ["Devices", "Groups", "Measurements", "AveragesAndStds", "Users", "Email"],
   endpoints: (builder) => ({
     //TODO maybe code split per feature
     //*DEVICES
@@ -170,7 +170,14 @@ export const apiSlice = createApi({
       invalidatesTags: ["Users"],
     }),
 
-
+    forgotPasswordEmail: builder.mutation({
+      query: (emailData) => ({
+        url: "email/forgotPasswordEmail",
+        method: "POST",
+        body: emailData,
+      }),
+      invalidatesTags: ["Email"],
+    }),  
 
   }),
 })
@@ -195,5 +202,6 @@ export const {
   useDeleteUserMutation,
   useResetPasswordMutation,
   useLoginUserMutation,
-  useValidateTokenMutation
+  useValidateTokenMutation,
+  useForgotPasswordEmailMutation,
 } = apiSlice
