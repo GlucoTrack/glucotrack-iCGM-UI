@@ -33,6 +33,9 @@ const initialValues: FormValues = {
 }
 
 const AddUser: React.FC = () => {
+  const jwtFromSession = sessionStorage.getItem('token');
+  //console.log('Session JWT from local session storage: ', jwtFromSession);
+
   const { role, username } = useAuth();
   const navigate = useNavigate()
   const theme = useTheme()

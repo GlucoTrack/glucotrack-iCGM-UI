@@ -46,7 +46,7 @@ const EditUser: React.FC = () => {
 
   const { userId } = useParams<Record<string, string>>()
 
-  console.log(`[Edit User]: The user Id from params is: ${userId}`)
+  //console.log(`[Edit User]: The user Id from params is: ${userId}`)
 
   const {
     data: getUserData,
@@ -166,7 +166,7 @@ const EditUser: React.FC = () => {
   }
 
   const handleCancel = () => {
-    navigate("/devices")
+    navigate("/users")
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -182,7 +182,7 @@ const EditUser: React.FC = () => {
 
   const handleMutationSuccess = () => {
     setTimeout(() => {
-      navigate("/devices")
+      navigate("/users")
     }, 0)
   }
 

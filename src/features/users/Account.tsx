@@ -149,7 +149,7 @@ const Account: React.FC = () => {
   }
 
   const handleCancel = () => {
-    navigate("/devices")
+    navigate("/home")
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -165,7 +165,7 @@ const Account: React.FC = () => {
 
   const handleMutationSuccess = () => {
     setTimeout(() => {
-      navigate("/users")
+      navigate("/home")
     }, 0)
   }
 
