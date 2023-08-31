@@ -18,7 +18,7 @@ export const apiSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Devices", "Groups", "Measurements", "AveragesAndStds", "Users"],
+  tagTypes: ["Devices", "Groups", "Measurements", "AveragesAndStds", "Users", "Email"],
   endpoints: (builder) => ({
     //TODO maybe code split per feature
     //*DEVICES
@@ -161,7 +161,7 @@ export const apiSlice = createApi({
     // Login & Authentication
     resetPassword: builder.mutation({
       query: (passwordData) => ({
-        url: "users/resetPassword",
+        url: "users/resetpassword",
         method: "POST",
         body: passwordData,
       }),
@@ -175,8 +175,22 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["Users"],
     }),
+    validateToken: builder.mutation({
+      query: (tokenInfo) => ({
+        url: `users/validate/${tokenInfo.token}/${tokenInfo.eMail}/${tokenInfo.username}`,
+        method: "GET",
+      }),
+      invalidatesTags: ["Users"],
+    }),
 
-
+    forgotPasswordEmail: builder.mutation({
+      query: (emailData) => ({
+        url: "email/forgotPasswordEmail",
+        method: "POST",
+        body: emailData,
+      }),
+      invalidatesTags: ["Email"],
+    }),  
 
 
   }),
@@ -201,5 +215,7 @@ export const {
   useEditUserMutation,
   useDeleteUserMutation,
   useResetPasswordMutation,
-  useLoginUserMutation
+  useLoginUserMutation,
+  useValidateTokenMutation,
+  useForgotPasswordEmailMutation,
 } = apiSlice

@@ -78,12 +78,6 @@ const EditUser: React.FC = () => {
     },
   ] = useEditUserMutation()
 
-  // const formatDate = (dateString: string): string => {
-  //   const date = new Date(dateString)
-  //   const formattedDate = date.toISOString().slice(0, 16) // Format: "yyyy-MM-ddThh:mm"
-  //   return formattedDate
-  // }
-
   useEffect(() => {
     if (getUserData) {
       const {
@@ -146,16 +140,13 @@ const EditUser: React.FC = () => {
     !isDeletingUser &&
     !isEditingUser
 
-  const [countryValue, setCountryValue] = useState<E164Number>();
-
-  useEffect(() => {
-    console.log(countryValue)
-    if (!(countryValue === undefined)) {
-      formValues.phone = countryValue!.toString();
-    } else {
-      formValues.phone = "+1";
-    }
-  }, [countryValue]);
+  const handlePhoneChange = (e: string) => 
+  {
+    setFormValues((prevValues) => ({
+      ...prevValues,
+      ["phone"]: e,
+    }))
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -173,6 +164,7 @@ const EditUser: React.FC = () => {
     e.preventDefault()
     if (canSave) {
       try {
+        console.log(formValues.phone)
         await editUser({ userId, ...formValues })
       } catch (error: any) {
         console.error(error)
@@ -270,9 +262,10 @@ const EditUser: React.FC = () => {
           />
           <PhoneInput
             defaultCountry="US"
+            international={false}
             placeholder ="Enter phone number"
-            value={countryValue}
-            onChange={setCountryValue}
+            value={formValues.phone}
+            onChange={handlePhoneChange}
           />
           {content}
 

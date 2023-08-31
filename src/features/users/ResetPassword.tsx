@@ -1,14 +1,19 @@
 import Header from "@/components/Header"
 import { Box, Button, TextField, useTheme } from "@mui/material"
-import React, { useState } from "react"
-import { useResetPasswordMutation } from "../api/apiSlice"
+import React, { useState, useEffect } from "react"
+import { useResetPasswordMutation, useValidateTokenMutation } from "../api/apiSlice"
 import { useNavigate, useParams } from "react-router-dom"
-import sendResetPasswordEmail from "@/components/Email"
 
 interface FormValues {
     oldPassword: string
     newPassword: string
     newPasswordConfirmation: string
+}
+
+interface resetPasswordPayload {
+    token: string
+    password: string
+    userId: string
 }
 
 const initialValues: FormValues = {
@@ -17,15 +22,49 @@ const initialValues: FormValues = {
     newPasswordConfirmation: "",
 }
 
+interface tokenToVerify {
+    token: string
+    username: string
+    eMail: string
+}
+
 const ResetPassword: React.FC = () => {
     const navigate = useNavigate()
     const theme = useTheme()
-    const { token, user, email } = useParams<Record<string, string>>()
-    const [formValues, setFormValues] = useState<FormValues>(initialValues)
-    const [passwordToken, setPasswordToken] = useState<String>('')
 
-    const [resetPassword, { isLoading, isError, error, isSuccess }] =
-        useResetPasswordMutation()
+    let content: JSX.Element | null = null
+
+    const [formValues, setFormValues] = useState<FormValues>(initialValues)
+
+    const [pageState, setPageState] = useState<boolean>(false)
+
+    const { token, email, user } = useParams<Record<string, string>>()
+
+    const [hideOldPassword, setHideOldPassword] = useState<boolean>(true)
+
+    const [
+        tokenValidation,
+        {
+            isLoading: isValidatingToken,
+            isError: isValidateTokenError,
+            error: validateTokenError,
+            isSuccess: isValidateTokenSuccess,
+            data: tokenValidationData,
+        },
+    ] = useValidateTokenMutation()
+
+    const [
+        resetPassword,
+        {
+            isLoading: isResetingPassword,
+            isError: isResetPasswordError,
+            error: resetPasswordError,
+            isSuccess: isResertPasswordSuccess,
+        },
+    ] = useResetPasswordMutation()
+
+    /*     const [validateToken, { isLoading, isError, error, isSuccess}] =
+        useResetPasswordMutation() */
 
     const canSave =
         [
@@ -33,7 +72,16 @@ const ResetPassword: React.FC = () => {
             formValues.newPassword,
             formValues.newPasswordConfirmation,
         ].every((value) => value !== undefined && value !== null && value !== "") &&
-        !isLoading
+        !isResetingPassword && (formValues.newPassword === formValues.newPasswordConfirmation)
+
+
+    const canSaveToken =
+        [
+            token,
+            email,
+            user,
+        ].every((value) => value !== undefined && value !== null && value !== "")
+    !isValidatingToken
 
 
 
@@ -49,7 +97,14 @@ const ResetPassword: React.FC = () => {
         e.preventDefault()
         if (canSave) {
             try {
-                await resetPassword(formValues).unwrap()
+                console.log(tokenValidationData)
+                const resetPasswordPayload: resetPasswordPayload = 
+                {
+                    token: token!,
+                    password: formValues.newPassword,
+                    userId: tokenValidationData,
+                }
+                await resetPassword(resetPasswordPayload)
             } catch (error: any) {
                 console.error(error)
             }
@@ -60,12 +115,79 @@ const ResetPassword: React.FC = () => {
         navigate("/")
     }
 
+    const handleMutationVerificationSuccess = () => {
+        setTimeout(() => {
+            setFormValues(initialValues)
+            setPageState(true)
+        }, 0)
+    }
+
+    useEffect(() => {
+        if (isValidatingToken) {
+            if (!(pageState)) {
+                content = <h3>Loading...</h3>
+                setFormValues((prevValues) => ({
+                    ...prevValues,
+                    ["oldPassword"]: "Not Used",
+                }))
+            }
+        } else if (isValidateTokenError) {
+            console.log(JSON.stringify(validateTokenError))
+        } else if (isValidateTokenSuccess) {
+            if (!pageState) {
+                handleMutationVerificationSuccess
+                console.log(email)
+                if (email === "false")
+                {
+                    setHideOldPassword(false)
+                }
+            }
+        }
+    }, [isValidatingToken, isValidateTokenError, isValidateTokenSuccess])
+
+    useEffect(() => {
+        if (isResetingPassword) {
+            if (pageState) {
+                content = <h3>Loading...</h3>
+            }
+        } else if (isResetPasswordError) {
+            console.log(JSON.stringify(resetPasswordError))
+        } else if (isResertPasswordSuccess) {
+            navigate("/users/login")
+        }
+    }, [isResetingPassword, isResetPasswordError, isResertPasswordSuccess])
+
+
+    const formLoad = async () => {
+        if (!pageState) {
+            try {
+                console.log("Hello")
+                if (canSaveToken) {
+                    const tokenPayload: tokenToVerify = {
+                        token: token!,
+                        username: user!,
+                        eMail: email!,
+                    }
+                    await tokenValidation(tokenPayload)
+                }
+            } catch (error: any) {
+                console.error(error)
+            }
+        }
+    }
+
+    useEffect(() => {
+        formLoad() 
+    }, [])
+
     return (
         <Box display="flex" flexDirection="column" height="85vh">
+            {content}
             <Header
                 title="Reset your password" subtitle={""} />
             <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">
                 <form onSubmit={handleSubmit}>
+                    {!hideOldPassword && (
                     <TextField
                         name="oldPassword"
                         label="Old Password"
@@ -74,7 +196,7 @@ const ResetPassword: React.FC = () => {
                         required
                         fullWidth
                         margin="normal"
-                    />
+                    />)}
                     <TextField
                         name="newPassword"
                         label="New Password"
@@ -85,7 +207,7 @@ const ResetPassword: React.FC = () => {
                         margin="normal"
                     />
                     <TextField
-                        name="confirmNewPassword"
+                        name="newPasswordConfirmation"
                         label="Confirm New Password"
                         value={formValues.newPasswordConfirmation}
                         onChange={handleChange}

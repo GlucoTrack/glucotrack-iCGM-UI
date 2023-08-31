@@ -5,7 +5,7 @@ import { DataGrid, GridCellParams, GridToolbar } from "@mui/x-data-grid"
 
 import Header from "@/components/Header"
 import Action from "@/components/HeaderAction"
-import User from "@/interfaces/User"
+import User, { UserWithId } from "@/interfaces/User"
 import { useGetUsersQuery } from "@/features/api/apiSlice"
 
 import { useAuth } from '../context/authContext';
@@ -54,7 +54,7 @@ const Users = () => {
         <DataGrid<TableRow>
           slots={{ toolbar: GridToolbar }}
           rows={data.users}
-          getRowId={(row) => row._id} 
+          getRowId={(row) => (row as UserWithId)._id} 
           columns={columns}
           onCellClick={handleCellClick}
         />

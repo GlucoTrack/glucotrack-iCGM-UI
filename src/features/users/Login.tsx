@@ -57,7 +57,6 @@ const Login: React.FC = () => {
   }
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
-
     event.preventDefault();
 
     try {
@@ -127,12 +126,6 @@ const Login: React.FC = () => {
   return (
     <Box display="flex" flexDirection="column" height="85vh" style={{ marginTop: 30, marginLeft: 50 }}>
       <Navbar isSidebarOpen={false} setIsSidebarOpen={emptyFunction} />
-      {/* <img
-        src={logoDarkMode}
-        alt={ "logoDarkMode"}
-        height={40}
-        width={150}
-      /> */}
       <Header
         title="Login" subtitle={""} />
       <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">
@@ -168,7 +161,6 @@ const Login: React.FC = () => {
         {error && <p style={{ color: 'red' }}>{error}</p>}
       </Box>
     </Box>
-    
   );
   
 }
