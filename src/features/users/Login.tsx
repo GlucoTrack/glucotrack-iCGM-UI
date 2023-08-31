@@ -115,14 +115,14 @@ const Login: React.FC = () => {
    setCredentials(initialValues);
   }
 
-  // const emptyFunction = () => {
-  //   // no statements
-  // };
+  const emptyFunction = () => {
+    // no statements
+  };
 
 
   return (
     <Box display="flex" flexDirection="column" height="85vh" style={{ marginTop: 30, marginLeft: 50 }}>
-      {/* <Navbar isSidebarOpen={false} setIsSidebarOpen={emptyFunction} /> */}
+      <Navbar isSidebarOpen={false} setIsSidebarOpen={emptyFunction} />
       <Header
         title="Login" subtitle={""} />
       <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">
