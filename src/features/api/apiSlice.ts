@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
+
 const token = sessionStorage.getItem('token');
-//console.log ('Session JWT in API: ', token)
 
 export const apiSlice = createApi({
   reducerPath: "api",
@@ -158,7 +158,7 @@ export const apiSlice = createApi({
       ],
     }),
 
-    // Login
+    // Login & Authentication
     resetPassword: builder.mutation({
       query: (passwordData) => ({
         url: "users/resetPassword",
@@ -175,6 +175,7 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["Users"],
     }),
+
 
 
 
