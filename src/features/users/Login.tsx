@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Header from "@/components/Header"
 import { Box, Button, TextField, useTheme } from "@mui/material"
 import { useNavigate } from "react-router-dom"
+import logoDarkMode from "@/images/dark-bg.png"
 //import { useHistory } from 'react-router-dom'; // For navigation
 
 import jwtDecode from 'jwt-decode';
@@ -32,19 +33,20 @@ const Login: React.FC = () => {
   //const history = useHistory();
   //const [usernameInput, setUsernameInput] = useState('');
   //const [password, setPassword] = useState('');
+  //console.log('<Login> is rendering')
 
   const [credentials, setCredentials] = useState<Credentials>(initialValues)
   const [error, setError] = useState('');
   const { role, setRole, username, setUsername, sessionToken, setSessionToken } = useAuth();
 
   // console.log('Token :', sessionToken);
-  console.log('Role :', role);
-  console.log('Username :', username);
+  // console.log('Role :', role);
+  // console.log('Username :', username);
 
   const [loginResponse, { data, isLoading, isError, isSuccess }] = useLoginUserMutation()
 
   const navigate = useNavigate()
-  const theme = useTheme()
+  // const theme = useTheme()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -72,7 +74,7 @@ const Login: React.FC = () => {
     if (isSuccess) {
 
       const token = data.token
-      console.log('Session JWT: ', token);
+      //console.log('Session JWT: ', token);
 
       setSessionToken(data.token);
       sessionStorage.setItem('token', token);  // localStorage
@@ -96,7 +98,8 @@ const Login: React.FC = () => {
       setRole(accountRole);
       sessionStorage.setItem('role', accountRole); 
 
-      handleMutationSuccess();    // navigate 'home'
+      navigate("/home")
+      //handleMutationSuccess();    // navigate 'home'
 
     } else if (isError) {
       setError('Invalid credentials');
@@ -104,12 +107,12 @@ const Login: React.FC = () => {
   }, [isSuccess, isError, data]);
 
 
-  const handleMutationSuccess = () => {
-    setTimeout(() => {
-      //setFormValues(initialValues)
-      navigate("/home")  
-    }, 0)
-  }
+  // const handleMutationSuccess = () => {
+  //   setTimeout(() => {
+  //     //setFormValues(initialValues)
+  //     navigate("/home")  
+  //   }, 0)
+  // }
 
   const handleCancel = () => {
    setCredentials(initialValues);

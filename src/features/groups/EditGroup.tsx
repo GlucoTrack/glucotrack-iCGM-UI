@@ -11,7 +11,7 @@ import { RootState } from "@/store/store"
 import { resetGroup } from "./groupsSlice"
 
 import { useAuth } from '../context/authContext';
-import { authenticateRoleEditGroup } from '../../hooks/useRoleAuth';
+import { authenticateRoleEditGroup, authenticateRoleGroupDelete } from '../../hooks/useRoleAuth';
 
 interface FormValues {
   groupName: string
@@ -106,10 +106,12 @@ const EditGroup: React.FC = () => {
   }
 
   const handleDelete = async () => {
-    try {
-      await deleteGroup(groupId)
-    } catch (error: any) {
-      console.error(error)
+    if (deletePermission) {
+      try {
+        await deleteGroup(groupId)
+      } catch (error: any) {
+        console.error(error)
+      }
     }
   }
 
@@ -135,6 +137,9 @@ const EditGroup: React.FC = () => {
   if (!authenticateRoleEditGroup(role)) {
     return <p>Forbidden access - no permission to perform action</p>;
   }
+
+  // DELETE Group:
+  const deletePermission = authenticateRoleGroupDelete(role);
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
@@ -189,10 +194,11 @@ const EditGroup: React.FC = () => {
                 Submit
               </Button>
             </Box>
-
-            <Button variant="outlined" color="error" onClick={handleDelete}>
-              Delete
-            </Button>
+            {deletePermission &&
+              <Button variant="outlined" color="error" onClick={handleDelete}>
+                Delete
+              </Button>
+            }
           </Box>
         </form>
       </Box>

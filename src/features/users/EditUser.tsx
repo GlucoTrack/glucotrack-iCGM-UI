@@ -14,7 +14,7 @@ import PhoneInput from 'react-phone-number-input'
 import { E164Number } from 'libphonenumber-js/core'
 
 import { useAuth } from '../context/authContext';
-import { authenticateRoleEditUser } from '../../hooks/useRoleAuth';
+import { authenticateRoleEditUser, authenticateRoleUserDelete } from '../../hooks/useRoleAuth';
 
 interface FormValues {
   username: string
@@ -179,10 +179,12 @@ const EditUser: React.FC = () => {
   }
 
   const handleDelete = async () => {
-    try {
-      await deleteUser(userId)
-    } catch (error: any) {
-      console.error(error)
+    if (deletePermission) {
+      try {
+        await deleteUser(userId)
+      } catch (error: any) {
+        console.error(error)
+      }
     }
   }
 
@@ -210,10 +212,13 @@ const EditUser: React.FC = () => {
     return <p>Forbidden access - no permission to perform action</p>;
   }
 
+  // DELETE User:
+  const deletePermission = authenticateRoleUserDelete(role);
+
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header
-        title="Edit a device"
+        title="Edit a User"
         subtitle="(complete all fields to edit a device)"
       />
       {getUserContent}
@@ -277,10 +282,11 @@ const EditUser: React.FC = () => {
                 Submit
               </Button>
             </Box>
-
-            <Button variant="outlined" color="error" onClick={handleDelete}>
-              Delete
-            </Button>
+            {deletePermission &&
+              <Button variant="outlined" color="error" onClick={handleDelete}>
+                Delete
+              </Button>
+            }
           </Box>
         </form>
       </Box>

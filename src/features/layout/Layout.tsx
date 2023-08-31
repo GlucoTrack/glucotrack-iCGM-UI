@@ -32,7 +32,6 @@ const Layout = () => {
           isSidebarOpen={isSideBarOpen}
           setIsSidebarOpen={setIsSideBarOpen}
         />
-        {/* <UserOption/> */}
         <Box flex="1" width="100%" px="1.5rem" overflow="auto">
           <Outlet />
         </Box>

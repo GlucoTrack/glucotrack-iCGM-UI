@@ -17,11 +17,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [username, setUsername] = useState<string>('');
   const [sessionToken, setSessionToken] = useState<string>('');
 
-  // const logout = () => {
-  //   setRole('');
-  //   setUsername('');
-  // };
-
   return (
     <AuthContext.Provider value={{ role, setRole, username, setUsername, sessionToken, setSessionToken }}>
       {children}
