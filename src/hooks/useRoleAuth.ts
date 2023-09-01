@@ -8,6 +8,9 @@ export const accountRoles = {
   Guest: 'Guest'
 };
 
+
+///   VERIFY ROLES ///
+
 // Superadmin
 function authenticateSuperAdmin(role: string) {
   if (role === accountRoles.Superadmin) {

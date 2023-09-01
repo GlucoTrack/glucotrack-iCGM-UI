@@ -175,6 +175,10 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["Users"],
     }),
+    getRolePermissions: builder.query({
+      query: (params = {}) => "users/getRolePermissions",
+      providesTags: ["Users"],
+    }),
     verifyRoleAccess: builder.mutation({
       query: (requestedAccessData) => ({
         url: "users/checkRoleAccess",   // adjust in API 
@@ -223,6 +227,7 @@ export const {
   useDeleteUserMutation,
   useResetPasswordMutation,
   useLoginUserMutation,
+  useGetRolePermissionsQuery,
   useVerifyRoleAccessMutation,
   useValidateTokenMutation,
   useForgotPasswordEmailMutation,

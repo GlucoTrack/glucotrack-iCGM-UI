@@ -8,7 +8,7 @@ import Action from "@/components/HeaderAction"
 import User, { UserWithId } from "@/interfaces/User"
 import { useGetUsersQuery, useVerifyRoleAccessMutation } from "@/features/api/apiSlice"
 
-import { useAuth } from '../context/authContext';
+import { useAuth, hasPermission } from '../context/authContext';
 import { authenticateRoleAddUser, authenticateRoleEditUser, authenticateRoleUsersInfo } from '../../hooks/useRoleAuth';
 import { access } from "fs"
 
@@ -19,18 +19,25 @@ interface TableRow extends User {
 }
 
 const Users = () => {
-  const { role, username } = useAuth();
+  const { role, username, permissions } = useAuth();
   const navigate = useNavigate()
   const { data, status, isFetching, isLoading, isSuccess, isError, error } = useGetUsersQuery({})
-  const [verifyRoleAccess, { data: roleAccessData, isLoading: checkroleIsLoading }] = useVerifyRoleAccessMutation();
 
-  const [viewPermission, setViewPermission] = useState(false);
+  // To check VIEW & WRITE permissions in  DB:
+  const [verifyRoleAccess, { data: roleAccessData, isLoading: checkroleIsLoading }] = useVerifyRoleAccessMutation();
+  const [readPermission, setReadPermission] = useState(false);
   const [writePermission, setWritePermission] = useState(false);
+
+  // const canReadUsers = hasPermission(permissions, 'Users', 'Read');
+  // const canWriteUsers = hasPermission(permissions, 'Users', 'Write');
+
+  //
 
   const handleCellClick = (params: GridCellParams) => {
     const { _id: userId } = params.row
-    if (editPermission) {
-    // if (writePermission) {
+    // if (editPermission) {
+    if (writePermission) {
+    // if (canWriteUsers) {
       navigate(`edit/${userId}`)
     }
   }
@@ -80,14 +87,14 @@ const Users = () => {
         { feature: 'Users', levelOfAccess: 'Write' },
       ]);
     } else {
-      setViewPermission(false);
+      setReadPermission(false);
       setWritePermission(false);
     }
   }, [role, verifyRoleAccess]);
 
   useEffect(() => {
     if (roleAccessData) {
-      setViewPermission(roleAccessData?.results[0]);
+      setReadPermission(roleAccessData?.results[0]);
       setWritePermission(roleAccessData?.results[1]);
     }
   }, [roleAccessData]);
@@ -108,16 +115,18 @@ const Users = () => {
 
   // View Users:
   //
-  if (!authenticateRoleUsersInfo(role)) {
-  // if (!viewPermission) {
+  // if (!authenticateRoleUsersInfo(role)) {    // using 'useRoleAuth.ts'
+  if (!readPermission) {    // using a DB query via API
+  // if (!canReadUsers) {   // locally saved Permissions (fetched from DB at login)
     return <p>Forbidden access - no permission to perform action</p>;
   }
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header title="Users" subtitle={`List of registered users: ${status}`}>
-        {/* {writePermission && <Action action="Add" url="/users/add" />} */}
-        {addPermission && <Action action="Add" url="/users/add" />}
+        {/* {canWriteUsers && <Action action="Add" url="/users/add" />} */}
+        {writePermission && <Action action="Add" url="/users/add" />}
+        {/* {addPermission && <Action action="Add" url="/users/add" />} */}
       </Header>
       {content}
       

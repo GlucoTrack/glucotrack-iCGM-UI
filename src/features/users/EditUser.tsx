@@ -7,13 +7,14 @@ import {
   useGetUserByIdQuery,
   useGetUserByNameQuery,
   useDeleteUserMutation,
+  useVerifyRoleAccessMutation,
 } from "@/features/api/apiSlice"
 
 import 'react-phone-number-input/style.css'
 import PhoneInput from 'react-phone-number-input'
 import { E164Number } from 'libphonenumber-js/core'
 
-import { useAuth } from '../context/authContext';
+import { useAuth, hasPermission } from '../context/authContext';
 import { authenticateRoleEditUser, authenticateRoleUserDelete } from '../../hooks/useRoleAuth';
 
 interface FormValues {
@@ -39,7 +40,7 @@ const initialValues: FormValues = {
 }
 
 const EditUser: React.FC = () => {
-  const { role, username } = useAuth();
+  const { role, username, permissions } = useAuth();
   const navigate = useNavigate()
   const theme = useTheme()
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
@@ -47,6 +48,15 @@ const EditUser: React.FC = () => {
   const { userId } = useParams<Record<string, string>>()
 
   //console.log(`[Edit User]: The user Id from params is: ${userId}`)
+
+  // To check WRITE & DELETE permissions in  DB:
+  const [userDeletePermission, setDeletePermission] = useState(false);
+  const [writePermission, setWritePermission] = useState(false);
+  const [verifyRoleAccess, { data: roleAccessData, isLoading: checkroleIsLoading }] = useVerifyRoleAccessMutation();
+
+  // const canWriteUsers = hasPermission(permissions, 'Users', 'Write');
+  // const canDeleteUsers = hasPermission(permissions, 'Users', 'Delete');
+
 
   const {
     data: getUserData,
@@ -206,9 +216,34 @@ const EditUser: React.FC = () => {
     handleMutationSuccess()
   }
 
-  // Role-based access control (RBAC):
+
+  // ----------   Role-based access control (RBAC): ------------- //
   //
-  if (!authenticateRoleEditUser(role)) {
+
+  // Option B: These logic verifies in the DataBase if the given role has permissions for the given feature/access:
+  //
+  useEffect(() => {
+    if (role) {
+      verifyRoleAccess([
+        { feature: 'Users', levelOfAccess: 'Write' },
+        { feature: 'Users', levelOfAccess: 'Delete' },
+      ]);
+    } else {
+      setWritePermission(false);     
+      setDeletePermission(false);
+    }
+  }, [role, verifyRoleAccess]);
+
+  useEffect(() => {
+    if (roleAccessData) {
+      setWritePermission(roleAccessData?.results[0]);  
+      setDeletePermission(roleAccessData?.results[1]);
+    }
+  }, [roleAccessData]);
+
+  // if (!authenticateRoleEditUser(role)) {
+  if (!writePermission) {
+  // if (!canWriteUsers) { 
     return <p>Forbidden access - no permission to perform action</p>;
   }
 
@@ -282,7 +317,9 @@ const EditUser: React.FC = () => {
                 Submit
               </Button>
             </Box>
-            {deletePermission &&
+            {/* {deletePermission && */}
+            { userDeletePermission &&
+            // { canDeleteUsers &&
               <Button variant="outlined" color="error" onClick={handleDelete}>
                 Delete
               </Button>
