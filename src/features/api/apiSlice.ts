@@ -175,6 +175,14 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["Users"],
     }),
+    verifyRoleAccess: builder.mutation({
+      query: (requestedAccessData) => ({
+        url: "users/checkRoleAccess",   // adjust in API 
+        method: "POST",
+        body: requestedAccessData,
+      }),
+      invalidatesTags: ["Users"],
+    }),
     validateToken: builder.mutation({
       query: (tokenInfo) => ({
         url: `users/validate/${tokenInfo.token}/${tokenInfo.eMail}/${tokenInfo.username}`,
@@ -182,7 +190,6 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["Users"],
     }),
-
     forgotPasswordEmail: builder.mutation({
       query: (emailData) => ({
         url: "email/forgotPasswordEmail",
@@ -216,6 +223,7 @@ export const {
   useDeleteUserMutation,
   useResetPasswordMutation,
   useLoginUserMutation,
+  useVerifyRoleAccessMutation,
   useValidateTokenMutation,
   useForgotPasswordEmailMutation,
 } = apiSlice
