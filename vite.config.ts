@@ -19,6 +19,6 @@ export default defineConfig({
     mockReset: true,
   },
   resolve: {
-    alias: [{ find: "@", replacement: path.resolve(__dirname, "src") }],
-  },
+    alias: [{ find: "@", replacement: path.resolve(__dirname, "src") }]
+    },
 })

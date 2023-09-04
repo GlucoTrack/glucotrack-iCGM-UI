@@ -8,6 +8,7 @@ import { authenticateRoleAddUser } from '../../hooks/useRoleAuth';
 import 'react-phone-number-input/style.css'
 import PhoneInput from 'react-phone-number-input'
 import { E164Number } from 'libphonenumber-js/core'
+import { GetGraphToken } from '@/components/Email'
 
 interface FormValues {
   username: string
@@ -24,6 +25,7 @@ interface SendEmailFields {
   token: string
   email: string
   username: string
+  graphToken: string
 }
 
 const initialValues: FormValues = {
@@ -50,14 +52,14 @@ const AddUser: React.FC = () => {
     useAddUserMutation()
 
   const [
-      sendForgotPasswordEmail,
-      {
-          isLoading: isSendingEmail,
-          isError: isSendEmailError,
-          error: sendEmailError,
-          isSuccess: isSendEmailSuccess,
-          data: SendEmailData,
-      },
+    sendForgotPasswordEmail,
+    {
+      isLoading: isSendingEmail,
+      isError: isSendEmailError,
+      error: sendEmailError,
+      isSuccess: isSendEmailSuccess,
+      data: SendEmailData,
+    },
   ] = useForgotPasswordEmailMutation()
 
   const canSave =
@@ -73,7 +75,7 @@ const AddUser: React.FC = () => {
     ].every((value) => value !== undefined && value !== null && value !== "") &&
     !isLoading
 
-    const canSendEmail =
+  const canSendEmail =
     [
       passwordToken,
       formValues.username,
@@ -91,16 +93,8 @@ const AddUser: React.FC = () => {
   }, [countryValue])
 
   useEffect(() => {
-    if (canSendEmail)
-    {
-      const sendEmailFields: SendEmailFields = {
-          token: passwordToken,
-          email: formValues.email,
-          username: formValues.username,
-      }
-      sendPasswordEmail(sendEmailFields)
-      //sendForgotPasswordEmail(sendEmailFields)
-      //sendResetPasswordEmail(passwordToken, formValues.email, formValues.username)
+    if (canSendEmail) {
+      callGetGraphToken()
     }
   }, [passwordToken])
 
@@ -110,6 +104,20 @@ const AddUser: React.FC = () => {
       ...prevValues,
       [name]: value,
     }))
+  }
+
+  const callGetGraphToken = async () => {
+    await GetGraphToken().then((graphToken) => {
+    console.log(graphToken)
+    if (!(graphToken.toString() === "false")) {
+      const sendEmailFields: SendEmailFields = {
+        token: passwordToken,
+        email: formValues.email,
+        username: formValues.username,
+        graphToken: graphToken.toString(),
+      }
+      sendPasswordEmail(sendEmailFields)
+    }})
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -123,9 +131,8 @@ const AddUser: React.FC = () => {
     }
   }
 
-  const sendPasswordEmail = async (emailOptions:SendEmailFields) => 
-  {
-      await sendForgotPasswordEmail(emailOptions)
+  const sendPasswordEmail = async (emailOptions: SendEmailFields) => {
+    await sendForgotPasswordEmail(emailOptions)
   }
 
   const handleMutationSuccess = () => {
@@ -170,15 +177,13 @@ const AddUser: React.FC = () => {
         </p>
       )
     } else if (isSendEmailSuccess) {
-      if (SendEmailData.toString() as boolean)
-      {
+      if (SendEmailData.toString() as boolean) {
         navigate("/users")
-      }else
-      {
-      content = (
-        <p style={{ color: theme.palette.error.main }}>
-          {`Error sending the reset passwword email to ${formValues.email}`}
-        </p>)
+      } else {
+        content = (
+          <p style={{ color: theme.palette.error.main }}>
+            {`Error sending the reset passwword email to ${formValues.email}`}
+          </p>)
       }
     }
   }, [isSendingEmail, isSendEmailError, isSendEmailSuccess])
@@ -190,7 +195,7 @@ const AddUser: React.FC = () => {
     return <p>Forbidden access - No permission to perform action</p>;
   }
 
-  
+
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header
