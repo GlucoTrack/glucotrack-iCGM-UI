@@ -23,7 +23,7 @@ const deviceCodeRequest = {
 
 export const GetGraphToken = async (): Promise<string> => {
     await authClient.initialize()
-    authClient.loginPopup({ scopes: scopes, redirectUri: 'http://localhost:1234/api/v1/graphresponse' }).then((response) => {
+    await authClient.loginPopup({ scopes: scopes }).then((response) => {
         console.log(JSON.stringify(response));
         return response.accessToken
     }).catch((error) => {
