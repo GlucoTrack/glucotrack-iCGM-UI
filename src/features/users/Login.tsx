@@ -30,10 +30,6 @@ interface DecodedToken {
 
 
 const Login: React.FC = () => {
-  //const history = useHistory();
-  //const [usernameInput, setUsernameInput] = useState('');
-  //const [password, setPassword] = useState('');
-  //console.log('<Login> is rendering')
 
   const [credentials, setCredentials] = useState<Credentials>(initialValues)
   const [error, setError] = useState('');
@@ -45,7 +41,7 @@ const Login: React.FC = () => {
 
   const [loginResponse, { data, isLoading, isError, isSuccess }] = useLoginUserMutation()
 
- // const { data: permissionsData, refetch } = useGetRolePermissionsQuery(undefined/*, { skip: true }*/);
+ // const { data: permissionsData, refetch } = useGetRolePermissionsQuery(undefined/*, { skip: true }*/);   // not fetching correctly!
 
   const navigate = useNavigate()
   // const theme = useTheme()
@@ -100,7 +96,7 @@ const Login: React.FC = () => {
       setRole(accountRole);
       sessionStorage.setItem('role', accountRole); 
 
-      // Fetch permissions for the role:
+      // Fetch permissions for the role (error 501!):
       //refetch();
 
       navigate("/home")

@@ -28,16 +28,14 @@ const Users = () => {
   const [readPermission, setReadPermission] = useState(false);
   const [writePermission, setWritePermission] = useState(false);
 
-  // const canReadUsers = hasPermission(permissions, 'Users', 'Read');
+  // const canReadUsers = hasPermission(permissions, 'Users', 'Read');    // check local cache
   // const canWriteUsers = hasPermission(permissions, 'Users', 'Write');
-
   //
 
   const handleCellClick = (params: GridCellParams) => {
     const { _id: userId } = params.row
     // if (editPermission) {
     if (writePermission) {
-    // if (canWriteUsers) {
       navigate(`edit/${userId}`)
     }
   }
@@ -117,14 +115,12 @@ const Users = () => {
   //
   // if (!authenticateRoleUsersInfo(role)) {    // using 'useRoleAuth.ts'
   if (!readPermission) {    // using a DB query via API
-  // if (!canReadUsers) {   // locally saved Permissions (fetched from DB at login)
     return <p>Forbidden access - no permission to perform action</p>;
   }
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header title="Users" subtitle={`List of registered users: ${status}`}>
-        {/* {canWriteUsers && <Action action="Add" url="/users/add" />} */}
         {writePermission && <Action action="Add" url="/users/add" />}
         {/* {addPermission && <Action action="Add" url="/users/add" />} */}
       </Header>

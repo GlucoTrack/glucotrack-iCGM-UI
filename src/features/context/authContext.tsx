@@ -39,3 +39,11 @@ export function useAuth() {
   }
   return context;
 }
+
+export function hasPermission(
+  permissions: Permission[],
+  feature: string,
+  levelOfAccess: string
+): boolean {
+  return permissions.some(p => p.feature === feature && p.levelOfAccess === levelOfAccess);
+}
