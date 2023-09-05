@@ -1,38 +1,55 @@
-import React from "react"
+import React, { useEffect } from "react"
 import { DataGrid, GridToolbar } from "@mui/x-data-grid"
+import { Box, useTheme, Button } from "@mui/material"
+import Measurements from "@/interfaces/Measurement"
 
-const MeasurementGrid = () => {
-  // const columns = [
-  //   { field: "name", headerName: "Name" },
-  //   { field: "date", headerName: "Name" },
-  // ]
+const MeasurementGrid = (measurements: any) => {
+  const [data, setData] = React.useState<Measurements[]>([]);
 
-  // const rows = []
+  useEffect(() => {
+    if (measurements) {
+            
+      let rowId = 0;
+      let mergedMesurements: any[] = []; 
+      const allData = measurements?.measurements.map((measurement: any) => {
+        let dd = measurement.data.map((data: any) => {
+          rowId++;
+          return {
+            current: data.current,
+            voltage: data.voltage,
+            date: data.date,
+            _id: rowId,
+          }
+        });
+        for (let d of dd) {
+          d.deviceName = measurement.name;
+        }
+        return dd;
+      });           
+      for(let d of allData) {
+        mergedMesurements = mergedMesurements.concat(d);
+      }
+      
+      setData(mergedMesurements);
+    }
+  }, [measurements]);
+  
+  
+  const columns = [
+    { field: "deviceName", headerName: "Name", flex: 0.5 },
+    { field: "date", headerName: "Date", flex: 1 },
+    { field: "voltage", headerName: "Voltate", flex: 1 },
+    { field: "current", headerName: "Current", flex: 1 },
+  ]
 
-  // content = (
-  //   <Box height={"75vh"}>
-  //     <DataGrid
-  //       slots={{ toolbar: GridToolbar }}
-  //       rows={data.measurements}
-  //       getRowId={(row) => row.name}
-  //       columns={[
-  //         { field: "name", headerName: "Name" },
-  //         {
-  //           field: "statistics",
-  //           headerName: "Date",
-  //           renderCell: (params) => (
-  //             <ul>
-  //               {params.value.map((value: any, index: number) => (
-  //                 <li key={index}>{value.date}</li>
-  //               ))}
-  //             </ul>
-  //           ),
-  //         },
-  //       ]}
-  //     />
-  //   </Box>
-  // )
-  return <div>MeasurementGrid</div>
+  return <Box sx={{mt:4}} flexGrow={1} overflow="auto" width="100%">
+    <DataGrid<Measurements>
+      slots={{ toolbar: GridToolbar }}
+      rows={data}
+      getRowId={(row) => row._id}
+      columns={columns}
+    />
+  </Box>
 }
 
 export default MeasurementGrid
