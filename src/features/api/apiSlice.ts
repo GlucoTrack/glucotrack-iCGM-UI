@@ -1,11 +1,24 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
 
+const token = sessionStorage.getItem('token');
+
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
     baseUrl: import.meta.env.VITE_API_BASE_URL,
+    prepareHeaders: (headers, { getState }) => {
+      // Get token from session storage
+      const token = sessionStorage.getItem('token');
+      
+      // If the token exists, set it in the headers
+      if (token) {
+        headers.set('authorization', `Bearer ${token}`);
+      }
+
+      return headers;
+    },
   }),
-  tagTypes: ["Devices", "Groups", "Measurements", "AveragesAndStds", "Users"],
+  tagTypes: ["Devices", "Groups", "Measurements", "AveragesAndStds", "Users", "Email"],
   endpoints: (builder) => ({
     //TODO maybe code split per feature
     //*DEVICES
@@ -145,10 +158,10 @@ export const apiSlice = createApi({
       ],
     }),
 
-    // Login
+    // Login & Authentication
     resetPassword: builder.mutation({
       query: (passwordData) => ({
-        url: "users/resetPassword",
+        url: "users/resetpassword",
         method: "POST",
         body: passwordData,
       }),
@@ -162,7 +175,33 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["Users"],
     }),
-
+    getRolePermissions: builder.query({
+      query: (params = {}) => "users/getRolePermissions",
+      providesTags: ["Users"],
+    }),
+    verifyRoleAccess: builder.mutation({
+      query: (requestedAccessData) => ({
+        url: "users/checkRoleAccess",   // adjust in API 
+        method: "POST",
+        body: requestedAccessData,
+      }),
+      invalidatesTags: ["Users"],
+    }),
+    validateToken: builder.mutation({
+      query: (tokenInfo) => ({
+        url: `users/validate/${tokenInfo.token}/${tokenInfo.eMail}/${tokenInfo.username}`,
+        method: "GET",
+      }),
+      invalidatesTags: ["Users"],
+    }),
+    forgotPasswordEmail: builder.mutation({
+      query: (emailData) => ({
+        url: "email/forgotPasswordEmail",
+        method: "POST",
+        body: emailData,
+      }),
+      invalidatesTags: ["Email"],
+    }),  
 
 
   }),
@@ -187,5 +226,9 @@ export const {
   useEditUserMutation,
   useDeleteUserMutation,
   useResetPasswordMutation,
-  useLoginUserMutation
+  useLoginUserMutation,
+  useGetRolePermissionsQuery,
+  useVerifyRoleAccessMutation,
+  useValidateTokenMutation,
+  useForgotPasswordEmailMutation,
 } = apiSlice

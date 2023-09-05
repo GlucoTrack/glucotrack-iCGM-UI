@@ -8,3 +8,8 @@ export default interface User {
   createdBy: string
   updatedBy: string
 }
+
+export interface UserWithId extends User
+{
+  _id: string
+} 

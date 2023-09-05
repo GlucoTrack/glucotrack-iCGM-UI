@@ -6,12 +6,13 @@ import Header from "@/components/Header"
 import {
   useDeleteGroupMutation,
   useEditGroupMutation,
+  useVerifyRoleAccessMutation
 } from "@/features/api/apiSlice"
 import { RootState } from "@/store/store"
 import { resetGroup } from "./groupsSlice"
 
 import { useAuth } from '../context/authContext';
-import { authenticateRoleEditGroup } from '../../hooks/useRoleAuth';
+import { authenticateRoleEditGroup, authenticateRoleGroupDelete } from '../../hooks/useRoleAuth';
 
 interface FormValues {
   groupName: string
@@ -31,6 +32,11 @@ const EditGroup: React.FC = () => {
   const dispatch = useDispatch()
   const theme = useTheme()
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
+
+  // To check WRITE & DELETE permissions in  DB:
+  const [userDeletePermission, setDeletePermission] = useState(false);
+  const [writePermission, setWritePermission] = useState(false);
+  const [verifyRoleAccess, { data: roleAccessData, isLoading: checkroleIsLoading }] = useVerifyRoleAccessMutation();
 
   const { groupId } = useParams<Record<string, string>>()
   const { groupName, groupDescription, deviceNames } = useSelector(
@@ -106,10 +112,13 @@ const EditGroup: React.FC = () => {
   }
 
   const handleDelete = async () => {
-    try {
-      await deleteGroup(groupId)
-    } catch (error: any) {
-      console.error(error)
+    if (userDeletePermission) {
+    // if (deletePermission) {
+      try {
+        await deleteGroup(groupId)
+      } catch (error: any) {
+        console.error(error)
+      }
     }
   }
 
@@ -130,9 +139,36 @@ const EditGroup: React.FC = () => {
     handleMutationSuccess()
   }
 
-  // // Role-based access control (RBAC):
-  // //
-  if (!authenticateRoleEditGroup(role)) {
+
+  // ----------   Role-based access control (RBAC): ------------- //
+  //
+  // Option B: These logic verifies in the DataBase if the given role has permissions for the given feature/access:
+  //
+  useEffect(() => {
+    if (role) {
+      verifyRoleAccess([
+        { feature: 'Groups', levelOfAccess: 'Write' },
+        { feature: 'Groups', levelOfAccess: 'Delete' },
+      ]);
+    } else {
+      setWritePermission(false);     
+      setDeletePermission(false);
+    }
+  }, [role, verifyRoleAccess]);
+
+  useEffect(() => {
+    if (roleAccessData) {
+      setWritePermission(roleAccessData?.results[0]);  
+      setDeletePermission(roleAccessData?.results[1]);
+    }
+  }, [roleAccessData]);
+
+
+  // DELETE Group:
+  const deletePermission = authenticateRoleGroupDelete(role);
+
+  if (!writePermission) {
+  // if (!authenticateRoleEditGroup(role)) {
     return <p>Forbidden access - no permission to perform action</p>;
   }
 
@@ -140,7 +176,7 @@ const EditGroup: React.FC = () => {
     <Box display="flex" flexDirection="column" height="85vh">
       <Header
         title="Edit a group"
-        subtitle="(compete each field below to edit a group)"
+        subtitle="(complete each field below to edit a group)"
       />
       <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">
         <form onSubmit={handleSubmit}>
@@ -189,10 +225,12 @@ const EditGroup: React.FC = () => {
                 Submit
               </Button>
             </Box>
-
-            <Button variant="outlined" color="error" onClick={handleDelete}>
-              Delete
-            </Button>
+            { userDeletePermission &&
+            // {deletePermission &&
+              <Button variant="outlined" color="error" onClick={handleDelete}>
+                Delete
+              </Button>
+            }
           </Box>
         </form>
       </Box>

@@ -1,22 +1,18 @@
 import Header from "@/components/Header"
 import { Box, Button, TextField, useTheme } from "@mui/material"
-import { Select, SelectChangeEvent, MenuItem, FormControl, InputLabel } from '@mui/material';
 import React, { useEffect, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate, Link } from "react-router-dom"
 import {
   useEditUserMutation,
-  useGetUserByIdQuery,
   useGetUserByNameQuery,
-  useDeleteUserMutation,
-  useVerifyRoleAccessMutation,
 } from "@/features/api/apiSlice"
 
 import 'react-phone-number-input/style.css'
 import PhoneInput from 'react-phone-number-input'
 import { E164Number } from 'libphonenumber-js/core'
 
-import { useAuth, hasPermission } from '../context/authContext';
-import { authenticateRoleEditUser, authenticateRoleUserDelete } from '../../hooks/useRoleAuth';
+import { useAuth } from '../context/authContext';
+import { authenticateRoleEditUser } from '../../hooks/useRoleAuth';
 
 interface FormValues {
   username: string
@@ -35,35 +31,16 @@ const initialValues: FormValues = {
   lastName: "",
   email: "",
   phone: "+1",
-  role: "Researcher",
+  role: "Administrator",
   createdBy: "Admin",
   updatedBy: "Admin",
 }
 
-const accountRoles = {
-  //Superadmin: 'Superadmin',   // not to include as option from UI (just DB admin should set)
-  Administrator: 'Administrator',
-  Researcher: 'Researcher',
-  // other? add options...
-  Guest: 'Guest'
-};
-
-const EditUser: React.FC = () => {
-  const { role, username, permissions } = useAuth();
+const Account: React.FC = () => {
+  const { role, username } = useAuth();
   const navigate = useNavigate()
   const theme = useTheme()
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
-
-  const { userId } = useParams<Record<string, string>>()
-
-  // To check WRITE & DELETE permissions in  DB:
-  const [userDeletePermission, setDeletePermission] = useState(false);
-  const [writePermission, setWritePermission] = useState(false);
-  const [verifyRoleAccess, { data: roleAccessData, isLoading: checkroleIsLoading }] = useVerifyRoleAccessMutation();
-
-  // const canWriteUsers = hasPermission(permissions, 'Users', 'Write');
-  // const canDeleteUsers = hasPermission(permissions, 'Users', 'Delete');
-
 
   const {
     data: getUserData,
@@ -73,20 +50,11 @@ const EditUser: React.FC = () => {
     isSuccess: getUserIsSuccess,
     isError: getUserIsError,
     error: getUserError,
-  } = useGetUserByIdQuery(userId)
+  } = useGetUserByNameQuery(username)
 
+  // not used yet to edit, may be allowed to edit part of the user account oneself
   const [
-    deleteUser,
-    {
-      isLoading: isDeletingUser,
-      isError: isDeleteError,
-      error: deleteError,
-      isSuccess: isDeleteSuccess,
-    },
-  ] = useDeleteUserMutation()
-
-  const [
-    editUser,
+    editUser,     
     {
       isLoading: isEditingUser,
       isError: isEditError,
@@ -154,16 +122,18 @@ const EditUser: React.FC = () => {
       formValues.updatedBy,
     ].every((value) => value !== undefined && value !== null && value !== "") &&
     !getUserIsLoading &&
-    !isDeletingUser &&
     !isEditingUser
 
-  const handlePhoneChange = (e: string) => 
-  {
-    setFormValues((prevValues) => ({
-      ...prevValues,
-      ["phone"]: e,
-    }))
-  }
+  const [countryValue, setCountryValue] = useState<E164Number>();
+
+  useEffect(() => {
+    console.log(countryValue)
+    if (!(countryValue === undefined)) {
+      formValues.phone = countryValue!.toString();
+    } else {
+      formValues.phone = "+1";
+    }
+  }, [countryValue]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -173,26 +143,15 @@ const EditUser: React.FC = () => {
     }))
   }
 
-  const handleDropChange = (event: SelectChangeEvent<string>) => {
-    const { name, value } = event.target;
-    if (name) {
-      setFormValues((prevValues) => ({
-        ...prevValues,
-        [name]: value,
-      }));
-    }
-};
-
   const handleCancel = () => {
-    navigate("/users")
+    navigate("/home")
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (canSave) {
       try {
-        console.log(formValues.phone)
-        await editUser({ userId, ...formValues })
+        // await editUser({ userId, ...formValues })
       } catch (error: any) {
         console.error(error)
       }
@@ -201,79 +160,39 @@ const EditUser: React.FC = () => {
 
   const handleMutationSuccess = () => {
     setTimeout(() => {
-      navigate("/users")
+      navigate("/home")
     }, 0)
-  }
-
-  const handleDelete = async () => {
-    if (userDeletePermission) {
-    // if (deletePermission) {
-      try {
-        await deleteUser(userId)
-      } catch (error: any) {
-        console.error(error)
-      }
-    }
   }
 
 
   let content: JSX.Element | null = null
-  if (isEditingUser  || isDeletingUser ) {
+  if (isEditingUser ) {
     content = <h3>Loading...</h3>
-  } else if (isEditError || isDeleteError ) {
+  } else if (isEditError ) {
     const errorMessageString = isEditError
       ? JSON.stringify(editError)
-      : JSON.stringify(deleteError) 
+      : JSON.stringify(editError) 
     const errorMessageParsed = JSON.parse(errorMessageString)
     content = (
       <p style={{ color: theme.palette.error.main }}>
         {errorMessageParsed.data.message}
       </p>
     )
-  } else if (isEditSuccess || isDeleteSuccess ) {
+  } else if (isEditSuccess ) {
     handleMutationSuccess()
   }
 
-
-  // ----------   Role-based access control (RBAC): ------------- //
+  // Role-based access control (RBAC):
   //
-  // Option B: These logic verifies in the DataBase if the given role has permissions for the given feature/access:
-  //
-  useEffect(() => {
-    if (role) {
-      verifyRoleAccess([
-        { feature: 'Users', levelOfAccess: 'Write' },
-        { feature: 'Users', levelOfAccess: 'Delete' },
-      ]);
-    } else {
-      setWritePermission(false);     
-      setDeletePermission(false);
-    }
-  }, [role, verifyRoleAccess]);
-
-  useEffect(() => {
-    if (roleAccessData) {
-      setWritePermission(roleAccessData?.results[0]);  
-      setDeletePermission(roleAccessData?.results[1]);
-    }
-  }, [roleAccessData]);
-
-  
-  // DELETE User:
-  const deletePermission = authenticateRoleUserDelete(role);
-
-
-  if (!writePermission) {
-  // if (!authenticateRoleEditUser(role)) {
-  // if (!canWriteUsers) { 
-    return <p>Forbidden access - no permission to perform action</p>;
-  }
+  // if (!authenticateRoleEditUser(role)) {      // edit own!
+  //   return <p>Forbidden access - no permission to perform action</p>;
+  // }
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header
-        title="Edit a User"
-        subtitle="(complete all fields to edit a device)"
+        title="Account Info"
+        subtitle=""
       />
       {getUserContent}
       <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">
@@ -286,32 +205,8 @@ const EditUser: React.FC = () => {
             required
             fullWidth
             margin="normal"
+            disabled
           />
-          {(formValues.role !== 'Superadmin') ?
-            <FormControl fullWidth margin="normal">
-              <InputLabel id="role-label">Role</InputLabel>
-              <Select
-                labelId="role-label"
-                name="role"
-                value={formValues.role}
-                onChange={handleDropChange}
-              >
-                {Object.values(accountRoles).map(role => (
-                  <MenuItem key={role} value={role}>
-                    {role}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            : <TextField
-              name="role"
-              label="Role"
-              value={formValues.role}
-              fullWidth
-              margin="normal"
-              disabled
-            />
-          } 
           <TextField
             name="firstName"
             label="First Name"
@@ -320,6 +215,7 @@ const EditUser: React.FC = () => {
             required
             fullWidth
             margin="normal"
+            disabled
           />
           <TextField
             name="lastName"
@@ -329,6 +225,7 @@ const EditUser: React.FC = () => {
             required
             fullWidth
             margin="normal"
+            disabled
           />
           <TextField
             name="email"
@@ -338,13 +235,14 @@ const EditUser: React.FC = () => {
             required
             fullWidth
             margin="normal"
+            disabled
           />
           <PhoneInput
             defaultCountry="US"
-            international={false}
             placeholder ="Enter phone number"
-            value={formValues.phone}
-            onChange={handlePhoneChange}
+            value={countryValue}
+            onChange={setCountryValue}
+            disabled
           />
           {content}
 
@@ -357,22 +255,17 @@ const EditUser: React.FC = () => {
               >
                 Cancel
               </Button>
-              <Button type="submit" variant="contained" color="primary">
+              {/* <Button type="submit" variant="contained" color="primary">
                 Submit
-              </Button>
+              </Button> */}
             </Box>
-            { userDeletePermission &&
-            /* {deletePermission && */
-            /* { canDeleteUsers && */
-              <Button variant="outlined" color="error" onClick={handleDelete}>
-                Delete
-              </Button>
-            }
+
           </Box>
+          {/* <Link to="/reset-password">Change Password</Link> */}
         </form>
       </Box>
     </Box>
   )
 }
 
-export default EditUser
+export default Account

@@ -1,8 +1,8 @@
 import Header from "@/components/Header"
 import { Box, Button, TextField, useTheme } from "@mui/material"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { useAddDeviceMutation } from "../api/apiSlice"
+import { useAddDeviceMutation, useVerifyRoleAccessMutation } from "../api/apiSlice"
 
 import { useAuth } from '../context/authContext';
 import { authenticateRoleAddDevice} from '../../hooks/useRoleAuth';
@@ -56,6 +56,14 @@ const AddDevice: React.FC = () => {
   const navigate = useNavigate()
   const theme = useTheme()
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
+
+  // To check WRITE permissions in  DB:
+  const [writePermission, setWritePermission] = useState(false);
+  const [verifyRoleAccess, { data: roleAccessData, isLoading: checkroleIsLoading }] = useVerifyRoleAccessMutation();
+
+  // const canWriteUsers = hasPermission(permissions, 'Users', 'Write');
+  //
+
   const [addDevice, { isLoading, isError, error, isSuccess }] =
     useAddDeviceMutation()
   const canSave =
@@ -127,9 +135,29 @@ const AddDevice: React.FC = () => {
     handleMutationSuccess()
   }
 
-  // Role-based access control (RBAC):
+  // ----------   Role-based access control (RBAC): ------------- //
   //
-  if (!authenticateRoleAddDevice(role)) {
+  // Option B: verify in the DataBase if the given role has permissions for the given feature/access:
+  //
+  useEffect(() => {
+    if (role) {
+      verifyRoleAccess([
+        { feature: 'Devices', levelOfAccess: 'Write' },
+      ]);
+    } else {
+      setWritePermission(false);
+    }
+  }, [role, verifyRoleAccess]);
+
+  useEffect(() => {
+    if (roleAccessData) {
+      setWritePermission(roleAccessData?.results[0]);
+    }
+  }, [roleAccessData]);
+
+
+  if (!writePermission) {   // using a DB query via API
+  //if (!authenticateRoleAddDevice(role)) {
     return <p>Forbidden access - no permission to perform action</p>;
   }
 

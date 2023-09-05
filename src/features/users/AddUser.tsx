@@ -1,14 +1,15 @@
 import Header from "@/components/Header"
 import { Box, Button, TextField, useTheme } from "@mui/material"
+import { Select, SelectChangeEvent, MenuItem, FormControl, InputLabel } from '@mui/material';
 import React, { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { useAddUserMutation } from "../api/apiSlice"
-import { useAuth } from '../context/authContext';
+import { useAddUserMutation, useForgotPasswordEmailMutation, useVerifyRoleAccessMutation } from "../api/apiSlice"
+import { useAuth, hasPermission } from '../context/authContext';
 import { authenticateRoleAddUser } from '../../hooks/useRoleAuth';
 import 'react-phone-number-input/style.css'
 import PhoneInput from 'react-phone-number-input'
 import { E164Number } from 'libphonenumber-js/core'
-import sendResetPasswordEmail from "@/components/Email"
+import { GetGraphToken } from '@/components/Email'
 
 interface FormValues {
   username: string
@@ -21,25 +22,63 @@ interface FormValues {
   updatedBy: string
 }
 
+interface SendEmailFields {
+  token: string
+  email: string
+  username: string
+  graphToken: string
+}
+
 const initialValues: FormValues = {
   username: "",
   firstName: "",
   lastName: "",
   email: "",
   phone: "+1",
-  role: "Administrator",
+  role: "Researcher",
   createdBy: "Admin",
   updatedBy: "Admin",
 }
 
+const accountRoles = {
+  //Superadmin: 'Superadmin',   // not to include as option from UI (just DB admin should set)
+  Administrator: 'Administrator',
+  Researcher: 'Researcher',
+  // other? add options...
+  Guest: 'Guest'
+};
+
 const AddUser: React.FC = () => {
-  const { role, username } = useAuth();
+  //const jwtFromSession = sessionStorage.getItem('token');
+  //console.log('Session JWT from local session storage: ', jwtFromSession);
+
+  const { role, username, permissions } = useAuth();
+
   const navigate = useNavigate()
   const theme = useTheme()
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
-  const [passwordToken, setPasswordToken] = useState<String>('')
+  const [passwordToken, setPasswordToken] = useState<string>('')
+
+  // To check WRITE permissions in  DB:
+  const [writePermission, setWritePermission] = useState(false);
+  const [verifyRoleAccess, { data: roleAccessData, isLoading: checkroleIsLoading }] = useVerifyRoleAccessMutation();
+  // const canWriteUsers = hasPermission(permissions, 'Users', 'Write');
+  //
+  
   const [addUser, { isLoading, isError, error, isSuccess, data }] =
     useAddUserMutation()
+
+  const [
+    sendForgotPasswordEmail,
+    {
+      isLoading: isSendingEmail,
+      isError: isSendEmailError,
+      error: sendEmailError,
+      isSuccess: isSendEmailSuccess,
+      data: SendEmailData,
+    },
+  ] = useForgotPasswordEmailMutation()
+
   const canSave =
     [
       formValues.username,
@@ -53,6 +92,13 @@ const AddUser: React.FC = () => {
     ].every((value) => value !== undefined && value !== null && value !== "") &&
     !isLoading
 
+  const canSendEmail =
+    [
+      passwordToken,
+      formValues.username,
+      formValues.email,
+    ].every((value) => value !== undefined && value !== null && value !== "") && isSuccess
+
   const [countryValue, setValue] = useState<E164Number>();
 
   useEffect(() => {
@@ -64,9 +110,8 @@ const AddUser: React.FC = () => {
   }, [countryValue])
 
   useEffect(() => {
-    if (!(passwordToken === ''))
-    {
-      sendResetPasswordEmail(passwordToken, formValues.username, formValues.email)
+    if (canSendEmail) {
+      callGetGraphToken()
     }
   }, [passwordToken])
 
@@ -78,17 +123,43 @@ const AddUser: React.FC = () => {
     }))
   }
 
+  const callGetGraphToken = async () => {
+    await GetGraphToken().then((graphToken) => {
+    console.log(graphToken)
+    if (!(graphToken.toString() === "false")) {
+      const sendEmailFields: SendEmailFields = {
+        token: passwordToken,
+        email: formValues.email,
+        username: formValues.username,
+        graphToken: graphToken.toString(),
+      }
+      sendPasswordEmail(sendEmailFields)
+    }})
+  }
+
+  const handleDropChange = (event: SelectChangeEvent<string>) => {
+    const { name, value } = event.target;
+    if (name) {
+      setFormValues((prevValues) => ({
+        ...prevValues,
+        [name]: value,
+      }));
+    }
+};
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (canSave) {
       try {
         await addUser(formValues)
-        // const resultUser = await addUser(formValues).unwrap()
-        // setPasswordToken(resultUser["jwtToken"])
       } catch (error: any) {
         console.error(error)
       }
     }
+  }
+
+  const sendPasswordEmail = async (emailOptions: SendEmailFields) => {
+    await sendForgotPasswordEmail(emailOptions)
   }
 
   const handleMutationSuccess = () => {
@@ -121,14 +192,61 @@ const AddUser: React.FC = () => {
     }
   }, [isLoading, isError, isSuccess])
 
+  useEffect(() => {
+    if (isSendingEmail) {
+      content = <h3>Loading...</h3>
+    } else if (isSendEmailError) {
+      const errorMessageString = JSON.stringify(sendEmailError)
+      const errorMessageParsed = JSON.parse(errorMessageString)
+      content = (
+        <p style={{ color: theme.palette.error.main }}>
+          {JSON.stringify(errorMessageParsed.data.message)}
+        </p>
+      )
+    } else if (isSendEmailSuccess) {
+      if (SendEmailData.toString() as boolean) {
+        navigate("/users")
+      } else {
+        content = (
+          <p style={{ color: theme.palette.error.main }}>
+            {`Error sending the reset passwword email to ${formValues.email}`}
+          </p>)
+      }
+    }
+  }, [isSendingEmail, isSendEmailError, isSendEmailSuccess])
 
-  // // Role-based access control (RBAC):
-  // //
-  if (!authenticateRoleAddUser(role)) {
+
+  // ----------   Role-based access control (RBAC): ------------- //
+  //
+
+  // Option B: These logic verifies in the DataBase if the given role has permissions for the given feature/access:
+  //
+  useEffect(() => {
+    if (role) {
+      verifyRoleAccess([
+        { feature: 'Users', levelOfAccess: 'Write' },
+      ]);
+    } else {
+      setWritePermission(false);
+    }
+  }, [role, verifyRoleAccess]);
+
+  useEffect(() => {
+    if (roleAccessData) {
+      setWritePermission(roleAccessData?.results[0]);
+    }
+  }, [roleAccessData]);
+
+
+  // Conditionally render content only if access permission is valid:
+  //
+  if (!writePermission) {   // using a DB query via API
+  // if (!authenticateRoleAddUser(role)) {    // using 'useRoleAuth.ts'
+  // if (!canWriteUsers) {    // locally saved Permissions (fetched from DB at login)
     return <p>Forbidden access - No permission to perform action</p>;
   }
 
-  
+
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header
@@ -144,6 +262,21 @@ const AddUser: React.FC = () => {
             fullWidth
             margin="normal"
           />
+          <FormControl fullWidth margin="normal">
+            <InputLabel id="role-label">Role</InputLabel>
+            <Select
+              labelId="role-label"
+              name="role"
+              value={formValues.role}
+              onChange={handleDropChange}
+            >
+              {Object.values(accountRoles).map(role => (
+                <MenuItem key={role} value={role}>
+                  {role}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <TextField
             name="firstName"
             label="First Name"

@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Box } from "@mui/material"
 import { DataGrid, GridCellParams, GridToolbar } from "@mui/x-data-grid"
@@ -6,10 +6,10 @@ import { DataGrid, GridCellParams, GridToolbar } from "@mui/x-data-grid"
 import Header from "@/components/Header"
 import HeaderAction from "@/components/HeaderAction"
 import Device from "@/interfaces/Device"
-import { useGetDevicesQuery } from "@/features/api/apiSlice"
+import { useGetDevicesQuery, useVerifyRoleAccessMutation } from "@/features/api/apiSlice"
 
 import { useAuth } from '../context/authContext';
-import { authenticateRoleDevicesInfo } from '../../hooks/useRoleAuth';
+import { authenticateRoleAddDevice, authenticateRoleDevicesInfo, authenticateRoleEditDevice } from '../../hooks/useRoleAuth';
 
 const Devices = () => {
   const { role, username } = useAuth();
@@ -17,9 +17,19 @@ const Devices = () => {
   const { data, status, isFetching, isLoading, isSuccess, isError, error } =
     useGetDevicesQuery({})
 
+  // To check VIEW & WRITE permissions in  DB:
+  const [verifyRoleAccess, { data: roleAccessData, isLoading: checkroleIsLoading }] = useVerifyRoleAccessMutation();
+  const [readPermission, setReadPermission] = useState(false);
+  const [writePermission, setWritePermission] = useState(false);
+
+  
   const handleCellClick = (params: GridCellParams) => {
     const { _id: deviceId } = params.row
-    navigate(`edit/${deviceId}`)
+
+    if (writePermission) {
+    //if (editPermission) {
+      navigate(`edit/${deviceId}`)
+    }
   }
 
   let content: JSX.Element | null = null
@@ -67,20 +77,44 @@ const Devices = () => {
     )
   }
 
-  // Role-based access control (RBAC):
+  // ----------   Role-based access control (RBAC): ------------- //
   //
-  if (!authenticateRoleDevicesInfo(role)) {
+  // Option B: These logic verifies in the DataBase if the given role has permissions for the given feature/access:
+  //
+  useEffect(() => {
+    if (role) {
+      verifyRoleAccess([
+        { feature: 'Devices', levelOfAccess: 'Read' },
+        { feature: 'Devices', levelOfAccess: 'Write' },
+      ]);
+    } else {
+      setReadPermission(false);
+      setWritePermission(false);
+    }
+  }, [role, verifyRoleAccess]);
+
+  useEffect(() => {
+    if (roleAccessData) {
+      setReadPermission(roleAccessData?.results[0]);
+      setWritePermission(roleAccessData?.results[1]);
+    }
+  }, [roleAccessData]);
+
+  // CREATE Device:
+  const addPermission = authenticateRoleAddDevice(role);
+  // UPDATE Device:
+  const editPermission = authenticateRoleEditDevice(role);
+
+  if (!readPermission) {
+  // if (!authenticateRoleDevicesInfo(role)) {
     return <p>Forbidden access - no permission to perform action</p>;
   }
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
-      <p>
-        Welcome, {username}. <br></br>
-        Role: {role}
-      </p>
       <Header title="Devices" subtitle={`List of devices: ${status}`}>
-        <HeaderAction action="Add" url="/devices/add" />
+        {writePermission && <HeaderAction action="Add" url="/devices/add" /> }
+        {/* {addPermission && <HeaderAction action="Add" url="/devices/add" /> } */}
       </Header>
       {content}
     </Box>

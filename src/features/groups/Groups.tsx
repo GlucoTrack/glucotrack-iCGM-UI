@@ -4,13 +4,14 @@ import { DataGrid, GridCellParams, GridToolbar } from "@mui/x-data-grid"
 
 import Header from "@/components/Header"
 import Action from "@/components/HeaderAction"
-import { useGetGroupsQuery } from "@/features/api/apiSlice"
+import { useGetGroupsQuery, useVerifyRoleAccessMutation } from "@/features/api/apiSlice"
 import { useDispatch } from "react-redux"
 import { setGroup } from "@/features/groups/groupsSlice"
 import Group from "@/interfaces/Group"
 
 import { useAuth } from '../context/authContext';
-import { authenticateRoleGroupsInfo } from '../../hooks/useRoleAuth';
+import { authenticateRoleAddGroup, authenticateRoleEditGroup, authenticateRoleGroupsInfo } from '../../hooks/useRoleAuth';
+import { useEffect, useState } from "react"
 
 const Groups: React.FC = () => {
   const { role, username } = useAuth();
@@ -25,6 +26,11 @@ const Groups: React.FC = () => {
     isError: isErrorGroups,
     error: getGroupsError,
   } = useGetGroupsQuery({})
+
+  // To check VIEW & WRITE permissions in  DB:
+  const [verifyRoleAccess, { data: roleAccessData, isLoading: checkroleIsLoading }] = useVerifyRoleAccessMutation();
+  const [readPermission, setReadPermission] = useState(false);
+  const [writePermission, setWritePermission] = useState(false);
 
   const handleCellClick = (params: GridCellParams) => {
     const {
@@ -42,7 +48,10 @@ const Groups: React.FC = () => {
         deviceNames: deviceNamesString,
       }),
     )
-    navigate(`edit/${groupId}`)
+    if (writePermission) {
+    // if (editPermission) {
+      navigate(`edit/${groupId}`)
+    }
   }
 
   let content: JSX.Element | null = null
@@ -73,20 +82,49 @@ const Groups: React.FC = () => {
     )
   }
 
-  // // Role-based access control (RBAC):
-  // //
-  if (!authenticateRoleGroupsInfo(role)) {
+
+  // ----------   Role-based access control (RBAC): ------------- //
+  //
+  // Option B: These logic verifies in the DataBase if the given role has permissions for the given feature/access:
+  //
+  useEffect(() => {
+    if (role) {
+      verifyRoleAccess([
+        { feature: 'Groups', levelOfAccess: 'Read' },
+        { feature: 'Groups', levelOfAccess: 'Write' },
+      ]);
+    } else {
+      setReadPermission(false);
+      setWritePermission(false);
+    }
+  }, [role, verifyRoleAccess]);
+
+  useEffect(() => {
+    if (roleAccessData) {
+      setReadPermission(roleAccessData?.results[0]);
+      setWritePermission(roleAccessData?.results[1]);
+    }
+  }, [roleAccessData]);
+
+
+  // CREATE Group:
+  const addPermission = authenticateRoleAddGroup(role);
+
+  // UPDATE Group:
+  const editPermission = authenticateRoleEditGroup(role);
+  
+
+  //
+  if (!readPermission) {    // using a DB query via API
+  // if (!authenticateRoleGroupsInfo(role)) {
     return <p>Forbidden access - no permission to perform action</p>;
   }
-  
+
   return (
     <Box display="flex" flexDirection="column" height="85vh">
-      <p>
-        Welcome, {username}. <br></br>
-        Role: {role}
-      </p>
       <Header title="Groups" subtitle={`List of groups: ${getGroupStatus}`}>
-        <Action action="Add" url="add" />
+        {/* {addPermission && <Action action="Add" url="add" />} */}
+        {writePermission && <Action action="Add" url="add" />}
       </Header>
       {content}
     </Box>

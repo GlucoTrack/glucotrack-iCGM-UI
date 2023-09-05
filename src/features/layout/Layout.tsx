@@ -5,6 +5,7 @@ import { Box, useMediaQuery } from "@mui/material"
 import Navbar from "@/features/navbar/Navbar"
 import Sidebar from "@/features/sidebar/Sidebar"
 import Footer from "@/components/Footer"
+import UserOption from "../users/UserOptions"
 
 const Layout = () => {
   const drawerWidth: string = "220px"
@@ -36,6 +37,7 @@ const Layout = () => {
         </Box>
       </Box>
       <Footer />
+      <UserOption/>
     </Box>
   )
 }
