@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Box } from "@mui/material"
 import { DataGrid, GridCellParams, GridToolbar } from "@mui/x-data-grid"
@@ -6,9 +6,9 @@ import { DataGrid, GridCellParams, GridToolbar } from "@mui/x-data-grid"
 import Header from "@/components/Header"
 import Action from "@/components/HeaderAction"
 import User, { UserWithId } from "@/interfaces/User"
-import { useGetUsersQuery } from "@/features/api/apiSlice"
+import { useGetUsersQuery, useVerifyRoleAccessMutation } from "@/features/api/apiSlice"
 
-import { useAuth } from '../context/authContext';
+import { useAuth, hasPermission } from '../context/authContext';
 import { authenticateRoleAddUser, authenticateRoleEditUser, authenticateRoleUsersInfo } from '../../hooks/useRoleAuth';
 import { access } from "fs"
 
@@ -19,13 +19,23 @@ interface TableRow extends User {
 }
 
 const Users = () => {
-  const { role, username } = useAuth();
+  const { role, username, permissions } = useAuth();
   const navigate = useNavigate()
   const { data, status, isFetching, isLoading, isSuccess, isError, error } = useGetUsersQuery({})
 
+  // To check VIEW & WRITE permissions in  DB:
+  const [verifyRoleAccess, { data: roleAccessData, isLoading: checkroleIsLoading }] = useVerifyRoleAccessMutation();
+  const [readPermission, setReadPermission] = useState(false);
+  const [writePermission, setWritePermission] = useState(false);
+
+  // const canReadUsers = hasPermission(permissions, 'Users', 'Read');    // check local cache
+  // const canWriteUsers = hasPermission(permissions, 'Users', 'Write');
+  //
+
   const handleCellClick = (params: GridCellParams) => {
     const { _id: userId } = params.row
-    if (editPermission) {
+    // if (editPermission) {
+    if (writePermission) {
       navigate(`edit/${userId}`)
     }
   }
@@ -63,23 +73,56 @@ const Users = () => {
   }
 
 
-  //    Role-based access control (RBAC):
+  // ----------   Role-based access control (RBAC): ------------- //
   //
-  // View Users:
-  if (!authenticateRoleUsersInfo(role)) {
-    return <p>Forbidden access - no permission to perform action</p>;
-  }
 
+  // Option B: These logic verifies in the DataBase if the given role has permissions for the given feature/access:
+  //
+  useEffect(() => {
+    if (role) {
+      verifyRoleAccess([
+        { feature: 'Users', levelOfAccess: 'Read' },
+        { feature: 'Users', levelOfAccess: 'Write' },
+      ]);
+    } else {
+      setReadPermission(false);
+      setWritePermission(false);
+    }
+  }, [role, verifyRoleAccess]);
+
+  useEffect(() => {
+    if (roleAccessData) {
+      setReadPermission(roleAccessData?.results[0]);
+      setWritePermission(roleAccessData?.results[1]);
+    }
+  }, [roleAccessData]);
+
+  //const viewPermission = roleAccessData?.results[0];    // deprecated -> now managed as state variables!
+  //const writePermission = roleAccessData?.results[1];
+
+  ////
+  
+  // Option A: these methods verify with local functions (in 'useRoleAuth.ts') the permissions by role -> render UI!
+  //
   // CREATE User:
-  const addPermission = authenticateRoleAddUser(role);
-
+  const addPermission = authenticateRoleAddUser(role);    
   // UPDATE User:
   const editPermission = authenticateRoleEditUser(role);
+  ////
+
+
+  // View Users:
+  //
+  // if (!authenticateRoleUsersInfo(role)) {    // using 'useRoleAuth.ts'
+  if (!readPermission) {    // using a DB query via API
+    return <p>Forbidden access - no permission to perform action</p>;
+  }
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header title="Users" subtitle={`List of registered users: ${status}`}>
-        {addPermission && <Action action="Add" url="/users/add" />}
+        {writePermission && <Action action="Add" url="/users/add" />}
+        {/* {addPermission && <Action action="Add" url="/users/add" />} */}
       </Header>
       {content}
       

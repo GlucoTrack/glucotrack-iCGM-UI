@@ -1,5 +1,6 @@
 import Header from "@/components/Header"
 import { Box, Button, TextField, useTheme } from "@mui/material"
+import { Select, SelectChangeEvent, MenuItem, FormControl, InputLabel } from '@mui/material';
 import React, { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import {
@@ -7,13 +8,14 @@ import {
   useGetUserByIdQuery,
   useGetUserByNameQuery,
   useDeleteUserMutation,
+  useVerifyRoleAccessMutation,
 } from "@/features/api/apiSlice"
 
 import 'react-phone-number-input/style.css'
 import PhoneInput from 'react-phone-number-input'
 import { E164Number } from 'libphonenumber-js/core'
 
-import { useAuth } from '../context/authContext';
+import { useAuth, hasPermission } from '../context/authContext';
 import { authenticateRoleEditUser, authenticateRoleUserDelete } from '../../hooks/useRoleAuth';
 
 interface FormValues {
@@ -33,20 +35,35 @@ const initialValues: FormValues = {
   lastName: "",
   email: "",
   phone: "+1",
-  role: "Administrator",
+  role: "Researcher",
   createdBy: "Admin",
   updatedBy: "Admin",
 }
 
+const accountRoles = {
+  //Superadmin: 'Superadmin',   // not to include as option from UI (just DB admin should set)
+  Administrator: 'Administrator',
+  Researcher: 'Researcher',
+  // other? add options...
+  Guest: 'Guest'
+};
+
 const EditUser: React.FC = () => {
-  const { role, username } = useAuth();
+  const { role, username, permissions } = useAuth();
   const navigate = useNavigate()
   const theme = useTheme()
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
 
   const { userId } = useParams<Record<string, string>>()
 
-  //console.log(`[Edit User]: The user Id from params is: ${userId}`)
+  // To check WRITE & DELETE permissions in  DB:
+  const [userDeletePermission, setDeletePermission] = useState(false);
+  const [writePermission, setWritePermission] = useState(false);
+  const [verifyRoleAccess, { data: roleAccessData, isLoading: checkroleIsLoading }] = useVerifyRoleAccessMutation();
+
+  // const canWriteUsers = hasPermission(permissions, 'Users', 'Write');
+  // const canDeleteUsers = hasPermission(permissions, 'Users', 'Delete');
+
 
   const {
     data: getUserData,
@@ -156,6 +173,16 @@ const EditUser: React.FC = () => {
     }))
   }
 
+  const handleDropChange = (event: SelectChangeEvent<string>) => {
+    const { name, value } = event.target;
+    if (name) {
+      setFormValues((prevValues) => ({
+        ...prevValues,
+        [name]: value,
+      }));
+    }
+};
+
   const handleCancel = () => {
     navigate("/users")
   }
@@ -179,7 +206,8 @@ const EditUser: React.FC = () => {
   }
 
   const handleDelete = async () => {
-    if (deletePermission) {
+    if (userDeletePermission) {
+    // if (deletePermission) {
       try {
         await deleteUser(userId)
       } catch (error: any) {
@@ -206,14 +234,40 @@ const EditUser: React.FC = () => {
     handleMutationSuccess()
   }
 
-  // Role-based access control (RBAC):
-  //
-  if (!authenticateRoleEditUser(role)) {
-    return <p>Forbidden access - no permission to perform action</p>;
-  }
 
+  // ----------   Role-based access control (RBAC): ------------- //
+  //
+  // Option B: These logic verifies in the DataBase if the given role has permissions for the given feature/access:
+  //
+  useEffect(() => {
+    if (role) {
+      verifyRoleAccess([
+        { feature: 'Users', levelOfAccess: 'Write' },
+        { feature: 'Users', levelOfAccess: 'Delete' },
+      ]);
+    } else {
+      setWritePermission(false);     
+      setDeletePermission(false);
+    }
+  }, [role, verifyRoleAccess]);
+
+  useEffect(() => {
+    if (roleAccessData) {
+      setWritePermission(roleAccessData?.results[0]);  
+      setDeletePermission(roleAccessData?.results[1]);
+    }
+  }, [roleAccessData]);
+
+  
   // DELETE User:
   const deletePermission = authenticateRoleUserDelete(role);
+
+
+  if (!writePermission) {
+  // if (!authenticateRoleEditUser(role)) {
+  // if (!canWriteUsers) { 
+    return <p>Forbidden access - no permission to perform action</p>;
+  }
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
@@ -233,6 +287,31 @@ const EditUser: React.FC = () => {
             fullWidth
             margin="normal"
           />
+          {(formValues.role !== 'Superadmin') ?
+            <FormControl fullWidth margin="normal">
+              <InputLabel id="role-label">Role</InputLabel>
+              <Select
+                labelId="role-label"
+                name="role"
+                value={formValues.role}
+                onChange={handleDropChange}
+              >
+                {Object.values(accountRoles).map(role => (
+                  <MenuItem key={role} value={role}>
+                    {role}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            : <TextField
+              name="role"
+              label="Role"
+              value={formValues.role}
+              fullWidth
+              margin="normal"
+              disabled
+            />
+          } 
           <TextField
             name="firstName"
             label="First Name"
@@ -282,7 +361,9 @@ const EditUser: React.FC = () => {
                 Submit
               </Button>
             </Box>
-            {deletePermission &&
+            { userDeletePermission &&
+            /* {deletePermission && */
+            /* { canDeleteUsers && */
               <Button variant="outlined" color="error" onClick={handleDelete}>
                 Delete
               </Button>

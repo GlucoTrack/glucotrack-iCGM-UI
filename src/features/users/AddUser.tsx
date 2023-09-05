@@ -1,9 +1,10 @@
 import Header from "@/components/Header"
 import { Box, Button, TextField, useTheme } from "@mui/material"
+import { Select, SelectChangeEvent, MenuItem, FormControl, InputLabel } from '@mui/material';
 import React, { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { useAddUserMutation, useForgotPasswordEmailMutation } from "../api/apiSlice"
-import { useAuth } from '../context/authContext';
+import { useAddUserMutation, useForgotPasswordEmailMutation, useVerifyRoleAccessMutation } from "../api/apiSlice"
+import { useAuth, hasPermission } from '../context/authContext';
 import { authenticateRoleAddUser } from '../../hooks/useRoleAuth';
 import 'react-phone-number-input/style.css'
 import PhoneInput from 'react-phone-number-input'
@@ -34,20 +35,36 @@ const initialValues: FormValues = {
   lastName: "",
   email: "",
   phone: "+1",
-  role: "Administrator",
+  role: "Researcher",
   createdBy: "Admin",
   updatedBy: "Admin",
 }
+
+const accountRoles = {
+  //Superadmin: 'Superadmin',   // not to include as option from UI (just DB admin should set)
+  Administrator: 'Administrator',
+  Researcher: 'Researcher',
+  // other? add options...
+  Guest: 'Guest'
+};
 
 const AddUser: React.FC = () => {
   //const jwtFromSession = sessionStorage.getItem('token');
   //console.log('Session JWT from local session storage: ', jwtFromSession);
 
-  const { role, username } = useAuth();
+  const { role, username, permissions } = useAuth();
+
   const navigate = useNavigate()
   const theme = useTheme()
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
   const [passwordToken, setPasswordToken] = useState<string>('')
+
+  // To check WRITE permissions in  DB:
+  const [writePermission, setWritePermission] = useState(false);
+  const [verifyRoleAccess, { data: roleAccessData, isLoading: checkroleIsLoading }] = useVerifyRoleAccessMutation();
+  // const canWriteUsers = hasPermission(permissions, 'Users', 'Write');
+  //
+  
   const [addUser, { isLoading, isError, error, isSuccess, data }] =
     useAddUserMutation()
 
@@ -120,6 +137,16 @@ const AddUser: React.FC = () => {
     }})
   }
 
+  const handleDropChange = (event: SelectChangeEvent<string>) => {
+    const { name, value } = event.target;
+    if (name) {
+      setFormValues((prevValues) => ({
+        ...prevValues,
+        [name]: value,
+      }));
+    }
+};
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (canSave) {
@@ -189,9 +216,33 @@ const AddUser: React.FC = () => {
   }, [isSendingEmail, isSendEmailError, isSendEmailSuccess])
 
 
-  // // Role-based access control (RBAC):
-  // //
-  if (!authenticateRoleAddUser(role)) {
+  // ----------   Role-based access control (RBAC): ------------- //
+  //
+
+  // Option B: These logic verifies in the DataBase if the given role has permissions for the given feature/access:
+  //
+  useEffect(() => {
+    if (role) {
+      verifyRoleAccess([
+        { feature: 'Users', levelOfAccess: 'Write' },
+      ]);
+    } else {
+      setWritePermission(false);
+    }
+  }, [role, verifyRoleAccess]);
+
+  useEffect(() => {
+    if (roleAccessData) {
+      setWritePermission(roleAccessData?.results[0]);
+    }
+  }, [roleAccessData]);
+
+
+  // Conditionally render content only if access permission is valid:
+  //
+  if (!writePermission) {   // using a DB query via API
+  // if (!authenticateRoleAddUser(role)) {    // using 'useRoleAuth.ts'
+  // if (!canWriteUsers) {    // locally saved Permissions (fetched from DB at login)
     return <p>Forbidden access - No permission to perform action</p>;
   }
 
@@ -211,6 +262,21 @@ const AddUser: React.FC = () => {
             fullWidth
             margin="normal"
           />
+          <FormControl fullWidth margin="normal">
+            <InputLabel id="role-label">Role</InputLabel>
+            <Select
+              labelId="role-label"
+              name="role"
+              value={formValues.role}
+              onChange={handleDropChange}
+            >
+              {Object.values(accountRoles).map(role => (
+                <MenuItem key={role} value={role}>
+                  {role}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <TextField
             name="firstName"
             label="First Name"

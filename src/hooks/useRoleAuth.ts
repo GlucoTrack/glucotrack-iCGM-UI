@@ -8,6 +8,9 @@ export const accountRoles = {
   Guest: 'Guest'
 };
 
+
+///   VERIFY ROLES ///
+
 // Superadmin
 function authenticateSuperAdmin(role: string) {
   if (role === accountRoles.Superadmin) {
@@ -103,11 +106,12 @@ export function authenticateRoleEditGroup(role: string) {
   return (isSuperAdmin || isAdmin)
 }
 
-//  [DELETE] - Delete Groups (Only Superadmin):
+//  [DELETE] - Delete Groups (Superadmin & Admin?):
 //
 export function authenticateRoleGroupDelete(role: string) {
   const isSuperAdmin = authenticateSuperAdmin(role);
-  return (isSuperAdmin)
+  const isAdmin = authenticateAdminRole(role);
+  return (isSuperAdmin || isAdmin)
 }
 
 

@@ -7,7 +7,7 @@ import logoDarkMode from "@/images/dark-bg.png"
 
 import jwtDecode from 'jwt-decode';
 
-import { useLoginUserMutation } from "../api/apiSlice"
+import { useLoginUserMutation, useGetRolePermissionsQuery } from "../api/apiSlice"
 
 import { useAuth } from '../context/authContext';
 import Navbar from '../navbar/Navbar';
@@ -30,20 +30,18 @@ interface DecodedToken {
 
 
 const Login: React.FC = () => {
-  //const history = useHistory();
-  //const [usernameInput, setUsernameInput] = useState('');
-  //const [password, setPassword] = useState('');
-  //console.log('<Login> is rendering')
 
   const [credentials, setCredentials] = useState<Credentials>(initialValues)
   const [error, setError] = useState('');
-  const { role, setRole, username, setUsername, sessionToken, setSessionToken } = useAuth();
+  const { role, setRole, username, setUsername, sessionToken, setSessionToken, setPermissions } = useAuth();
 
   // console.log('Token :', sessionToken);
   // console.log('Role :', role);
   // console.log('Username :', username);
 
   const [loginResponse, { data, isLoading, isError, isSuccess }] = useLoginUserMutation()
+
+ // const { data: permissionsData, refetch } = useGetRolePermissionsQuery(undefined/*, { skip: true }*/);   // not fetching correctly!
 
   const navigate = useNavigate()
   // const theme = useTheme()
@@ -98,6 +96,9 @@ const Login: React.FC = () => {
       setRole(accountRole);
       sessionStorage.setItem('role', accountRole); 
 
+      // Fetch permissions for the role (error 501!):
+      //refetch();
+
       navigate("/home")
       //handleMutationSuccess();    // navigate 'home'
 
@@ -105,6 +106,15 @@ const Login: React.FC = () => {
       setError('Invalid credentials');
     }
   }, [isSuccess, isError, data]);
+
+  // Handle the fetched data for user's Permissions:
+  // useEffect(() => {
+  //   if (permissionsData) {
+  //     setPermissions(permissionsData);
+  //     //LOGS:
+  //     console.log('The users role permissions are', permissionsData);
+  //   }
+  // }, [permissionsData]);
 
 
   // const handleMutationSuccess = () => {

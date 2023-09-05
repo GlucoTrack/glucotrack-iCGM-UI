@@ -15,7 +15,7 @@ import { useAuth } from '../context/authContext';
 const UserOption: React.FC = () => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   //const { auth, setAuth } = useContext(AuthContext);
-  const { role, setRole, username, setUsername, setSessionToken } = useAuth();
+  const { role, setRole, username, setUsername, setSessionToken, setPermissions } = useAuth();
   //const history = useHistory();
   const navigate = useNavigate()
 
@@ -51,6 +51,8 @@ const UserOption: React.FC = () => {
     setSessionToken('');
     sessionStorage.removeItem('token');
     //localStorage.removeItem('token'); 
+
+    setPermissions([]);
 
     handleClose();
     navigate("/users/login")

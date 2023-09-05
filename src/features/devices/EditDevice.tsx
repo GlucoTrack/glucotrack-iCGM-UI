@@ -6,6 +6,7 @@ import {
   useDeleteDeviceMutation,
   useEditDeviceMutation,
   useGetDeviceQuery,
+  useVerifyRoleAccessMutation
 } from "@/features/api/apiSlice"
 
 import { useAuth } from '../context/authContext';
@@ -62,6 +63,11 @@ const EditDevice: React.FC = () => {
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
 
   const { deviceId } = useParams<Record<string, string>>()
+
+  // To check WRITE & DELETE permissions in  DB:
+  const [userDeletePermission, setDeletePermission] = useState(false);
+  const [writePermission, setWritePermission] = useState(false);
+  const [verifyRoleAccess, { data: roleAccessData, isLoading: checkroleIsLoading }] = useVerifyRoleAccessMutation();
 
   const {
     data: getDeviceData,
@@ -222,7 +228,8 @@ const EditDevice: React.FC = () => {
   }
 
   const handleDelete = async () => {
-    if (deletePermission) {
+    if (userDeletePermission) {
+    //if (deletePermission) {
       try {
         await deleteDevice(deviceId)
       } catch (error: any) {
@@ -248,14 +255,39 @@ const EditDevice: React.FC = () => {
     handleMutationSuccess()
   }
 
-  // Role-based access control (RBAC):
+
+  // ----------   Role-based access control (RBAC): ------------- //
   //
-  if (!authenticateRoleEditDevice(role)) {
-    return <p>Forbidden access - no permission to perform action</p>;
-  }
+  // Option B: These logic verifies in the DataBase if the given role has permissions for the given feature/access:
+  //
+  useEffect(() => {
+    if (role) {
+      verifyRoleAccess([
+        { feature: 'Devices', levelOfAccess: 'Write' },
+        { feature: 'Devices', levelOfAccess: 'Delete' },
+      ]);
+    } else {
+      setWritePermission(false);     
+      setDeletePermission(false);
+    }
+  }, [role, verifyRoleAccess]);
+
+  useEffect(() => {
+    if (roleAccessData) {
+      setWritePermission(roleAccessData?.results[0]);  
+      setDeletePermission(roleAccessData?.results[1]);
+    }
+  }, [roleAccessData]);
+
 
   // DELETE User:
-  const deletePermission = authenticateRoleDevicesDelete(role);
+  const deletePermission = authenticateRoleDevicesDelete(role);   // from source-code 'useRoleAuth.ts'
+
+
+  if (!writePermission) {
+    // if (!authenticateRoleEditDevice(role)) {
+    return <p>Forbidden access - no permission to perform action</p>;
+  }
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
@@ -519,7 +551,8 @@ const EditDevice: React.FC = () => {
               </Button>
             </Box>
 
-            {deletePermission &&
+            {/* {deletePermission && */}
+            {userDeletePermission &&
               <Button variant="outlined" color="error" onClick={handleDelete}>
                 Delete
               </Button>

@@ -1,7 +1,7 @@
 import Header from "@/components/Header"
 import { Box, Button, TextField, useTheme } from "@mui/material"
 import React, { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Link } from "react-router-dom"
 import {
   useEditUserMutation,
   useGetUserByNameQuery,
@@ -261,6 +261,7 @@ const Account: React.FC = () => {
             </Box>
 
           </Box>
+          {/* <Link to="/reset-password">Change Password</Link> */}
         </form>
       </Box>
     </Box>

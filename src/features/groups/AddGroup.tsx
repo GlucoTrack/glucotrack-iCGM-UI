@@ -1,8 +1,8 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Box, Button, TextField, useTheme } from "@mui/material"
 import Header from "@/components/Header"
-import { useAddGroupMutation } from "@/features/api/apiSlice"
+import { useAddGroupMutation, useVerifyRoleAccessMutation } from "@/features/api/apiSlice"
 
 import { useAuth } from '../context/authContext';
 import { authenticateRoleAddGroup } from '../../hooks/useRoleAuth';
@@ -24,6 +24,11 @@ const AddGroup: React.FC = () => {
   const navigate = useNavigate()
   const theme = useTheme()
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
+
+  // To check WRITE permissions in  DB:
+  const [writePermission, setWritePermission] = useState(false);
+  const [verifyRoleAccess, { data: roleAccessData, isLoading: checkroleIsLoading }] = useVerifyRoleAccessMutation();
+
   const [addGroup, { isLoading, isError, error, isSuccess }] =
     useAddGroupMutation()
   const canSave =
@@ -79,12 +84,31 @@ const AddGroup: React.FC = () => {
   }
 
 
-  // // Role-based access control (RBAC):
-  // //
-  if (!authenticateRoleAddGroup(role)) {
+  // ----------   Role-based access control (RBAC): ------------- //
+  //
+  // Option B: These logic verifies in the DataBase if the given role has permissions for the given feature/access:
+  //
+  useEffect(() => {
+    if (role) {
+      verifyRoleAccess([
+        { feature: 'Groups', levelOfAccess: 'Write' },
+      ]);
+    } else {
+      setWritePermission(false);
+    }
+  }, [role, verifyRoleAccess]);
+
+  useEffect(() => {
+    if (roleAccessData) {
+      setWritePermission(roleAccessData?.results[0]);
+    }
+  }, [roleAccessData]);
+
+
+  if (!writePermission) {   // using a DB query via API
+  // if (!authenticateRoleAddGroup(role)) {
     return <p>Forbidden access - no permission to perform action</p>;
   }
-  
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">

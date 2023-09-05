@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
+
 const token = sessionStorage.getItem('token');
-//console.log ('Session JWT in API: ', token)
 
 export const apiSlice = createApi({
   reducerPath: "api",
@@ -158,7 +158,7 @@ export const apiSlice = createApi({
       ],
     }),
 
-    // Login
+    // Login & Authentication
     resetPassword: builder.mutation({
       query: (passwordData) => ({
         url: "users/resetpassword",
@@ -175,6 +175,18 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["Users"],
     }),
+    getRolePermissions: builder.query({
+      query: (params = {}) => "users/getRolePermissions",
+      providesTags: ["Users"],
+    }),
+    verifyRoleAccess: builder.mutation({
+      query: (requestedAccessData) => ({
+        url: "users/checkRoleAccess",   // adjust in API 
+        method: "POST",
+        body: requestedAccessData,
+      }),
+      invalidatesTags: ["Users"],
+    }),
     validateToken: builder.mutation({
       query: (tokenInfo) => ({
         url: `users/validate/${tokenInfo.token}/${tokenInfo.eMail}/${tokenInfo.username}`,
@@ -182,7 +194,6 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["Users"],
     }),
-
     forgotPasswordEmail: builder.mutation({
       query: (emailData) => ({
         url: "email/forgotPasswordEmail",
@@ -191,6 +202,7 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["Email"],
     }),  
+
 
   }),
 })
@@ -215,6 +227,8 @@ export const {
   useDeleteUserMutation,
   useResetPasswordMutation,
   useLoginUserMutation,
+  useGetRolePermissionsQuery,
+  useVerifyRoleAccessMutation,
   useValidateTokenMutation,
   useForgotPasswordEmailMutation,
 } = apiSlice
