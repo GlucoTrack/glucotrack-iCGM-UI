@@ -1,4 +1,4 @@
-import { PublicClientApplication, AuthenticationResult, SsoSilentRequest, PopupRequest,InteractionRequiredAuthError, AuthError } from "@azure/msal-browser";
+import { PublicClientApplication, SsoSilentRequest, PopupRequest,InteractionRequiredAuthError, AuthError } from "@azure/msal-browser";
 
 const clientId = 'f648d662-3e0a-4c10-9095-ae81ca9b36bd'
 const clientSecret = 'oc68Q~WHfdZY37tCxnEK_KxgJE5fisFwWxvcPaKl'
@@ -10,7 +10,7 @@ const configuration = {
     auth:
     {
         clientId: clientId,
-        //clientSecret: clientSecret,
+        clientSecret: clientSecret,
         authority: `https://login.microsoft.com/${tenantId}`,
         redirectUri: window.location.origin,
         postLogoutRedirectUri: window.location.origin,
@@ -18,11 +18,11 @@ const configuration = {
     },
     cache:
     {
-        cacheLocation: "sessionStorage",
-        temporaryCacheLocation: "sessionStorage",
+        cacheLocation: "localStorage",
+        temporaryCacheLocation: "localStorage",
         storeAuthStateInCookie: false,
         secureCookies: false,
-        claimsBasedCachingEnabled: true,
+        claimsBasedCachingEnabled: false,
     },
 }
 
@@ -59,7 +59,7 @@ export const GetGraphToken = async (): Promise<string> => {
     }catch (error: any)
     {
         if (error instanceof InteractionRequiredAuthError) {
-            console.log("Silent Login failed - interactive requred")
+            console.log("Silent Login failed - interactive required")
             return await logIn();
           } else if (error instanceof AuthError) {
             console.log("Some other auth error - fallback to interactive login anyway", error)
