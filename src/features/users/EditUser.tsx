@@ -64,6 +64,7 @@ const EditUser: React.FC = () => {
   // const canWriteUsers = hasPermission(permissions, 'Users', 'Write');
   // const canDeleteUsers = hasPermission(permissions, 'Users', 'Delete');
 
+  const [loading, setLoading] = useState(true);
 
   const {
     data: getUserData,
@@ -248,6 +249,7 @@ const EditUser: React.FC = () => {
     } else {
       setWritePermission(false);     
       setDeletePermission(false);
+      setLoading(false);
     }
   }, [role, verifyRoleAccess]);
 
@@ -255,6 +257,7 @@ const EditUser: React.FC = () => {
     if (roleAccessData) {
       setWritePermission(roleAccessData?.results[0]);  
       setDeletePermission(roleAccessData?.results[1]);
+      setLoading(false);
     }
   }, [roleAccessData]);
 
@@ -262,6 +265,12 @@ const EditUser: React.FC = () => {
   // DELETE User:
   const deletePermission = authenticateRoleUserDelete(role);
 
+
+  // ------------------   Render  ------------------ //
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
 
   if (!writePermission) {
   // if (!authenticateRoleEditUser(role)) {

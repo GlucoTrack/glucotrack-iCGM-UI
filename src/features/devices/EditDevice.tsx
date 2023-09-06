@@ -69,6 +69,8 @@ const EditDevice: React.FC = () => {
   const [writePermission, setWritePermission] = useState(false);
   const [verifyRoleAccess, { data: roleAccessData, isLoading: checkroleIsLoading }] = useVerifyRoleAccessMutation();
 
+  const [loading, setLoading] = useState(true);
+
   const {
     data: getDeviceData,
     // status: getDeviceStatus,
@@ -269,6 +271,7 @@ const EditDevice: React.FC = () => {
     } else {
       setWritePermission(false);     
       setDeletePermission(false);
+      setLoading(false);
     }
   }, [role, verifyRoleAccess]);
 
@@ -276,13 +279,19 @@ const EditDevice: React.FC = () => {
     if (roleAccessData) {
       setWritePermission(roleAccessData?.results[0]);  
       setDeletePermission(roleAccessData?.results[1]);
+      setLoading(false);
     }
   }, [roleAccessData]);
-
 
   // DELETE User:
   const deletePermission = authenticateRoleDevicesDelete(role);   // from source-code 'useRoleAuth.ts'
 
+
+  // ------------------   Render  ------------------ //
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
 
   if (!writePermission) {
     // if (!authenticateRoleEditDevice(role)) {

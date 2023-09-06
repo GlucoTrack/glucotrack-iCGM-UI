@@ -64,6 +64,8 @@ const AddDevice: React.FC = () => {
   // const canWriteUsers = hasPermission(permissions, 'Users', 'Write');
   //
 
+  const [loading, setLoading] = useState(true);
+
   const [addDevice, { isLoading, isError, error, isSuccess }] =
     useAddDeviceMutation()
   const canSave =
@@ -146,16 +148,24 @@ const AddDevice: React.FC = () => {
       ]);
     } else {
       setWritePermission(false);
+      setLoading(false);
     }
   }, [role, verifyRoleAccess]);
 
   useEffect(() => {
     if (roleAccessData) {
       setWritePermission(roleAccessData?.results[0]);
+      setLoading(false);
     }
   }, [roleAccessData]);
 
 
+  // ------------------   Render  ------------------ //
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+  
   if (!writePermission) {   // using a DB query via API
   //if (!authenticateRoleAddDevice(role)) {
     return <p>Forbidden access - no permission to perform action</p>;
