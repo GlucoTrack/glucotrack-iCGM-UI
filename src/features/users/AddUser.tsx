@@ -81,6 +81,11 @@ const AddUser: React.FC = () => {
     },
   ] = useForgotPasswordEmailMutation()
 
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^(?!.*\.\.)[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
   const canSave =
     [
       formValues.username,
@@ -92,6 +97,7 @@ const AddUser: React.FC = () => {
       formValues.createdBy,
       formValues.updatedBy,
     ].every((value) => value !== undefined && value !== null && value !== "") &&
+    isValidEmail(formValues.email) &&
     !isLoading
 
   const canSendEmail =
@@ -327,6 +333,8 @@ const AddUser: React.FC = () => {
             required
             fullWidth
             margin="normal"
+            error={!isValidEmail(formValues.email) && formValues.email !== ""}
+            helperText={!isValidEmail(formValues.email) && formValues.email !== "" ? "Email format is invalid" : ""}
           />
           <PhoneInput
             defaultCountry="US"

@@ -42,6 +42,8 @@ const ResetPassword: React.FC = () => {
 
     const [hideOldPassword, setHideOldPassword] = useState<boolean>(true)
 
+    const [pwConfirmWarning, setPwConfirmWarning] = useState("")
+
     const [
         tokenValidation,
         {
@@ -90,8 +92,9 @@ const ResetPassword: React.FC = () => {
         isValidPassword(formValues.newPassword) &&
         !isResetingPassword && 
         (formValues.newPassword === formValues.newPasswordConfirmation) &&
-        formValues.oldPassword !== formValues.newPassword;
-
+        formValues.oldPassword !== formValues.newPassword;      
+        //
+        // this last check still is not really "working", since we still have to pull the 'old PW' from the DB
 
     const canSaveToken =
         [
@@ -113,10 +116,18 @@ const ResetPassword: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
+
+        // Check if passwords match:
+        if (formValues.newPassword !== formValues.newPasswordConfirmation) {
+            setPwConfirmWarning("New password and confirmation pw do not match!");
+            return; 
+        }
+        setPwConfirmWarning("");
+
         if (canSave) {
             try {
                 console.log(tokenValidationData)
-                const resetPasswordPayload: resetPasswordPayload = 
+                const resetPasswordPayload: resetPasswordPayload =
                 {
                     token: token!,
                     password: formValues.newPassword,
@@ -209,6 +220,7 @@ const ResetPassword: React.FC = () => {
                     <TextField
                         name="oldPassword"
                         label="Old Password"
+                        type="password"
                         value={formValues.oldPassword}
                         onChange={handleChange}
                         required
@@ -218,6 +230,7 @@ const ResetPassword: React.FC = () => {
                     <TextField
                         name="newPassword"
                         label="New Password"
+                        type="password"
                         value={formValues.newPassword}
                         onChange={handleChange}
                         required
@@ -242,11 +255,14 @@ const ResetPassword: React.FC = () => {
                     <TextField
                         name="newPasswordConfirmation"
                         label="Confirm New Password"
+                        type="password"
                         value={formValues.newPasswordConfirmation}
                         onChange={handleChange}
                         required
                         fullWidth
                         margin="normal"
+                        helperText={pwConfirmWarning}
+                        error={!!pwConfirmWarning}
                     />
                     <Box mt={2} display={"flex"} justifyContent={"flex-start"} gap={2}>
                         <Button variant="outlined" color="secondary" onClick={handleCancel}>
