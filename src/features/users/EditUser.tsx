@@ -64,6 +64,7 @@ const EditUser: React.FC = () => {
   // const canWriteUsers = hasPermission(permissions, 'Users', 'Write');
   // const canDeleteUsers = hasPermission(permissions, 'Users', 'Delete');
 
+  const [loading, setLoading] = useState(true);
 
   const {
     data: getUserData,
@@ -142,6 +143,11 @@ const EditUser: React.FC = () => {
     getUserContent = null
   }
 
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^(?!.*\.\.)[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
   const canSave =
     [
       formValues.username,
@@ -153,6 +159,7 @@ const EditUser: React.FC = () => {
       formValues.createdBy,
       formValues.updatedBy,
     ].every((value) => value !== undefined && value !== null && value !== "") &&
+    isValidEmail(formValues.email) &&
     !getUserIsLoading &&
     !isDeletingUser &&
     !isEditingUser
@@ -248,6 +255,7 @@ const EditUser: React.FC = () => {
     } else {
       setWritePermission(false);     
       setDeletePermission(false);
+      setLoading(false);
     }
   }, [role, verifyRoleAccess]);
 
@@ -255,6 +263,7 @@ const EditUser: React.FC = () => {
     if (roleAccessData) {
       setWritePermission(roleAccessData?.results[0]);  
       setDeletePermission(roleAccessData?.results[1]);
+      setLoading(false);
     }
   }, [roleAccessData]);
 
@@ -262,6 +271,12 @@ const EditUser: React.FC = () => {
   // DELETE User:
   const deletePermission = authenticateRoleUserDelete(role);
 
+
+  // ------------------   Render  ------------------ //
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
 
   if (!writePermission) {
   // if (!authenticateRoleEditUser(role)) {
@@ -338,6 +353,8 @@ const EditUser: React.FC = () => {
             required
             fullWidth
             margin="normal"
+            error={!isValidEmail(formValues.email) && formValues.email !== ""}
+            helperText={!isValidEmail(formValues.email) && formValues.email !== "" ? "Email format is invalid" : ""}
           />
           <PhoneInput
             defaultCountry="US"

@@ -64,6 +64,8 @@ const AddUser: React.FC = () => {
   const [verifyRoleAccess, { data: roleAccessData, isLoading: checkroleIsLoading }] = useVerifyRoleAccessMutation();
   // const canWriteUsers = hasPermission(permissions, 'Users', 'Write');
   //
+
+  const [loading, setLoading] = useState(true);
   
   const [addUser, { isLoading, isError, error, isSuccess, data }] =
     useAddUserMutation()
@@ -79,6 +81,11 @@ const AddUser: React.FC = () => {
     },
   ] = useForgotPasswordEmailMutation()
 
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^(?!.*\.\.)[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
   const canSave =
     [
       formValues.username,
@@ -90,6 +97,7 @@ const AddUser: React.FC = () => {
       formValues.createdBy,
       formValues.updatedBy,
     ].every((value) => value !== undefined && value !== null && value !== "") &&
+    isValidEmail(formValues.email) &&
     !isLoading
 
   const canSendEmail =
@@ -192,6 +200,20 @@ const AddUser: React.FC = () => {
     }
   }, [isLoading, isError, isSuccess])
 
+
+  // necessary to set here, because inside the previous useEffect it will never render and the error message is lost!
+  if (isLoading) {
+      content = <h3>Loading...</h3>
+    } else if (isError) {
+    const errorMessageString = JSON.stringify(error)
+    const errorMessageParsed = JSON.parse(errorMessageString)
+    content = (
+      <p style={{ color: theme.palette.error.main }}>
+        {JSON.stringify(errorMessageParsed.data.message)}
+      </p>
+    )
+  }
+
   useEffect(() => {
     if (isSendingEmail) {
       content = <h3>Loading...</h3>
@@ -228,15 +250,24 @@ const AddUser: React.FC = () => {
       ]);
     } else {
       setWritePermission(false);
+      setLoading(false);
     }
   }, [role, verifyRoleAccess]);
 
   useEffect(() => {
     if (roleAccessData) {
       setWritePermission(roleAccessData?.results[0]);
+      setLoading(false);
     }
   }, [roleAccessData]);
 
+
+
+  // ------------------   Render  ------------------ //
+  
+  if (loading) {
+    return <p>Loading...</p>;
+  }
 
   // Conditionally render content only if access permission is valid:
   //
@@ -245,7 +276,6 @@ const AddUser: React.FC = () => {
   // if (!canWriteUsers) {    // locally saved Permissions (fetched from DB at login)
     return <p>Forbidden access - No permission to perform action</p>;
   }
-
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
@@ -303,6 +333,8 @@ const AddUser: React.FC = () => {
             required
             fullWidth
             margin="normal"
+            error={!isValidEmail(formValues.email) && formValues.email !== ""}
+            helperText={!isValidEmail(formValues.email) && formValues.email !== "" ? "Email format is invalid" : ""}
           />
           <PhoneInput
             defaultCountry="US"

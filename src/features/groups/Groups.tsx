@@ -32,6 +32,8 @@ const Groups: React.FC = () => {
   const [readPermission, setReadPermission] = useState(false);
   const [writePermission, setWritePermission] = useState(false);
 
+  const [loading, setLoading] = useState(true);
+
   const handleCellClick = (params: GridCellParams) => {
     const {
       _id: groupId,
@@ -96,6 +98,7 @@ const Groups: React.FC = () => {
     } else {
       setReadPermission(false);
       setWritePermission(false);
+      setLoading(false);
     }
   }, [role, verifyRoleAccess]);
 
@@ -103,6 +106,7 @@ const Groups: React.FC = () => {
     if (roleAccessData) {
       setReadPermission(roleAccessData?.results[0]);
       setWritePermission(roleAccessData?.results[1]);
+      setLoading(false);
     }
   }, [roleAccessData]);
 
@@ -113,6 +117,12 @@ const Groups: React.FC = () => {
   // UPDATE Group:
   const editPermission = authenticateRoleEditGroup(role);
   
+
+  // ------------------   Render  ------------------ //
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
 
   //
   if (!readPermission) {    // using a DB query via API

@@ -5,6 +5,7 @@ import { useNavigate, Link } from "react-router-dom"
 import {
   useEditUserMutation,
   useGetUserByNameQuery,
+  useResetPasswordTokenMutation
 } from "@/features/api/apiSlice"
 
 import 'react-phone-number-input/style.css'
@@ -41,6 +42,8 @@ const Account: React.FC = () => {
   const navigate = useNavigate()
   const theme = useTheme()
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
+
+  const [resetPasswordToken, { isLoading: resetTokenLoading, isError: resetTokenError }] = useResetPasswordTokenMutation();
 
   const {
     data: getUserData,
@@ -164,6 +167,22 @@ const Account: React.FC = () => {
     }, 0)
   }
 
+  const handlePasswordReset = async () => {
+    try {
+      const result = await resetPasswordToken({ user: getUserData.user });
+  
+      //if (result.data) {  // type error
+      if ('data' in result) {
+        const resetToken = result.data.token; // Adjust as per API response structure
+        //console.log('The reset PW token:', resetToken);
+        navigate(`/users/resetpassword/${resetToken}/${username}/false`);
+      } else {
+        console.error("Error generating reset token:", resetTokenError);
+      }
+    } catch (error) {
+      console.error("Error in handlePasswordReset:", (error as Error).message);    // cannot use 'error.message' -> "['error' is of type 'unknown']"
+    }
+  };
 
   let content: JSX.Element | null = null
   if (isEditingUser ) {
@@ -259,9 +278,9 @@ const Account: React.FC = () => {
                 Submit
               </Button> */}
             </Box>
-
+            <Button onClick={handlePasswordReset}>Reset Password</Button>
           </Box>
-          {/* <Link to="/reset-password">Change Password</Link> */}
+
         </form>
       </Box>
     </Box>

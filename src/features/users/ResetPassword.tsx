@@ -1,5 +1,5 @@
 import Header from "@/components/Header"
-import { Box, Button, TextField, useTheme } from "@mui/material"
+import { Box, Button, TextField, Typography, useTheme } from "@mui/material"
 import React, { useState, useEffect } from "react"
 import { useResetPasswordMutation, useValidateTokenMutation } from "../api/apiSlice"
 import { useNavigate, useParams } from "react-router-dom"
@@ -42,6 +42,8 @@ const ResetPassword: React.FC = () => {
 
     const [hideOldPassword, setHideOldPassword] = useState<boolean>(true)
 
+    const [pwConfirmWarning, setPwConfirmWarning] = useState("")
+
     const [
         tokenValidation,
         {
@@ -63,6 +65,21 @@ const ResetPassword: React.FC = () => {
         },
     ] = useResetPasswordMutation()
 
+    const isValidPassword = (password: string): boolean => {
+
+        // To validate the complexity of the input password:
+
+        // - Minimum eight characters (8+),
+        // - at least one uppercase letter (A-Z), 
+        // - one lowercase letter (a-z), 
+        // - one number (0-9)
+        // - and one special character (*,?,#,% ...)
+
+        const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+        return regex.test(password);
+    };
+    
+
     /*     const [validateToken, { isLoading, isError, error, isSuccess}] =
         useResetPasswordMutation() */
 
@@ -72,8 +89,12 @@ const ResetPassword: React.FC = () => {
             formValues.newPassword,
             formValues.newPasswordConfirmation,
         ].every((value) => value !== undefined && value !== null && value !== "") &&
-        !isResetingPassword && (formValues.newPassword === formValues.newPasswordConfirmation)
-
+        isValidPassword(formValues.newPassword) &&
+        !isResetingPassword && 
+        (formValues.newPassword === formValues.newPasswordConfirmation) &&
+        formValues.oldPassword !== formValues.newPassword;      
+        //
+        // this last check still is not really "working", since we still have to pull the 'old PW' from the DB
 
     const canSaveToken =
         [
@@ -95,10 +116,18 @@ const ResetPassword: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
+
+        // Check if passwords match:
+        if (formValues.newPassword !== formValues.newPasswordConfirmation) {
+            setPwConfirmWarning("New password and confirmation pw do not match!");
+            return; 
+        }
+        setPwConfirmWarning("");
+
         if (canSave) {
             try {
                 console.log(tokenValidationData)
-                const resetPasswordPayload: resetPasswordPayload = 
+                const resetPasswordPayload: resetPasswordPayload =
                 {
                     token: token!,
                     password: formValues.newPassword,
@@ -191,6 +220,7 @@ const ResetPassword: React.FC = () => {
                     <TextField
                         name="oldPassword"
                         label="Old Password"
+                        type="password"
                         value={formValues.oldPassword}
                         onChange={handleChange}
                         required
@@ -200,20 +230,39 @@ const ResetPassword: React.FC = () => {
                     <TextField
                         name="newPassword"
                         label="New Password"
+                        type="password"
                         value={formValues.newPassword}
                         onChange={handleChange}
                         required
                         fullWidth
                         margin="normal"
+                        error={!isValidPassword(formValues.newPassword) && formValues.newPassword !== ""}
                     />
+                    {!isValidPassword(formValues.newPassword) && formValues.newPassword !== "" && (
+                        <Box mt={1}>
+                            <Typography variant="caption" color="error">
+                                Password Requirements:
+                                <ul>
+                                    <li>At least 8 characters</li>
+                                    <li>At least one uppercase letter (A-Z)</li>
+                                    <li>At least one lowercase letter (a-z)</li>
+                                    <li>At least one number (0-9)</li>
+                                    <li>At least one special character ($, !, *, ?, #, ...)</li>
+                                </ul>
+                            </Typography>
+                        </Box>
+                    )}
                     <TextField
                         name="newPasswordConfirmation"
                         label="Confirm New Password"
+                        type="password"
                         value={formValues.newPasswordConfirmation}
                         onChange={handleChange}
                         required
                         fullWidth
                         margin="normal"
+                        helperText={pwConfirmWarning}
+                        error={!!pwConfirmWarning}
                     />
                     <Box mt={2} display={"flex"} justifyContent={"flex-start"} gap={2}>
                         <Button variant="outlined" color="secondary" onClick={handleCancel}>
