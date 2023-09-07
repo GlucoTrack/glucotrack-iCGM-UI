@@ -187,6 +187,14 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["Users"],
     }),
+    resetPasswordToken: builder.mutation({
+      query: (emailData) => ({
+        url: "users/forgot-password-jwt",
+        method: "POST",
+        body: emailData,
+      }),
+      invalidatesTags: ["Users"],
+    }), 
     validateToken: builder.mutation({
       query: (tokenInfo) => ({
         url: `users/validate/${tokenInfo.token}/${tokenInfo.eMail}/${tokenInfo.username}`,
@@ -229,6 +237,7 @@ export const {
   useLoginUserMutation,
   useGetRolePermissionsQuery,
   useVerifyRoleAccessMutation,
+  useResetPasswordTokenMutation,
   useValidateTokenMutation,
   useForgotPasswordEmailMutation,
 } = apiSlice

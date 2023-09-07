@@ -29,6 +29,8 @@ const AddGroup: React.FC = () => {
   const [writePermission, setWritePermission] = useState(false);
   const [verifyRoleAccess, { data: roleAccessData, isLoading: checkroleIsLoading }] = useVerifyRoleAccessMutation();
 
+  const [loading, setLoading] = useState(true);
+
   const [addGroup, { isLoading, isError, error, isSuccess }] =
     useAddGroupMutation()
   const canSave =
@@ -95,15 +97,23 @@ const AddGroup: React.FC = () => {
       ]);
     } else {
       setWritePermission(false);
+      setLoading(false);
     }
   }, [role, verifyRoleAccess]);
 
   useEffect(() => {
     if (roleAccessData) {
       setWritePermission(roleAccessData?.results[0]);
+      setLoading(false);
     }
   }, [roleAccessData]);
 
+
+  // ------------------   Render  ------------------ //
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
 
   if (!writePermission) {   // using a DB query via API
   // if (!authenticateRoleAddGroup(role)) {

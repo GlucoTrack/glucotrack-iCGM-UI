@@ -1,5 +1,5 @@
 import Header from "@/components/Header"
-import { Box, Button, TextField, useTheme } from "@mui/material"
+import { Box, Button, TextField, Typography, useTheme } from "@mui/material"
 import React, { useState, useEffect } from "react"
 import { useResetPasswordMutation, useValidateTokenMutation } from "../api/apiSlice"
 import { useNavigate, useParams } from "react-router-dom"
@@ -13,6 +13,7 @@ interface FormValues {
 interface resetPasswordPayload {
     token: string
     password: string
+    oldPassword: string
     userId: string
 }
 
@@ -42,6 +43,8 @@ const ResetPassword: React.FC = () => {
 
     const [hideOldPassword, setHideOldPassword] = useState<boolean>(true)
 
+    const [pwConfirmWarning, setPwConfirmWarning] = useState("")
+
     const [
         tokenValidation,
         {
@@ -63,17 +66,35 @@ const ResetPassword: React.FC = () => {
         },
     ] = useResetPasswordMutation()
 
+    const isValidPassword = (password: string): boolean => {
+
+        // To validate the complexity of the input password:
+
+        // - Minimum eight characters (8+),
+        // - at least one uppercase letter (A-Z), 
+        // - one lowercase letter (a-z), 
+        // - one number (0-9)
+        // - and one special character (*,?,#,% ...)
+
+        const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+        return regex.test(password);
+    };
+
+
     /*     const [validateToken, { isLoading, isError, error, isSuccess}] =
         useResetPasswordMutation() */
 
     const canSave =
         [
-            formValues.oldPassword,
             formValues.newPassword,
             formValues.newPasswordConfirmation,
         ].every((value) => value !== undefined && value !== null && value !== "") &&
-        !isResetingPassword && (formValues.newPassword === formValues.newPasswordConfirmation)
-
+        isValidPassword(formValues.newPassword) &&
+        !isResetingPassword &&
+        (formValues.newPassword === formValues.newPasswordConfirmation) &&
+        formValues.oldPassword !== formValues.newPassword;
+    //
+    // this last check still is not really "working", since we still have to pull the 'old PW' from the DB
 
     const canSaveToken =
         [
@@ -95,13 +116,21 @@ const ResetPassword: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
+
+        // Check if passwords match:
+        if (formValues.newPassword !== formValues.newPasswordConfirmation) {
+            setPwConfirmWarning("New password and confirmation pw do not match!");
+            return;
+        }
+        setPwConfirmWarning("");
+
         if (canSave) {
             try {
-                console.log(tokenValidationData)
-                const resetPasswordPayload: resetPasswordPayload = 
+                const resetPasswordPayload: resetPasswordPayload =
                 {
                     token: token!,
                     password: formValues.newPassword,
+                    oldPassword: (email === "false") ? formValues.oldPassword : "false",
                     userId: tokenValidationData,
                 }
                 await resetPassword(resetPasswordPayload)
@@ -128,7 +157,7 @@ const ResetPassword: React.FC = () => {
                 content = <h3>Loading...</h3>
                 setFormValues((prevValues) => ({
                     ...prevValues,
-                    ["oldPassword"]: "Not Used",
+                    ["oldPassword"]: "",
                 }))
             }
         } else if (isValidateTokenError) {
@@ -137,8 +166,7 @@ const ResetPassword: React.FC = () => {
             if (!pageState) {
                 handleMutationVerificationSuccess
                 console.log(email)
-                if (email === "false")
-                {
+                if (email === "false") {
                     setHideOldPassword(false)
                 }
             }
@@ -152,11 +180,13 @@ const ResetPassword: React.FC = () => {
             }
         } else if (isResetPasswordError) {
             console.log(JSON.stringify(resetPasswordError))
+            if (pageState) {
+                content = <h3>Password Error</h3>
+            }
         } else if (isResertPasswordSuccess) {
             navigate("/users/login")
         }
     }, [isResetingPassword, isResetPasswordError, isResertPasswordSuccess])
-
 
     const formLoad = async () => {
         if (!pageState) {
@@ -177,8 +207,18 @@ const ResetPassword: React.FC = () => {
     }
 
     useEffect(() => {
-        formLoad() 
+        formLoad()
     }, [])
+
+    if (isResetPasswordError) {
+        const errorMessageString = JSON.stringify(resetPasswordError)
+        const errorMessageParsed = JSON.parse(errorMessageString)
+        content = (
+          <p style={{ color: theme.palette.error.main }}>
+            {JSON.stringify(errorMessageParsed.data.message)}
+          </p>
+        )
+    }
 
     return (
         <Box display="flex" flexDirection="column" height="85vh">
@@ -188,32 +228,52 @@ const ResetPassword: React.FC = () => {
             <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">
                 <form onSubmit={handleSubmit}>
                     {!hideOldPassword && (
-                    <TextField
-                        name="oldPassword"
-                        label="Old Password"
-                        value={formValues.oldPassword}
-                        onChange={handleChange}
-                        required
-                        fullWidth
-                        margin="normal"
-                    />)}
+                        <TextField
+                            name="oldPassword"
+                            label="Old Password"
+                            type="password"
+                            value={formValues.oldPassword}
+                            onChange={handleChange}
+                            required
+                            fullWidth
+                            margin="normal"
+                        />)}
                     <TextField
                         name="newPassword"
                         label="New Password"
+                        type="password"
                         value={formValues.newPassword}
                         onChange={handleChange}
                         required
                         fullWidth
                         margin="normal"
+                        error={!isValidPassword(formValues.newPassword) && formValues.newPassword !== ""}
                     />
+                    {!isValidPassword(formValues.newPassword) && formValues.newPassword !== "" && (
+                        <Box mt={1}>
+                            <Typography variant="caption" color="error">
+                                Password Requirements:
+                                <ul>
+                                    <li>At least 8 characters</li>
+                                    <li>At least one uppercase letter (A-Z)</li>
+                                    <li>At least one lowercase letter (a-z)</li>
+                                    <li>At least one number (0-9)</li>
+                                    <li>At least one special character ($, !, *, ?, #, ...)</li>
+                                </ul>
+                            </Typography>
+                        </Box>
+                    )}
                     <TextField
                         name="newPasswordConfirmation"
                         label="Confirm New Password"
+                        type="password"
                         value={formValues.newPasswordConfirmation}
                         onChange={handleChange}
                         required
                         fullWidth
                         margin="normal"
+                        helperText={pwConfirmWarning}
+                        error={!!pwConfirmWarning}
                     />
                     <Box mt={2} display={"flex"} justifyContent={"flex-start"} gap={2}>
                         <Button variant="outlined" color="secondary" onClick={handleCancel}>

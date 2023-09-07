@@ -22,7 +22,8 @@ const Devices = () => {
   const [readPermission, setReadPermission] = useState(false);
   const [writePermission, setWritePermission] = useState(false);
 
-  
+  const [loading, setLoading] = useState(true);
+
   const handleCellClick = (params: GridCellParams) => {
     const { _id: deviceId } = params.row
 
@@ -90,6 +91,7 @@ const Devices = () => {
     } else {
       setReadPermission(false);
       setWritePermission(false);
+      setLoading(false);
     }
   }, [role, verifyRoleAccess]);
 
@@ -97,6 +99,7 @@ const Devices = () => {
     if (roleAccessData) {
       setReadPermission(roleAccessData?.results[0]);
       setWritePermission(roleAccessData?.results[1]);
+      setLoading(false);
     }
   }, [roleAccessData]);
 
@@ -104,6 +107,13 @@ const Devices = () => {
   const addPermission = authenticateRoleAddDevice(role);
   // UPDATE Device:
   const editPermission = authenticateRoleEditDevice(role);
+
+
+  // ------------------   Render  ------------------ //
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
 
   if (!readPermission) {
   // if (!authenticateRoleDevicesInfo(role)) {

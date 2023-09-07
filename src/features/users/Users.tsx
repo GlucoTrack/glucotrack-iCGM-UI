@@ -32,6 +32,8 @@ const Users = () => {
   // const canWriteUsers = hasPermission(permissions, 'Users', 'Write');
   //
 
+  const [loading, setLoading] = useState(true);
+
   const handleCellClick = (params: GridCellParams) => {
     const { _id: userId } = params.row
     // if (editPermission) {
@@ -87,6 +89,7 @@ const Users = () => {
     } else {
       setReadPermission(false);
       setWritePermission(false);
+      setLoading(false);
     }
   }, [role, verifyRoleAccess]);
 
@@ -94,6 +97,7 @@ const Users = () => {
     if (roleAccessData) {
       setReadPermission(roleAccessData?.results[0]);
       setWritePermission(roleAccessData?.results[1]);
+      setLoading(false);
     }
   }, [roleAccessData]);
 
@@ -111,7 +115,12 @@ const Users = () => {
   ////
 
 
-  // View Users:
+  // ------------------   Render  ------------------ //
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
   //
   // if (!authenticateRoleUsersInfo(role)) {    // using 'useRoleAuth.ts'
   if (!readPermission) {    // using a DB query via API

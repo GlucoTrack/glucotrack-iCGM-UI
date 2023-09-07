@@ -38,6 +38,8 @@ const EditGroup: React.FC = () => {
   const [writePermission, setWritePermission] = useState(false);
   const [verifyRoleAccess, { data: roleAccessData, isLoading: checkroleIsLoading }] = useVerifyRoleAccessMutation();
 
+  const [loading, setLoading] = useState(true);
+
   const { groupId } = useParams<Record<string, string>>()
   const { groupName, groupDescription, deviceNames } = useSelector(
     (state: RootState) => state.groups,
@@ -153,6 +155,7 @@ const EditGroup: React.FC = () => {
     } else {
       setWritePermission(false);     
       setDeletePermission(false);
+      setLoading(false);
     }
   }, [role, verifyRoleAccess]);
 
@@ -160,12 +163,20 @@ const EditGroup: React.FC = () => {
     if (roleAccessData) {
       setWritePermission(roleAccessData?.results[0]);  
       setDeletePermission(roleAccessData?.results[1]);
+      setLoading(false);
     }
   }, [roleAccessData]);
 
 
   // DELETE Group:
   const deletePermission = authenticateRoleGroupDelete(role);
+
+
+  // ------------------   Render  ------------------ //
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
 
   if (!writePermission) {
   // if (!authenticateRoleEditGroup(role)) {
