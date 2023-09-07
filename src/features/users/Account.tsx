@@ -175,7 +175,7 @@ const Account: React.FC = () => {
       if ('data' in result) {
         const resetToken = result.data.token; // Adjust as per API response structure
         //console.log('The reset PW token:', resetToken);
-        navigate(`/users/resetpassword/${resetToken}/${username}/false`);
+        navigate(`/users/resetpassword/${resetToken}/false/${username}`);
       } else {
         console.error("Error generating reset token:", resetTokenError);
       }

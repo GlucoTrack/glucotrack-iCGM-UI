@@ -13,6 +13,7 @@ interface FormValues {
 interface resetPasswordPayload {
     token: string
     password: string
+    oldPassword: string
     userId: string
 }
 
@@ -78,23 +79,22 @@ const ResetPassword: React.FC = () => {
         const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
         return regex.test(password);
     };
-    
+
 
     /*     const [validateToken, { isLoading, isError, error, isSuccess}] =
         useResetPasswordMutation() */
 
     const canSave =
         [
-            formValues.oldPassword,
             formValues.newPassword,
             formValues.newPasswordConfirmation,
         ].every((value) => value !== undefined && value !== null && value !== "") &&
         isValidPassword(formValues.newPassword) &&
-        !isResetingPassword && 
+        !isResetingPassword &&
         (formValues.newPassword === formValues.newPasswordConfirmation) &&
-        formValues.oldPassword !== formValues.newPassword;      
-        //
-        // this last check still is not really "working", since we still have to pull the 'old PW' from the DB
+        formValues.oldPassword !== formValues.newPassword;
+    //
+    // this last check still is not really "working", since we still have to pull the 'old PW' from the DB
 
     const canSaveToken =
         [
@@ -120,17 +120,17 @@ const ResetPassword: React.FC = () => {
         // Check if passwords match:
         if (formValues.newPassword !== formValues.newPasswordConfirmation) {
             setPwConfirmWarning("New password and confirmation pw do not match!");
-            return; 
+            return;
         }
         setPwConfirmWarning("");
 
         if (canSave) {
             try {
-                console.log(tokenValidationData)
                 const resetPasswordPayload: resetPasswordPayload =
                 {
                     token: token!,
                     password: formValues.newPassword,
+                    oldPassword: (email === "false") ? formValues.oldPassword : "false",
                     userId: tokenValidationData,
                 }
                 await resetPassword(resetPasswordPayload)
@@ -157,7 +157,7 @@ const ResetPassword: React.FC = () => {
                 content = <h3>Loading...</h3>
                 setFormValues((prevValues) => ({
                     ...prevValues,
-                    ["oldPassword"]: "Not Used",
+                    ["oldPassword"]: "",
                 }))
             }
         } else if (isValidateTokenError) {
@@ -166,8 +166,7 @@ const ResetPassword: React.FC = () => {
             if (!pageState) {
                 handleMutationVerificationSuccess
                 console.log(email)
-                if (email === "false")
-                {
+                if (email === "false") {
                     setHideOldPassword(false)
                 }
             }
@@ -181,11 +180,13 @@ const ResetPassword: React.FC = () => {
             }
         } else if (isResetPasswordError) {
             console.log(JSON.stringify(resetPasswordError))
+            if (pageState) {
+                content = <h3>Password Error</h3>
+            }
         } else if (isResertPasswordSuccess) {
             navigate("/users/login")
         }
     }, [isResetingPassword, isResetPasswordError, isResertPasswordSuccess])
-
 
     const formLoad = async () => {
         if (!pageState) {
@@ -206,8 +207,18 @@ const ResetPassword: React.FC = () => {
     }
 
     useEffect(() => {
-        formLoad() 
+        formLoad()
     }, [])
+
+    if (isResetPasswordError) {
+        const errorMessageString = JSON.stringify(resetPasswordError)
+        const errorMessageParsed = JSON.parse(errorMessageString)
+        content = (
+          <p style={{ color: theme.palette.error.main }}>
+            {JSON.stringify(errorMessageParsed.data.message)}
+          </p>
+        )
+    }
 
     return (
         <Box display="flex" flexDirection="column" height="85vh">
@@ -217,16 +228,16 @@ const ResetPassword: React.FC = () => {
             <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">
                 <form onSubmit={handleSubmit}>
                     {!hideOldPassword && (
-                    <TextField
-                        name="oldPassword"
-                        label="Old Password"
-                        type="password"
-                        value={formValues.oldPassword}
-                        onChange={handleChange}
-                        required
-                        fullWidth
-                        margin="normal"
-                    />)}
+                        <TextField
+                            name="oldPassword"
+                            label="Old Password"
+                            type="password"
+                            value={formValues.oldPassword}
+                            onChange={handleChange}
+                            required
+                            fullWidth
+                            margin="normal"
+                        />)}
                     <TextField
                         name="newPassword"
                         label="New Password"
