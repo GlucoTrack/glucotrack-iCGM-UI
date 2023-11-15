@@ -14,6 +14,7 @@ import {
 } from "recharts"
 import { cp } from "fs"
 import MeasurementGrid from "./MeasurementGrid"
+import { socket } from '../../utils/socket';
 
 
 const MeasurementChart = (props: any) => {
@@ -24,7 +25,23 @@ const MeasurementChart = (props: any) => {
     (state) => state.measurements.deviceNames,
   )
 
-  const { data, isFetching, isLoading, isSuccess, isError, error } = props.query;
+  const devicesDepts = JSON.stringify(deviceNames)
+
+  const { data, isFetching, isLoading, isSuccess, isError, error } = props.query
+
+  useEffect(() => {
+    for (const deviceName of deviceNames) {
+      socket.on('new_animal_measurement__' + deviceName, (data: any) => {
+        console.log('new measurement: ', data)
+      })
+    }
+
+    return () => {
+      for (const deviceName of deviceNames) {
+        socket.off('new_animal_measurement__' + deviceName)
+      }
+    }
+  }, [devicesDepts]);
 
   const getRandomColor = useCallback((): string => {
     const letters = "0123456789ABCDEF"
@@ -54,7 +71,6 @@ const MeasurementChart = (props: any) => {
 
   useEffect(() => {
     if (data?.measurements) {
-      console.log(data.measurements)
       setMeasurements(data.measurements);
       setFilteredMeasurements(data.measurements);
     }
