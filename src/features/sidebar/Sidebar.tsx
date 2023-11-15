@@ -45,6 +45,11 @@ const navItems = [
     icon: <TimelineOutlined />,
   },
   {
+    text: "Animal",
+    icon: <TimelineOutlined />,
+    path: "animal-measurements",
+  },
+  {
     text: "Divider",
     icon: null,
   },
@@ -120,12 +125,12 @@ const Sidebar: React.FC<SidebarProps> = ({
             <Divider />
 
             <List>
-              {navItems.map(({ text, icon }, index) => {
+              {navItems.map(({ text, icon, path }, index) => {
                 if (!icon) {
                   return <Divider key={index} />
                 }
 
-                const lcText = text.toLowerCase()
+                const lcText = path ? path : text.toLowerCase()
 
                 return (
                   <ListItem key={index} disablePadding>

@@ -1,7 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit"
 import navbarReducer from "@/features/navbar/navbarSlice"
 import groupsReducer from "@/features/groups/groupsSlice"
-import measurementsReducer from "@/features/measurements/measurementsSlice"
+import measurementsReducer from "@/components/measurements/measurementsSlice"
 import { apiSlice } from "@/features/api/apiSlice"
 
 export const store = configureStore({

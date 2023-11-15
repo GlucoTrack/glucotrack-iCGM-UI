@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react"
 import { Box, useTheme, Button } from "@mui/material"
-import { useGetMeasurementsByDeviceNamesQuery } from "@/features/api/apiSlice"
 import { useAppSelector } from "@/hooks/useStore"
 import {
   CartesianGrid,
@@ -17,13 +16,15 @@ import { cp } from "fs"
 import MeasurementGrid from "./MeasurementGrid"
 
 
-const MeasurementChart = () => {
+const MeasurementChart = (props: any) => {
   const theme = useTheme()
   const isDarkMode = theme.palette.mode === "dark"
   const [lineColors, setLineColors] = useState<string[]>([])
   const deviceNames: string[] = useAppSelector(
     (state) => state.measurements.deviceNames,
   )
+
+  const { data, isFetching, isLoading, isSuccess, isError, error } = props.query;
 
   const getRandomColor = useCallback((): string => {
     const letters = "0123456789ABCDEF"
@@ -46,29 +47,14 @@ const MeasurementChart = () => {
     const colors = deviceNames.map(() => getRandomColor())
     setLineColors(colors)
   }, [deviceNames, getRandomColor])
-
-  const deviceNamesString: string = deviceNames.join(",")
-  // const groupName: string = useAppSelector(
-  //   (state) => state.measurements.groupName,
-  // )
-  const startTime: string = useAppSelector(
-    (state) => state.measurements.startTime,
-  )
-  const endTime: string = useAppSelector((state) => state.measurements.endTime)
-
-  const { data, isFetching, isLoading, isSuccess, isError, error } =
-    useGetMeasurementsByDeviceNamesQuery({
-      deviceNames: deviceNamesString,
-      startTime: startTime,
-      endTime: endTime,
-    })
-
+  
   const [isZoomed, setIsZoomed] = useState(false);
   const [measurements, setMeasurements] = useState<any>([]);
   const [filteredMeasurements, setFilteredMeasurements] = useState<any>([]);
 
   useEffect(() => {
     if (data?.measurements) {
+      console.log(data.measurements)
       setMeasurements(data.measurements);
       setFilteredMeasurements(data.measurements);
     }
@@ -153,7 +139,7 @@ const MeasurementChart = () => {
     content = (
       <>
         <Box style={{ userSelect: 'none' }}>
-          {isZoomed && <Button variant="contained" color="primary" onClick={handleZoomOut} sx={{mb:3, alignItems: 'center'}}>Zoom Out</Button>}
+          {isZoomed && <Button variant="contained" color="primary" onClick={handleZoomOut} sx={{ mb: 3, alignItems: 'center' }}>Zoom Out</Button>}
           <ResponsiveContainer height={500} width={"100%"}>
             <LineChart
               data={filteredMeasurements}

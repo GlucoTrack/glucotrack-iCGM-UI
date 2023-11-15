@@ -13,6 +13,7 @@ import Groups from "@/features/groups/Groups"
 import AddGroup from "./features/groups/AddGroup"
 import EditGroup from "@/features/groups/EditGroup"
 import Measurements from "@/features/measurements/Measurements"
+import AnimalMeasurements from "./features/animalMeasurements/AnimalMeasurements"
 import Users from "@/features/users/Users"
 import New from "@/features/new/New"
 import { useAppSelector } from "@/hooks/useStore"
@@ -38,6 +39,7 @@ function App() {
               <Route path="/groups/add" element={<AddGroup />} />
               <Route path="/groups/edit/:groupId" element={<EditGroup />} />
               <Route path="/measurements" element={<Measurements />} />
+              <Route path="/animal-measurements" element={<AnimalMeasurements />} />
               <Route path="/users" element={<Users />} />
               <Route path="/new" element={<New />} />
             </Route>

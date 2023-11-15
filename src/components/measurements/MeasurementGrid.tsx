@@ -38,7 +38,7 @@ const MeasurementGrid = (measurements: any) => {
   const columns = [
     { field: "deviceName", headerName: "Name", flex: 0.5 },
     { field: "date", headerName: "Date", flex: 1 },
-    { field: "voltage", headerName: "Voltate", flex: 1 },
+    { field: "voltage", headerName: "Voltage", flex: 1 },
     { field: "current", headerName: "Current", flex: 1 },
   ]
 

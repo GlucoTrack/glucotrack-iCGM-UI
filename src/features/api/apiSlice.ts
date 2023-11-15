@@ -86,6 +86,24 @@ export const apiSlice = createApi({
       },
       providesTags: ["Measurements"],
     }),
+    getAnimalMeasurementsByDeviceNames: builder.query({
+      query: (args) => {
+        const { deviceNames, startTime, endTime } = args
+        return {
+          url: `measurements/readAnimalDeviceNames/${deviceNames}?startTime=${startTime}&endTime=${endTime}`,
+        }
+      },
+      providesTags: ["Measurements"],
+    }),
+    getAnimalMeasurementsBySensorNames: builder.query({
+      query: (args) => {
+        const { deviceNames, startTime, endTime } = args
+        return {
+          url: `measurements/readAnimalSensorNames/${deviceNames}?startTime=${startTime}&endTime=${endTime}`,
+        }
+      },
+      providesTags: ["Measurements"],
+    }),
     getAveragesAndStds: builder.query({
       query: (args) => {
         const { deviceNames, startDate, endDate, startTime, endTime } = args
@@ -109,5 +127,7 @@ export const {
   useEditGroupMutation,
   useDeleteGroupMutation,
   useGetMeasurementsByDeviceNamesQuery,
+  useGetAnimalMeasurementsByDeviceNamesQuery,
+  useGetAnimalMeasurementsBySensorNamesQuery,
   useGetAveragesAndStdsQuery,
 } = apiSlice
