@@ -4,8 +4,7 @@ import Header from "@/components/Header"
 import MeasurementForm from "@/components/measurements/MeasurementForm"
 import { useAppSelector } from "@/hooks/useStore"
 import MeasurementChart from "@/components/measurements/MeasurementChart"
-import { useGetMeasurementsByDeviceNamesQuery, useGetAnimalMeasurementsByDeviceNamesQuery, useGetAnimalMeasurementsBySensorNamesQuery } from "@/features/api/apiSlice"
-import { isReadable } from "stream"
+import { useGetAnimalMeasurementsBySensorNamesQuery } from "@/features/api/apiSlice"
 
 const AnimalMeasurements: React.FC = () => {
   const deviceNames = useAppSelector((state) => state.measurements.deviceNames)
@@ -33,7 +32,7 @@ const AnimalMeasurements: React.FC = () => {
         subtitle={`Fill out your criteria and hit submit to see measurements`}
       />
       <MeasurementForm />
-      <MeasurementChart query={query} />
+      <MeasurementChart query={query} eventName={'new_animal_measurement__'} />
     </Box>
   )
 }

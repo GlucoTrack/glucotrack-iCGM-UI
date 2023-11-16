@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react"
-import { Box, useTheme, Button } from "@mui/material"
+import { Box, useTheme, Button, Paper } from "@mui/material"
 import { useAppSelector } from "@/hooks/useStore"
 import {
   CartesianGrid,
@@ -12,15 +12,41 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
-import { cp } from "fs"
 import MeasurementGrid from "./MeasurementGrid"
 import { socket } from '../../utils/socket';
+import dayjs from "dayjs"
 
+const dateFormatter = (date: any) => {
+  if (date) {
+    return dayjs(date).format('YYYY-MM-DD HH:mm:ss')
+  }
+  return date
+}
+
+function CustomTooltip({ payload, label, active }:any) {
+  if (active && payload && payload.length) {
+    const pl = payload[0]
+    return (
+      <Paper elevation={3} sx={{p: 2}}>
+        <h4>{pl.name}</h4>
+        <p>
+          {dayjs(label).format('YYYY-MM-DD HH:mm:ss')}<br/>
+          Current: {pl.payload.current}<br/>
+          Voltage: {pl.payload.voltage}<br/>
+        </p>        
+      </Paper>      
+    );
+  }
+
+  return null;
+}
 
 const MeasurementChart = (props: any) => {
   const theme = useTheme()
   const isDarkMode = theme.palette.mode === "dark"
   const [lineColors, setLineColors] = useState<string[]>([])
+  const startTime = useAppSelector((state) => state.measurements.startTime)
+  const endTime = useAppSelector((state) => state.measurements.endTime)
   const deviceNames: string[] = useAppSelector(
     (state) => state.measurements.deviceNames,
   )
@@ -28,21 +54,7 @@ const MeasurementChart = (props: any) => {
   const devicesDepts = JSON.stringify(deviceNames)
 
   const { data, isFetching, isLoading, isSuccess, isError, error } = props.query
-
-  useEffect(() => {
-    for (const deviceName of deviceNames) {
-      socket.on('new_animal_measurement__' + deviceName, (data: any) => {
-        console.log('new measurement: ', data)
-      })
-    }
-
-    return () => {
-      for (const deviceName of deviceNames) {
-        socket.off('new_animal_measurement__' + deviceName)
-      }
-    }
-  }, [devicesDepts]);
-
+  
   const getRandomColor = useCallback((): string => {
     const letters = "0123456789ABCDEF"
     let color = "#"
@@ -65,42 +77,55 @@ const MeasurementChart = (props: any) => {
     setLineColors(colors)
   }, [deviceNames, getRandomColor])
   
-  const [isZoomed, setIsZoomed] = useState(false);
-  const [measurements, setMeasurements] = useState<any>([]);
-  const [filteredMeasurements, setFilteredMeasurements] = useState<any>([]);
+  const [isZoomed, setIsZoomed] = useState(false)
+  const [measurements, setMeasurements] = useState<any>([])
+  const [filteredMeasurements, setFilteredMeasurements] = useState<any>([])
 
   useEffect(() => {
     if (data?.measurements) {
-      setMeasurements(data.measurements);
-      setFilteredMeasurements(data.measurements);
+      let fixedMeasurements = []
+      for (let measurement of data.measurements) {
+        let fixMeasurement = {...measurement}
+        fixMeasurement.data = measurement.data.map((d: any) => {
+          let fixMeasure = {...d}
+          fixMeasure.date = new Date(d.date)
+          return d
+        })
+        fixedMeasurements.push(fixMeasurement)
+      }
+      setMeasurements(fixedMeasurements);
+      setFilteredMeasurements(fixedMeasurements);
+      setIsZoomed(false)
+      setStartZoomArea('')
+      setEndZoomArea('')
     }
   }, [data?.measurements]);
-
-  const [startArea, setStartArea] = useState<string>('');
-  const [endArea, setEndArea] = useState<string>('');
+  
+  const [startZoomArea, setStartZoomArea] = useState<string>('')
+  const [endZoomArea, setEndZoomArea] = useState<string>('')
 
   // flag if currently zooming (press and drag)
-  const [isZooming, setIsZooming] = useState(false);
+  const [isZooming, setIsZooming] = useState(false)
 
   // flag to show the zooming area (ReferenceArea)
   const showZoomBox =
-    isZooming && startArea && endArea;
+    isZooming && startZoomArea && endZoomArea
 
   // reset the states on zoom out
   function handleZoomOut() {
     setFilteredMeasurements(measurements);
-    setIsZoomed(false);
+    setIsZoomed(false)
   }
 
   function handleMouseDown(e: any) {
-    setIsZooming(true);
-    setStartArea(e.activeLabel);
-    setEndArea('');
+    setIsZooming(true)
+    setStartZoomArea(e.activeLabel)
+    setEndZoomArea('')
   }
 
   function handleMouseMove(e: any) {
     if (isZooming) {
-      setEndArea(e.activeLabel);
+      setEndZoomArea(e.activeLabel)
     }
   }
 
@@ -108,34 +133,74 @@ const MeasurementChart = (props: any) => {
     if (isZooming) {
       setIsZooming(false);
 
-      if (startArea === endArea || endArea === '') {
-        setStartArea('');
-        setEndArea('');
-        return;
+      if (startZoomArea === endZoomArea || endZoomArea === '') {
+        setStartZoomArea('')
+        setEndZoomArea('')
+        return
       }
-
-      // Check the date order
-      let startDate = new Date(startArea);
-      let endDate = new Date(endArea);
-      if (startDate > endDate) {
-        let temp = startDate;
-        startDate = endDate;
-        endDate = temp;
-      }
-
-      let filtered = [];
-      for (let measurement of measurements) {
-        let data = measurement.data.filter((d: any) => {
-          let date = new Date(d.date);
-          return date >= startDate && date <= endDate;
-        });
-        filtered.push({ name: measurement.name, data: data });
-        setIsZoomed(true);
-      }
-      setFilteredMeasurements(filtered);
-
+      
+      filterMeasurements()
     }
   }
+
+  const filterMeasurements = useCallback( () => {
+    // Check the date order
+    let startDate = new Date(startZoomArea)
+    let endDate = new Date(endZoomArea)
+    if (startDate > endDate) {
+      let temp = startDate
+      startDate = endDate
+      endDate = temp
+    }
+
+    let filtered = [];
+    for (let measurement of measurements) {
+      let data = measurement.data.filter((d: any) => {
+        return d.date >= startDate && d.date <= endDate
+      });
+      filtered.push({ name: measurement.name, data: data })
+      setIsZoomed(true)
+    }
+    setFilteredMeasurements(filtered)
+  }, [startZoomArea, endZoomArea, measurements])
+
+  // Handle new measurements events
+  useEffect(() => {
+    if(props.eventName) {
+      for (const deviceName of deviceNames) {
+        socket.on(props.eventName + deviceName, (data: any) => {                  
+          data.date = new Date(data.date)
+          if (data.date >= new Date(startTime) && data.date <= new Date(endTime)) {
+            console.log('measurement in range')
+
+            let newMeasurements = []
+            for (let measurement of measurements) {
+              if (measurement.name === data.deviceName) {
+                let newMeasurement = {...measurement}
+                newMeasurement.data = [...measurement.data, data];
+                newMeasurements.push(newMeasurement)
+              } else {
+                newMeasurements.push(measurement)
+              }              
+            }
+            setMeasurements(newMeasurements)
+
+            if (startZoomArea && endZoomArea) {
+              filterMeasurements()
+            } else {
+              setFilteredMeasurements(newMeasurements)
+            }            
+          }
+        })
+      }
+    }    
+
+    return () => {
+      for (const deviceName of deviceNames) {
+        socket.off(props.eventName + deviceName)
+      }
+    }
+  }, [devicesDepts, deviceNames, props.eventName, measurements, startTime, endTime, startZoomArea, endZoomArea, filterMeasurements])
 
   let content: JSX.Element | null = null
   if (isFetching) {
@@ -162,28 +227,30 @@ const MeasurementChart = (props: any) => {
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
-              style={{ cursor: "pointer" }}
+              style={{ cursor: "pointer" }}              
             >
               <CartesianGrid strokeDasharray={"3 3"} />
               <XAxis
                 dataKey="date"
+                tickFormatter={dateFormatter}
                 type="category"
                 allowDuplicatedCategory={false}
               />
               <YAxis dataKey={"current"} />
-              <Tooltip />
+              <Tooltip content={<CustomTooltip />}/>
               <Legend />
 
               {showZoomBox && (
                 <ReferenceArea
-                  x1={startArea}
-                  x2={endArea}
+                  x1={startZoomArea}
+                  x2={endZoomArea}
                   strokeOpacity={0.3}
                   alwaysShow
                 />
               )}
               {filteredMeasurements.map((measurement: any, index: number) => (
                 <Line
+                  //key={`l_${measurement.name}_${measurement.data.length}`}
                   key={measurement.name}
                   data={measurement.data}
                   dataKey="current"
