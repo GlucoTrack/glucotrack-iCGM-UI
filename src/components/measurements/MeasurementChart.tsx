@@ -171,8 +171,6 @@ const MeasurementChart = (props: any) => {
         socket.on(props.eventName + deviceName, (data: any) => {                  
           data.date = new Date(data.date)
           if (data.date >= new Date(startTime) && data.date <= new Date(endTime)) {
-            console.log('measurement in range')
-
             let newMeasurements = []
             for (let measurement of measurements) {
               if (measurement.name === data.deviceName) {
