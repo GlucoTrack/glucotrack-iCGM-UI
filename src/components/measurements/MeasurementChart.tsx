@@ -86,9 +86,14 @@ const MeasurementChart = (props: any) => {
       setIsZoomed(false)
       setStartZoomArea('')
       setEndZoomArea('')
+      setTempStartZoomArea('')
+      setTempEndZoomArea('')
     }
   }, [data?.measurements]);
 
+
+  const [tempStartZoomArea, setTempStartZoomArea] = useState<string>('')
+  const [tempEndZoomArea, setTempEndZoomArea] = useState<string>('')
   const [startZoomArea, setStartZoomArea] = useState<string>('')
   const [endZoomArea, setEndZoomArea] = useState<string>('')
 
@@ -97,7 +102,7 @@ const MeasurementChart = (props: any) => {
 
   // flag to show the zooming area (ReferenceArea)
   const showZoomBox =
-    isZooming && startZoomArea && endZoomArea
+    isZooming && tempStartZoomArea && tempEndZoomArea
 
 
   const filteredMeasurements = measurements.map((measurement: any) => {
@@ -124,17 +129,21 @@ const MeasurementChart = (props: any) => {
   // reset the states on zoom out
   function handleZoomOut() {
     setIsZoomed(false)
+    setStartZoomArea('')
+    setEndZoomArea('')
+    setTempStartZoomArea('')
+    setTempEndZoomArea('')
   }
 
   function handleMouseDown(e: any) {
     setIsZooming(true)
-    setStartZoomArea(e.activeLabel)
-    setEndZoomArea('')
+    setTempStartZoomArea(e.activeLabel)
+    setTempEndZoomArea('')
   }
 
   function handleMouseMove(e: any) {
     if (isZooming) {
-      setEndZoomArea(e.activeLabel)
+      setTempEndZoomArea(e.activeLabel)
     }
   }
 
@@ -142,11 +151,16 @@ const MeasurementChart = (props: any) => {
     if (isZooming) {
       setIsZooming(false);
 
-      if (startZoomArea === endZoomArea || endZoomArea === '') {
-        setStartZoomArea('')
-        setEndZoomArea('')
+      if (tempStartZoomArea === tempEndZoomArea || tempStartZoomArea === '') {
+        setTempStartZoomArea('')
+        setTempEndZoomArea('')
         return
       }
+      
+      setEndZoomArea(tempEndZoomArea)
+      setStartZoomArea(tempStartZoomArea)
+      setTempStartZoomArea('')
+      setTempEndZoomArea('')
 
       setIsZoomed(true)
     }
@@ -225,8 +239,8 @@ const MeasurementChart = (props: any) => {
 
               {showZoomBox && (
                 <ReferenceArea
-                  x1={startZoomArea}
-                  x2={endZoomArea}
+                  x1={tempStartZoomArea}
+                  x2={tempEndZoomArea}
                   strokeOpacity={0.3}
                 />
               )}
