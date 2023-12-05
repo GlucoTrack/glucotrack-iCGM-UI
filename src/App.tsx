@@ -7,13 +7,16 @@ import themeSettings from "@/theme/themeSettings"
 import Layout from "@/features/layout/Layout"
 import Home from "@/features/home/Home"
 import Devices from "@/features/devices/Devices"
-import AddDevice from "./features/devices/AddDevice"
-import EditDevice from "./features/devices/EditDevice"
+import AddDevice from "@/features/devices/AddDevice"
+import EditDevice from "@/features/devices/EditDevice"
+import Mobiles from "@/features/mobiles/Mobiles"
+import AddMobile from "@/features/mobiles/AddMobile"
+import EditMobile from "@/features/mobiles/EditMobile"
 import Groups from "@/features/groups/Groups"
-import AddGroup from "./features/groups/AddGroup"
+import AddGroup from "@/features/groups/AddGroup"
 import EditGroup from "@/features/groups/EditGroup"
 import Measurements from "@/features/measurements/Measurements"
-import AnimalMeasurements from "./features/animalMeasurements/AnimalMeasurements"
+import AnimalMeasurements from "@/features/animalMeasurements/AnimalMeasurements"
 import Users from "@/features/users/Users"
 import New from "@/features/new/New"
 import { useAppSelector } from "@/hooks/useStore"
@@ -35,11 +38,17 @@ function App() {
               <Route path="/devices" element={<Devices />} />
               <Route path="/devices/add" element={<AddDevice />} />
               <Route path="/devices/edit/:deviceId" element={<EditDevice />} />
-              <Route path="groups" element={<Groups />} />
+              <Route path="/mobiles" element={<Mobiles />} />
+              <Route path="/mobiles/add" element={<AddMobile />} />
+              <Route path="/mobiles/edit/:mobileId" element={<EditMobile />} />
+              <Route path="/groups" element={<Groups />} />
               <Route path="/groups/add" element={<AddGroup />} />
               <Route path="/groups/edit/:groupId" element={<EditGroup />} />
               <Route path="/measurements" element={<Measurements />} />
-              <Route path="/animal-measurements" element={<AnimalMeasurements />} />
+              <Route
+                path="/animal-measurements"
+                element={<AnimalMeasurements />}
+              />
               <Route path="/users" element={<Users />} />
               <Route path="/new" element={<New />} />
             </Route>

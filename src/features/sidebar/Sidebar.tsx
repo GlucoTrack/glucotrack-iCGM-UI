@@ -10,7 +10,7 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  // useTheme,
+  useTheme,
 } from "@mui/material"
 import {
   ChevronLeft,
@@ -18,6 +18,7 @@ import {
   GroupOutlined,
   GroupWorkOutlined,
   HomeOutlined,
+  MobileFriendlyOutlined,
   TimelineOutlined,
   TipsAndUpdatesOutlined,
 } from "@mui/icons-material"
@@ -43,6 +44,14 @@ const navItems = [
   {
     text: "Measurements",
     icon: <TimelineOutlined />,
+  },
+  {
+    text: "Divider",
+    icon: null,
+  },
+  {
+    text: "Mobiles",
+    icon: <MobileFriendlyOutlined />,
   },
   {
     text: "Animal",
@@ -81,7 +90,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   setIsSidebarOpen,
 }) => {
   const navigate = useNavigate()
-  // const theme = useTheme()
+  const theme = useTheme()
   const { pathname } = useLocation()
   const [active, setActive] = useState("")
 
@@ -104,6 +113,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               width: drawerWidth,
               boxSizing: "border-box",
               borderWidth: isNonMobile ? 0 : "2px",
+              transition: "width 1.5s ease",
             },
           }}
         >
@@ -127,7 +137,12 @@ const Sidebar: React.FC<SidebarProps> = ({
             <List>
               {navItems.map(({ text, icon, path }, index) => {
                 if (!icon) {
-                  return <Divider key={index} />
+                  return (
+                    <Divider
+                      key={index}
+                      sx={{ backgroundColor: theme.palette.divider }}
+                    />
+                  )
                 }
 
                 const lcText = path ? path : text.toLowerCase()
@@ -145,20 +160,23 @@ const Sidebar: React.FC<SidebarProps> = ({
                       }}
                     >
                       <ListItemIcon
-                        sx={
-                          {
-                            //   ml: "0.5rem",
-                            //   color:
-                            //     active === lcText
-                            //       ? theme.palette.primary
-                            //       : theme.palette.secondary,
-                          }
-                        }
+                        sx={{
+                          ml: "0.5rem",
+                          color:
+                            active === lcText
+                              ? theme.palette.primary.main
+                              : theme.palette.grey[400],
+                        }}
                       >
                         {icon}
                       </ListItemIcon>
                       <ListItemText
-                        color={active === lcText ? "red" : "blue"}
+                        sx={{
+                          color:
+                            active === lcText
+                              ? theme.palette.primary.main
+                              : theme.palette.grey[400],
+                        }}
                         primary={text}
                       ></ListItemText>
                     </ListItemButton>
