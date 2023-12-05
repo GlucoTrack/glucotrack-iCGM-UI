@@ -1,17 +1,18 @@
 import React, { useEffect } from "react"
 import { DataGrid, GridToolbar } from "@mui/x-data-grid"
-import { Box, useTheme, Button } from "@mui/material"
+import { Box } from "@mui/material"
 import Measurements from "@/interfaces/Measurement"
+import dayjs from "dayjs"
 
-const MeasurementGrid = (measurements: any) => {
+const MeasurementGrid = (props: any) => {
   const [data, setData] = React.useState<Measurements[]>([]);
 
   useEffect(() => {
-    if (measurements) {
+    if (props) {
             
       let rowId = 0;
       let mergedMesurements: any[] = []; 
-      const allData = measurements?.measurements.map((measurement: any) => {
+      const allData = props?.measurements.map((measurement: any) => {
         let dd = measurement.data.map((data: any) => {
           rowId++;
           return {
@@ -32,13 +33,13 @@ const MeasurementGrid = (measurements: any) => {
       
       setData(mergedMesurements);
     }
-  }, [measurements]);
+  }, [props]);
   
   
   const columns = [
     { field: "deviceName", headerName: "Name", flex: 0.5 },
-    { field: "date", headerName: "Date", flex: 1 },
-    { field: "voltage", headerName: "Voltate", flex: 1 },
+    { field: "date", headerName: "Date", flex: 1, valueFormatter: (params:any) => dayjs(params?.value).format('YYYY-MM-DD HH:mm:ss'), },
+    { field: "voltage", headerName: "Voltage", flex: 1 },
     { field: "current", headerName: "Current", flex: 1 },
   ]
 
@@ -53,3 +54,4 @@ const MeasurementGrid = (measurements: any) => {
 }
 
 export default MeasurementGrid
+

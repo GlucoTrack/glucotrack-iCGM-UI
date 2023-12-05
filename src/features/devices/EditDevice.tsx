@@ -3,9 +3,9 @@ import { Box, Button, TextField, useTheme } from "@mui/material"
 import React, { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import {
-  useDeleteDeviceMutation,
-  useEditDeviceMutation,
   useGetDeviceQuery,
+  useEditDeviceMutation,
+  useDeleteDeviceMutation,
 } from "@/features/api/apiSlice"
 
 interface FormValues {
@@ -69,6 +69,8 @@ const EditDevice: React.FC = () => {
     error: getDeviceError,
   } = useGetDeviceQuery(deviceId)
 
+  //TODO unlike Mobile, getting an error "getting" devices after a Delete
+
   const [
     deleteDevice,
     {
@@ -117,7 +119,7 @@ const EditDevice: React.FC = () => {
         onTest,
         enzyme,
         testStation,
-      } = getDeviceData.device
+      } = getDeviceData
 
       setFormValues({
         macAddress,
@@ -241,6 +243,8 @@ const EditDevice: React.FC = () => {
   } else if (isEditSuccess || isDeleteSuccess) {
     handleMutationSuccess()
   }
+
+  console.log(content)
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
@@ -499,7 +503,12 @@ const EditDevice: React.FC = () => {
               >
                 Cancel
               </Button>
-              <Button type="submit" variant="contained" color="primary">
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                disabled={!canSave}
+              >
                 Submit
               </Button>
             </Box>

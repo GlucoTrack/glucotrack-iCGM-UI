@@ -4,7 +4,7 @@ import { Autocomplete, Box, Button, TextField, useTheme } from "@mui/material"
 import { useGetDevicesQuery, useGetGroupsQuery } from "@/features/api/apiSlice"
 import Group from "@/interfaces/Group"
 import Device from "@/interfaces/Device"
-import { setFilter } from "@/features/measurements/measurementsSlice"
+import { setFilter } from "@/components/measurements/measurementsSlice"
 
 const MeasurementForm: React.FC = () => {
   const dispatch = useDispatch()
@@ -18,8 +18,8 @@ const MeasurementForm: React.FC = () => {
     //* REMOVE below after testing and keep above
     // deviceNames: ["lab053", "lab055", "lab052"],
     // groupName: "",
-    startTime: "2023-06-13T23:51",
-    endTime: "2023-06-13T23:59",
+    startTime: "2023-11-14T18:35",
+    endTime: "2023-11-14T23:59",
   })
 
   const {
@@ -132,10 +132,7 @@ const MeasurementForm: React.FC = () => {
       startTime &&
       endTime
     ) {
-      try {
-        console.log(`deviceNames:`, deviceNames)
-        console.log(`deviceNamesFromGroup:`, deviceNamesFromGroup)
-
+      try {        
         dispatch(
           setFilter({
             deviceNames:

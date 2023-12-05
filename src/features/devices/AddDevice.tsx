@@ -319,7 +319,12 @@ const AddDevice: React.FC = () => {
             <Button variant="outlined" color="secondary" onClick={handleCancel}>
               Cancel
             </Button>
-            <Button type="submit" variant="contained" color="primary">
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              disabled={!canSave}
+            >
               Submit
             </Button>
           </Box>{" "}

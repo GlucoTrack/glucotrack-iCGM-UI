@@ -5,7 +5,7 @@ export const apiSlice = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: import.meta.env.VITE_API_BASE_URL,
   }),
-  tagTypes: ["Devices", "Groups", "Measurements", "AveragesAndStds"],
+  tagTypes: ["Devices", "Mobiles", "Groups", "Measurements", "AveragesAndStds"],
   endpoints: (builder) => ({
     //TODO maybe code split per feature
     //*DEVICES
@@ -48,6 +48,46 @@ export const apiSlice = createApi({
         "Devices",
       ],
     }),
+    //*MOBILES
+    addMobile: builder.mutation({
+      query: (mobileData) => ({
+        url: "mobile/create",
+        method: "POST",
+        body: mobileData,
+      }),
+      invalidatesTags: ["Mobiles"],
+    }),
+    getMobiles: builder.query({
+      query: () => "mobile/read",
+      providesTags: ["Mobiles"],
+    }),
+    getMobile: builder.query({
+      query: (mobileId) => ({
+        url: `mobile/readByMobileId/${mobileId}`,
+      }),
+      providesTags: ["Mobiles"],
+    }),
+    editMobile: builder.mutation({
+      query: ({ mobileId, ...mobileData }) => ({
+        url: `mobile/updateByMobileId/${mobileId}`,
+        method: "PATCH",
+        body: mobileData,
+      }),
+      invalidatesTags: (result, error, arg) => [
+        { type: "Mobiles", id: arg },
+        "Mobiles",
+      ],
+    }),
+    deleteMobile: builder.mutation({
+      query: (mobileId) => ({
+        url: `mobile/deleteByMobileId/${mobileId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, arg) => [
+        { type: "Mobiles", id: arg },
+        "Mobiles",
+      ],
+    }),
     //*GROUPS
     addGroup: builder.mutation({
       query: (groupData) => ({
@@ -86,6 +126,24 @@ export const apiSlice = createApi({
       },
       providesTags: ["Measurements"],
     }),
+    getAnimalMeasurementsByDeviceNames: builder.query({
+      query: (args) => {
+        const { deviceNames, startTime, endTime } = args
+        return {
+          url: `measurements/readAnimalDeviceNames/${deviceNames}?startTime=${startTime}&endTime=${endTime}`,
+        }
+      },
+      providesTags: ["Measurements"],
+    }),
+    getAnimalMeasurementsBySensorNames: builder.query({
+      query: (args) => {
+        const { deviceNames, startTime, endTime } = args
+        return {
+          url: `measurements/readAnimalSensorNames/${deviceNames}?startTime=${startTime}&endTime=${endTime}`,
+        }
+      },
+      providesTags: ["Measurements"],
+    }),
     getAveragesAndStds: builder.query({
       query: (args) => {
         const { deviceNames, startDate, endDate, startTime, endTime } = args
@@ -104,10 +162,17 @@ export const {
   useGetDeviceQuery,
   useEditDeviceMutation,
   useDeleteDeviceMutation,
+  useAddMobileMutation,
+  useGetMobilesQuery,
+  useGetMobileQuery,
+  useEditMobileMutation,
+  useDeleteMobileMutation,
   useAddGroupMutation,
   useGetGroupsQuery,
   useEditGroupMutation,
   useDeleteGroupMutation,
   useGetMeasurementsByDeviceNamesQuery,
+  useGetAnimalMeasurementsByDeviceNamesQuery,
+  useGetAnimalMeasurementsBySensorNamesQuery,
   useGetAveragesAndStdsQuery,
 } = apiSlice
