@@ -3,9 +3,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
-    //? change back for Vite if Heroku doesn't work
-    // baseUrl: import.meta.env.VITE_API_BASE_URL,
-    baseUrl: process.env.API_BASE_URL,
+    baseUrl: import.meta.env.VITE_API_BASE_URL,
   }),
   tagTypes: ["Devices", "Mobiles", "Groups", "Measurements", "AveragesAndStds"],
   endpoints: (builder) => ({
