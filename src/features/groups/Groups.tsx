@@ -1,42 +1,78 @@
-import Header from "@/components/Header"
+import { useNavigate } from "react-router-dom"
 import { Box } from "@mui/material"
-import { DataGrid, GridToolbar } from "@mui/x-data-grid"
-import { useGetGroupsQuery } from "../api/apiSlice"
-import Action from "@/components/Action"
+import { DataGrid, GridCellParams, GridToolbar } from "@mui/x-data-grid"
 
-const Groups = () => {
-  const { data, status, isFetching, isLoading, isSuccess, isError, error } =
-    useGetGroupsQuery({})
+import Header from "@/components/Header"
+import Action from "@/components/HeaderAction"
+import { useGetGroupsQuery } from "@/features/api/apiSlice"
+import { useDispatch } from "react-redux"
+import { setGroup } from "@/features/groups/groupsSlice"
+import Group from "@/interfaces/Group"
 
-  let content
-  if (isFetching) {
+const Groups: React.FC = () => {
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const {
+    data,
+    status: getGroupStatus,
+    isFetching: isFetchingGroups,
+    isLoading: isLoadingGroups,
+    isSuccess: isSuccessGroups,
+    isError: isErrorGroups,
+    error: getGroupsError,
+  } = useGetGroupsQuery({})
+
+  const handleCellClick = (params: GridCellParams) => {
+    const {
+      _id: groupId,
+      groupName,
+      groupDescription,
+      deviceNames,
+    } = params.row
+    const deviceNamesString = deviceNames.join(" ")
+
+    dispatch(
+      setGroup({
+        groupName,
+        groupDescription,
+        deviceNames: deviceNamesString,
+      }),
+    )
+    navigate(`edit/${groupId}`)
+  }
+
+  let content: JSX.Element | null = null
+
+  if (isFetchingGroups) {
     content = <h3>Fetching...</h3>
-  } else if (isLoading) {
+  } else if (isLoadingGroups) {
     content = <h3>Loading...</h3>
-  } else if (isError) {
-    content = <p>{JSON.stringify(error)}</p>
-  } else if (isSuccess) {
+  } else if (isErrorGroups) {
+    content = <p>{JSON.stringify(getGroupsError)}</p>
+  } else if (isSuccessGroups) {
+    const columns = [
+      { field: "groupName", headerName: "Name", flex: 1 },
+      { field: "groupDescription", headerName: "Description", flex: 2 },
+      { field: "deviceNames", headerName: "Devices", flex: 2 },
+    ]
+
     content = (
       <Box height={"75vh"}>
-        <DataGrid
+        <DataGrid<Group>
           slots={{ toolbar: GridToolbar }}
           rows={data.groups}
           getRowId={(row) => row._id}
-          columns={[
-            { field: "groupName", headerName: "Name", flex: 1 },
-            { field: "groupDescription", headerName: "Description", flex: 2 },
-            { field: "deviceNames", headerName: "Devices", flex: 2 },
-          ]}
-          checkboxSelection={true}
+          columns={columns}
+          onCellClick={handleCellClick}
         />
       </Box>
     )
   }
 
   return (
-    <Box>
-      <Header title="Groups" subtitle={`List of groups: ${status}`}>
-        <Action type="Create" />
+    <Box display="flex" flexDirection="column" height="85vh">
+      <Header title="Groups" subtitle={`List of groups: ${getGroupStatus}`}>
+        <Action action="Add" url="add" />
       </Header>
       {content}
     </Box>
