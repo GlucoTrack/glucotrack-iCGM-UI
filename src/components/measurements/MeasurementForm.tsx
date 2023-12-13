@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react"
 import { useDispatch } from "react-redux"
-import { Autocomplete, Box, Button, TextField, useTheme } from "@mui/material"
+import { Autocomplete, Box, Button, Divider, TextField, useTheme } from "@mui/material"
 import Grid from '@mui/system/Unstable_Grid';
 import { useGetDevicesQuery, useGetGroupsQuery } from "@/features/api/apiSlice"
 import Group from "@/interfaces/Group"
@@ -24,11 +24,6 @@ const MeasurementForm = (props: any) => {
     startTime: dayjs().subtract(30, "minutes").format("YYYY-MM-DDTHH:mm"),
     endTime: dayjs().format("YYYY-MM-DDTHH:mm"),
   })
-
-  const localStorageData = localStorage.getItem("deviceNames");
-  const [filterName, setFilterName] = useState<string>("");
-  const [savedNames, setSavedNames] = useState<string[]>([]);
-  const [selectedSave, setSelectedSave] = useState("");
 
   const {
     data: deviceData,
@@ -191,6 +186,13 @@ const MeasurementForm = (props: any) => {
     }
   }
 
+  const [localStorageFilters, setLocalStorageFilters] = useState(JSON.parse(localStorage.getItem('filters') || '{}'));
+  //localStorage.clear();
+  //console.log("localStorageFilters", localStorageFilters, formValues);
+
+  const [filterName, setFilterName] = useState<string>("");
+  const [savedNames, setSavedNames] = useState<string[]>([]);
+  const [selectedSave, setSelectedSave] = useState("");
   const handleSaveFilter = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!filterName) {
@@ -220,20 +222,24 @@ const MeasurementForm = (props: any) => {
           </Button>
         </Grid>
 
-        <TextField
-          select
-          label="Load filters"
-          value={selectedSave}
-          onChange={(event) => setSelectedSave(event.target.value)}
-          style={{ marginLeft: "1rem", width: "150px" }}
-        >
-          {savedNames.map((name) => (
-            <MenuItem key={name} value={name}>
-              {name}
-            </MenuItem>
-          ))}
-        </TextField>
+        <Grid>
+          <TextField
+            select
+            label="Load filters"
+            value={selectedSave}
+            onChange={(event) => setSelectedSave(event.target.value)}
+            style={{ marginLeft: "1rem", width: "150px" }}
+          >
+            {savedNames.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </TextField>
+        </Grid>
       </form>
+
+      <Divider sx={{ mt:3, mb: 3 }} />
       
       <form onSubmit={handleSubmit}>
         <Grid container spacing={4}>
@@ -243,9 +249,12 @@ const MeasurementForm = (props: any) => {
                 multiple
                 loading={deviceIsLoading || deviceIsFetching}
                 options={deviceNames ? deviceNames : []}
-                value={formValues.deviceNames ?? []}
+                value={localStorageFilters && localStorageFilters.deviceNames ? localStorageFilters.deviceNames : (formValues.deviceNames ?? [])}
                 onChange={(event, newValue) => {
-                  handleInputChange("deviceNames", newValue)
+                  handleInputChange("deviceNames", newValue);
+                  let newLocalStorageFilters = { ...localStorageFilters, deviceNames: newValue, groupName: "" };
+                  setLocalStorageFilters(newLocalStorageFilters);
+                  localStorage.setItem('filters', JSON.stringify(newLocalStorageFilters));
                 }}
                 renderInput={(params) => (
                   <TextField {...params} label={props.label} fullWidth />
@@ -259,9 +268,15 @@ const MeasurementForm = (props: any) => {
               <Autocomplete
                 loading={groupIsLoading || groupIsFetching}
                 options={groupName ? groupName : []}
-                value={formValues.groupName === "" ? null : formValues.groupName}
+                value={localStorageFilters && localStorageFilters.groupName ? localStorageFilters.groupName : (formValues.groupName === "" ? "" : formValues.groupName)}
+                isOptionEqualToValue={(option, newValue) => {
+                  return option.id === newValue.id;
+                }}
                 onChange={(event, newValue) => {
                   handleInputChange("groupName", newValue !== null ? newValue : "")
+                  let newLocalStorageFilters = { ...localStorageFilters, deviceNames: [], groupName: newValue };
+                  setLocalStorageFilters(newLocalStorageFilters);
+                  localStorage.setItem('filters', JSON.stringify(newLocalStorageFilters));
                 }}
                 renderInput={(params) => (
                   <TextField {...params} label="Group Name" fullWidth />
@@ -273,9 +288,12 @@ const MeasurementForm = (props: any) => {
               <TextField
                 label="Start Time"
                 type="datetime-local"
-                value={formValues.startTime}
+                value={localStorageFilters && localStorageFilters.startTime ? localStorageFilters.startTime : formValues.startTime}
                 onChange={(event) => {
                   handleInputChange("startTime", event.target.value)
+                  let newLocalStorageFilters = { ...localStorageFilters, startTime: event.target.value };
+                  setLocalStorageFilters(newLocalStorageFilters);
+                  localStorage.setItem('filters', JSON.stringify(newLocalStorageFilters));
                 }}
                 required
                 fullWidth
@@ -290,9 +308,12 @@ const MeasurementForm = (props: any) => {
               <TextField
                 label="End Time"
                 type="datetime-local"
-                value={formValues.endTime}
+                value={localStorageFilters && localStorageFilters.endTime ? localStorageFilters.endTime : formValues.endTime}
                 onChange={(event) => {
                   handleInputChange("endTime", event.target.value)
+                  let newLocalStorageFilters = { ...localStorageFilters, endTime: event.target.value };
+                  setLocalStorageFilters(newLocalStorageFilters);
+                  localStorage.setItem('filters', JSON.stringify(newLocalStorageFilters));
                 }}
                 required
                 fullWidth
