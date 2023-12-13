@@ -4,7 +4,8 @@ import Header from "@/components/Header"
 import MeasurementForm from "@/components/measurements/MeasurementForm"
 import { useAppSelector } from "@/hooks/useStore"
 import MeasurementChart from "@/components/measurements/MeasurementChart"
-import { useGetAnimalMeasurementsBySensorNamesQuery } from "@/features/api/apiSlice"
+import { useGetAnimalMeasurementsByMobileNamesQuery } from "@/features/api/apiSlice"
+import { useGetMobilesQuery } from "@/features/api/apiSlice"
 
 const AnimalMeasurements: React.FC = () => {
   const deviceNames = useAppSelector((state) => state.measurements.deviceNames)
@@ -14,14 +15,16 @@ const AnimalMeasurements: React.FC = () => {
 
 
   const deviceNamesString: string = deviceNames.join(",")
-  
+
 
   const query =
-    useGetAnimalMeasurementsBySensorNamesQuery({
+    useGetAnimalMeasurementsByMobileNamesQuery({
       deviceNames: deviceNamesString,
       startTime: startTime,
-      endTime: endTime,      
-    }, {skip: deviceNamesString.length === 0,})
+      endTime: endTime,
+    }, { skip: deviceNamesString.length === 0, })
+
+  const mobileQuery = useGetMobilesQuery({})
 
 
   return (
@@ -31,7 +34,7 @@ const AnimalMeasurements: React.FC = () => {
         // subtitle={`Queried measurements: ${status}`}
         subtitle={`Fill out your criteria and hit submit to see measurements`}
       />
-      <MeasurementForm />
+      <MeasurementForm query={mobileQuery} label={'Mobile Names'} />
       <MeasurementChart query={query} eventName={'new_animal_measurement__'} />
     </Box>
   )

@@ -1,12 +1,13 @@
 import React, { useState } from "react"
 import { useDispatch } from "react-redux"
 import { Autocomplete, Box, Button, TextField, useTheme } from "@mui/material"
-import { useGetDevicesQuery, useGetGroupsQuery } from "@/features/api/apiSlice"
+import { useGetGroupsQuery } from "@/features/api/apiSlice"
 import Group from "@/interfaces/Group"
 import Device from "@/interfaces/Device"
 import { setFilter } from "@/components/measurements/measurementsSlice"
+import Mobile from "@/interfaces/Mobile"
 
-const MeasurementForm: React.FC = () => {
+const MeasurementForm = (props: any) => {
   const dispatch = useDispatch()
   const theme = useTheme()
   const [errorMessage, setErrorMessage] = useState("")
@@ -18,8 +19,8 @@ const MeasurementForm: React.FC = () => {
     //* REMOVE below after testing and keep above
     // deviceNames: ["lab053", "lab055", "lab052"],
     // groupName: "",
-    startTime: "2023-11-14T18:35",
-    endTime: "2023-11-14T23:59",
+    startTime: "2023-12-12T08:35",
+    endTime: "2023-12-12T23:59",
   })
 
   const {
@@ -30,7 +31,7 @@ const MeasurementForm: React.FC = () => {
     isSuccess: deviceIsSuccess,
     isError: deviceIsError,
     error: deviceError,
-  } = useGetDevicesQuery({})
+  } = props.query
 
   const {
     data: groupData,
@@ -51,9 +52,15 @@ const MeasurementForm: React.FC = () => {
   } else if (deviceIsError) {
     deviceContent = <p>{JSON.stringify(deviceError)}</p>
   } else if (deviceIsSuccess) {
-    deviceNames = deviceData.devices.map((device: Device) => {
-      return device.deviceName
-    })
+    if (deviceData.mobileDevices) {
+      deviceNames = deviceData.mobileDevices.map((device: Mobile) => {
+        return device.mobileName
+      })
+    } else {
+      deviceNames = deviceData.devices.map((device: Device) => {
+        return device.deviceName
+      })
+    }    
   }
 
   let groupContent: JSX.Element | null = null
@@ -132,15 +139,15 @@ const MeasurementForm: React.FC = () => {
       startTime &&
       endTime
     ) {
-      try {        
+      try {
         dispatch(
           setFilter({
             deviceNames:
               deviceNamesFromGroup.length > 0
                 ? deviceNamesFromGroup
                 : deviceNames && deviceNames.length > 0
-                ? deviceNames
-                : [],
+                  ? deviceNames
+                  : [],
             groupName: groupName ? groupName : "",
             startTime,
             endTime,
@@ -168,7 +175,7 @@ const MeasurementForm: React.FC = () => {
             handleInputChange("deviceNames", newValue)
           }}
           renderInput={(params) => (
-            <TextField {...params} label="Device Names" fullWidth />
+            <TextField {...params} label={props.label} fullWidth />
           )}
           style={{ flex: 1, marginRight: "1rem" }}
         />
