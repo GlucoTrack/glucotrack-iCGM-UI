@@ -25,7 +25,8 @@ const MeasurementForm = (props: any) => {
     // groupName: "",
     startTime: dayjs().utc().subtract(30, "minutes").format("YYYY-MM-DDTHH:mm"),
     endTime: dayjs().utc().format("YYYY-MM-DDTHH:mm"),
-    realtime: false,
+    startTime: dayjs().subtract(30, "minutes").format("YYYY-MM-DDTHH:mm"),
+    endTime: dayjs().format("YYYY-MM-DDTHH:mm"),
   })
   const [realtime, setRealtime] = useState(false);
 

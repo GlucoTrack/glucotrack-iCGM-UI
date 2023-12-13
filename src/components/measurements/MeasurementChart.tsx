@@ -13,7 +13,7 @@ import {
   YAxis,
 } from "recharts"
 import MeasurementGrid from "./MeasurementGrid"
-import { socket } from '../../utils/socket';
+import { socket } from '../../utils/socket'
 import dayjs from "dayjs"
 
 const dateFormatter = (date: any) => {
