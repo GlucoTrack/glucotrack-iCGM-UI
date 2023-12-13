@@ -1,6 +1,6 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useDispatch } from "react-redux"
-import { Autocomplete, Box, Button, TextField, useTheme } from "@mui/material"
+import { Autocomplete, Box, Button, Grid, MenuItem, TextField, useTheme } from "@mui/material"
 import { useGetDevicesQuery, useGetGroupsQuery } from "@/features/api/apiSlice"
 import Group from "@/interfaces/Group"
 import Device from "@/interfaces/Device"
@@ -21,6 +21,11 @@ const MeasurementForm: React.FC = () => {
     startTime: "2023-11-14T18:35",
     endTime: "2023-11-14T23:59",
   })
+
+  const localStorageData = localStorage.getItem("deviceNames");
+  const [filterName, setFilterName] = useState<string>("");
+  const [savedNames, setSavedNames] = useState<string[]>([]);
+  const [selectedSave, setSelectedSave] = useState("");
 
   const {
     data: deviceData,
@@ -76,6 +81,8 @@ const MeasurementForm: React.FC = () => {
   ) => {
     setFormValues((prevFormValues) => {
       if (field === "deviceNames") {
+        console.log("deviceNames", value);
+        localStorage.setItem("deviceNames", JSON.stringify(value));
         return {
           ...prevFormValues,
           deviceNames: value !== null ? (value as string[]) : [],
@@ -153,8 +160,50 @@ const MeasurementForm: React.FC = () => {
     }
   }
 
+  const handleSaveFilter = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!filterName) {
+      setErrorMessage("Please enter a name to save the filter as");
+      return;
+    }
+    //localStorage.setItem(selectedSave, JSON.stringify(formValues));
+    //const [savedNames, setSavedNames] = useState<string[]>([]);
+    setSavedNames([...savedNames, filterName]);
+  }
+
   return (
     <Box>
+      <form 
+        onSubmit={handleSaveFilter}
+        style={{ display: "flex", justifyContent: "space-between", marginBottom: 20 }}
+      >
+        <Grid container alignItems={"center"}>
+          <TextField
+            label="Save filter as"
+            onChange={(event) => setFilterName(event.target.value)}
+            style={{ marginRight: "1rem", width: "150px" }}
+          >
+          </TextField>
+          <Button type="submit" variant="contained" color="primary">
+            Save
+          </Button>
+        </Grid>
+
+        <TextField
+          select
+          label="Load filters"
+          value={selectedSave}
+          onChange={(event) => setSelectedSave(event.target.value)}
+          style={{ marginLeft: "1rem", width: "150px" }}
+        >
+          {savedNames.map((name) => (
+            <MenuItem key={name} value={name}>
+              {name}
+            </MenuItem>
+          ))}
+        </TextField>
+      </form>
+
       <form
         onSubmit={handleSubmit}
         style={{ display: "flex", alignItems: "center", marginBottom: 20 }}
@@ -163,7 +212,7 @@ const MeasurementForm: React.FC = () => {
           multiple
           loading={deviceIsLoading || deviceIsFetching}
           options={deviceNames ? deviceNames : []}
-          value={formValues.deviceNames ?? []}
+          value={formValues.deviceNames ?? (localStorageData ? JSON.parse(localStorageData) : [])}
           onChange={(event, newValue) => {
             handleInputChange("deviceNames", newValue)
           }}
