@@ -14,7 +14,7 @@ const MeasurementForm = (props: any) => {
   const theme = useTheme()
   const [localStorageFilters, setLocalStorageFilters] = useState(JSON.parse(localStorage.getItem('filters') || '{}'));
   //localStorage.clear();
-  console.log("localStorageFilters", localStorageFilters);
+  //console.log("localStorageFilters", localStorageFilters);
   const [errorMessage, setErrorMessage] = useState("")
   const [formValues, setFormValues] = useState({
     deviceNames: localStorageFilters && localStorageFilters.deviceNames ? localStorageFilters.deviceNames : null as string[] | null,
@@ -27,6 +27,9 @@ const MeasurementForm = (props: any) => {
     startTime: localStorageFilters && localStorageFilters.startTime ? localStorageFilters.startTime : dayjs().subtract(30, "minutes").format("YYYY-MM-DDTHH:mm"),
     endTime: localStorageFilters && localStorageFilters.endTime ? localStorageFilters.endTime : dayjs().format("YYYY-MM-DDTHH:mm"),
   })
+  const [savedFilters, setSavedNames] = useState<string[]>(JSON.parse(localStorage.getItem('filterList') || '[]'));
+  const [filterName, setFilterName] = useState<string>("");
+  const [selectedFilter, setSelectedFilter] = useState(null);
 
   const {
     data: deviceData,
@@ -88,7 +91,6 @@ const MeasurementForm = (props: any) => {
   ) => {
     setFormValues((prevFormValues) => {
       if (field === "deviceNames") {
-        localStorage.setItem("deviceNames", JSON.stringify(value));
         return {
           ...prevFormValues,
           deviceNames: value !== null ? (value as string[]) : [],
@@ -114,8 +116,8 @@ const MeasurementForm = (props: any) => {
         let newLocalStorageFilters = { ...localStorageFilters, deviceNames: formValues.deviceNames, groupName: formValues.groupName, startTime: formValues.startTime, endTime: formValues.endTime };
         setLocalStorageFilters(newLocalStorageFilters);
         localStorage.setItem('filters', JSON.stringify(newLocalStorageFilters));
-        console.log("formValues", formValues, localStorageFilters);
-    }
+        setSelectedFilter(null);
+      }
   }, [formValues]);
 
   const setPastMinutesRange = (minutes: number) => {
@@ -196,56 +198,73 @@ const MeasurementForm = (props: any) => {
       }
     }
   }
-  
-  // TODO: Save and load filters
-  const [filterName, setFilterName] = useState<string>("");
-  const [savedNames, setSavedNames] = useState<string[]>([]);
-  const [selectedSave, setSelectedSave] = useState("");
+
+  useEffect(() => {
+    localStorage.setItem('filterList', JSON.stringify(savedFilters));
+  }, [savedFilters]);
+    
   const handleSaveFilter = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!filterName) {
-      setErrorMessage("Please enter a name to save the filter as");
+      setErrorMessage("Please enter a name to save the filter");
       return;
     }
-    //localStorage.setItem(selectedSave, JSON.stringify(formValues));
-    //const [savedNames, setSavedNames] = useState<string[]>([]);
-    setSavedNames([...savedNames, filterName]);
+    try {
+      setSavedNames([...savedFilters, filterName]);
+      setErrorMessage("");
+      localStorage.setItem(filterName, JSON.stringify(formValues));      
+    } catch (error) {
+      setErrorMessage("Failed to save filter...");
+    }
   }
 
+  const handleChangeFilter = (filterName: string) => {
+    try {
+      const savedFilter = localStorage.getItem(filterName);
+      if (savedFilter) {
+        setFormValues(JSON.parse(savedFilter));
+      }
+    } catch (error) {
+      setErrorMessage("Failed to load filter...");
+    }
+  }
 
   return (
     <Box sx={{ flexGrow: 1 }}>
       <form 
         onSubmit={handleSaveFilter}
-        style={{ display: "flex", justifyContent: "space-between", marginBottom: 20 }}
+        style={{ marginBottom: 20 }}
       >
-        <Grid container alignItems={"center"}>
-          <TextField
-            label="Save filter as"
-            onChange={(event) => setFilterName(event.target.value)}
-            style={{ marginRight: "1rem", width: "150px" }}
-          >
-          </TextField>
-          <Button type="submit" variant="contained" color="primary">
-            Save
-          </Button>
-        </Grid>
+        <Grid container xs={12}>
+          <Grid xs={9}>
+            <Grid alignItems={"center"} container>
+              <TextField
+                label="Save filter as"
+                onChange={(event) => setFilterName(event.target.value)}
+                style={{ marginRight: "1rem", width: "150px" }}
+              >
+              </TextField>
+              <Button type="submit" variant="outlined" color="primary">
+                Save
+              </Button>
+            </Grid>
+          </Grid>
 
-        <Grid>
-          <TextField
-            select
-            label="Load filters"
-            value={selectedSave}
-            onChange={(event) => setSelectedSave(event.target.value)}
-            style={{ marginLeft: "1rem", width: "150px" }}
-          >
-            {savedNames.map((name) => (
-              <option key={name} value={name}>
-                {name}
-              </option>
-            ))}
-          </TextField>
-        </Grid>
+          <Grid xs={3}>
+            <Autocomplete
+              options={savedFilters ? savedFilters : []}
+              value={selectedFilter}
+              onChange={(event, newValue) => {
+                if (newValue !== null) {
+                  handleChangeFilter(newValue);
+                }
+              }}
+              renderInput={(params) => (
+                <TextField {...params} label="Filters" fullWidth />
+              )}
+            />
+          </Grid>
+        </Grid> 
       </form>
 
       <Divider sx={{ mt:3, mb: 3 }} />
