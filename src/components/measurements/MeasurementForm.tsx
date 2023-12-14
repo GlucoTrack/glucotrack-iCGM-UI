@@ -9,10 +9,11 @@ import { setFilter } from "@/components/measurements/measurementsSlice"
 import Mobile from "@/interfaces/Mobile"
 import dayjs from "dayjs"
 
-const MeasurementForm = (props: any) => {
+//const MeasurementForm = (props: any, page: string) => {
+const MeasurementForm = ({ page, ...props }: { page: string, [key: string]: any }) => {
   const dispatch = useDispatch()
   const theme = useTheme()
-  const [localStorageFilters, setLocalStorageFilters] = useState(JSON.parse(localStorage.getItem('filters') || '{}'));
+  const [localStorageFilters, setLocalStorageFilters] = useState(JSON.parse(localStorage.getItem('filters_' + page) || '{}'));
   //localStorage.clear();
   //console.log("localStorageFilters", localStorageFilters);
   const [errorMessage, setErrorMessage] = useState("")
@@ -27,7 +28,7 @@ const MeasurementForm = (props: any) => {
     startTime: localStorageFilters && localStorageFilters.startTime ? localStorageFilters.startTime : dayjs().subtract(30, "minutes").format("YYYY-MM-DDTHH:mm"),
     endTime: localStorageFilters && localStorageFilters.endTime ? localStorageFilters.endTime : dayjs().format("YYYY-MM-DDTHH:mm"),
   })
-  const [savedFilters, setSavedNames] = useState<string[]>(JSON.parse(localStorage.getItem('filterList') || '[]'));
+  const [savedFilters, setSavedFilters] = useState<string[]>(JSON.parse(localStorage.getItem('filterList_' + page) || '[]'));
   const [filterName, setFilterName] = useState<string>("");
   const [selectedFilter, setSelectedFilter] = useState(null);
 
@@ -115,7 +116,7 @@ const MeasurementForm = (props: any) => {
     if (formValues.deviceNames || formValues.groupName || formValues.startTime || formValues.endTime) {
         let newLocalStorageFilters = { ...localStorageFilters, deviceNames: formValues.deviceNames, groupName: formValues.groupName, startTime: formValues.startTime, endTime: formValues.endTime };
         setLocalStorageFilters(newLocalStorageFilters);
-        localStorage.setItem('filters', JSON.stringify(newLocalStorageFilters));
+        localStorage.setItem('filters_' + page, JSON.stringify(newLocalStorageFilters));
         setSelectedFilter(null);
       }
   }, [formValues]);
@@ -200,7 +201,10 @@ const MeasurementForm = (props: any) => {
   }
 
   useEffect(() => {
-    localStorage.setItem('filterList', JSON.stringify(savedFilters));
+    if (savedFilters) {
+      console.log("savedFilters", savedFilters, page);
+      localStorage.setItem('filterList_' + page, JSON.stringify(savedFilters));
+    }
   }, [savedFilters]);
     
   const handleSaveFilter = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -210,9 +214,10 @@ const MeasurementForm = (props: any) => {
       return;
     }
     try {
-      setSavedNames([...savedFilters, filterName]);
+      setSavedFilters([...savedFilters, filterName]);
       setErrorMessage("");
-      localStorage.setItem(filterName, JSON.stringify(formValues));      
+      localStorage.setItem(filterName + '_' + page, JSON.stringify(formValues));      
+      setFilterName("");
     } catch (error) {
       setErrorMessage("Failed to save filter...");
     }
@@ -220,7 +225,7 @@ const MeasurementForm = (props: any) => {
 
   const handleChangeFilter = (filterName: string) => {
     try {
-      const savedFilter = localStorage.getItem(filterName);
+      const savedFilter = localStorage.getItem(filterName + '_' + page);
       if (savedFilter) {
         setFormValues(JSON.parse(savedFilter));
       }
@@ -240,6 +245,7 @@ const MeasurementForm = (props: any) => {
             <Grid alignItems={"center"} container>
               <TextField
                 label="Save filter as"
+                value={filterName}
                 onChange={(event) => setFilterName(event.target.value)}
                 style={{ marginRight: "1rem", width: "150px" }}
               >
