@@ -12,17 +12,20 @@ import dayjs from "dayjs"
 const MeasurementForm = (props: any) => {
   const dispatch = useDispatch()
   const theme = useTheme()
+  const [localStorageFilters, setLocalStorageFilters] = useState(JSON.parse(localStorage.getItem('filters') || '{}'));
+  //localStorage.clear();
+  console.log("localStorageFilters", localStorageFilters);
   const [errorMessage, setErrorMessage] = useState("")
   const [formValues, setFormValues] = useState({
-    deviceNames: null as string[] | null,
-    groupName: "",
+    deviceNames: localStorageFilters && localStorageFilters.deviceNames ? localStorageFilters.deviceNames : null as string[] | null,
+    groupName: localStorageFilters && localStorageFilters.groupName ? localStorageFilters.groupName : "",
     // startTime: "",
     // endTime: "",
     //* REMOVE below after testing and keep above
     // deviceNames: ["lab053", "lab055", "lab052"],
     // groupName: "",
-    startTime: dayjs().subtract(30, "minutes").format("YYYY-MM-DDTHH:mm"),
-    endTime: dayjs().format("YYYY-MM-DDTHH:mm"),
+    startTime: localStorageFilters && localStorageFilters.startTime ? localStorageFilters.startTime : dayjs().subtract(30, "minutes").format("YYYY-MM-DDTHH:mm"),
+    endTime: localStorageFilters && localStorageFilters.endTime ? localStorageFilters.endTime : dayjs().format("YYYY-MM-DDTHH:mm"),
   })
 
   const {
@@ -85,7 +88,6 @@ const MeasurementForm = (props: any) => {
   ) => {
     setFormValues((prevFormValues) => {
       if (field === "deviceNames") {
-        console.log("deviceNames", value);
         localStorage.setItem("deviceNames", JSON.stringify(value));
         return {
           ...prevFormValues,
@@ -106,6 +108,15 @@ const MeasurementForm = (props: any) => {
       }
     })
   }
+
+  useEffect(() => {
+    if (formValues.deviceNames || formValues.groupName || formValues.startTime || formValues.endTime) {
+        let newLocalStorageFilters = { ...localStorageFilters, deviceNames: formValues.deviceNames, groupName: formValues.groupName, startTime: formValues.startTime, endTime: formValues.endTime };
+        setLocalStorageFilters(newLocalStorageFilters);
+        localStorage.setItem('filters', JSON.stringify(newLocalStorageFilters));
+        console.log("formValues", formValues, localStorageFilters);
+    }
+  }, [formValues]);
 
   const setPastMinutesRange = (minutes: number) => {
     setFormValues((prevFormValues) => {
@@ -185,11 +196,8 @@ const MeasurementForm = (props: any) => {
       }
     }
   }
-
-  const [localStorageFilters, setLocalStorageFilters] = useState(JSON.parse(localStorage.getItem('filters') || '{}'));
-  //localStorage.clear();
-  //console.log("localStorageFilters", localStorageFilters, formValues);
-
+  
+  // TODO: Save and load filters
   const [filterName, setFilterName] = useState<string>("");
   const [savedNames, setSavedNames] = useState<string[]>([]);
   const [selectedSave, setSelectedSave] = useState("");
@@ -203,6 +211,7 @@ const MeasurementForm = (props: any) => {
     //const [savedNames, setSavedNames] = useState<string[]>([]);
     setSavedNames([...savedNames, filterName]);
   }
+
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -249,12 +258,9 @@ const MeasurementForm = (props: any) => {
                 multiple
                 loading={deviceIsLoading || deviceIsFetching}
                 options={deviceNames ? deviceNames : []}
-                value={localStorageFilters && localStorageFilters.deviceNames ? localStorageFilters.deviceNames : (formValues.deviceNames ?? [])}
+                value={formValues.deviceNames ?? []}
                 onChange={(event, newValue) => {
                   handleInputChange("deviceNames", newValue);
-                  let newLocalStorageFilters = { ...localStorageFilters, deviceNames: newValue, groupName: "" };
-                  setLocalStorageFilters(newLocalStorageFilters);
-                  localStorage.setItem('filters', JSON.stringify(newLocalStorageFilters));
                 }}
                 renderInput={(params) => (
                   <TextField {...params} label={props.label} fullWidth />
@@ -268,15 +274,12 @@ const MeasurementForm = (props: any) => {
               <Autocomplete
                 loading={groupIsLoading || groupIsFetching}
                 options={groupName ? groupName : []}
-                value={localStorageFilters && localStorageFilters.groupName ? localStorageFilters.groupName : (formValues.groupName === "" ? "" : formValues.groupName)}
+                value={formValues.groupName === "" ? null : formValues.groupName}
                 isOptionEqualToValue={(option, newValue) => {
                   return option.id === newValue.id;
                 }}
                 onChange={(event, newValue) => {
                   handleInputChange("groupName", newValue !== null ? newValue : "")
-                  let newLocalStorageFilters = { ...localStorageFilters, deviceNames: [], groupName: newValue };
-                  setLocalStorageFilters(newLocalStorageFilters);
-                  localStorage.setItem('filters', JSON.stringify(newLocalStorageFilters));
                 }}
                 renderInput={(params) => (
                   <TextField {...params} label="Group Name" fullWidth />
@@ -288,12 +291,9 @@ const MeasurementForm = (props: any) => {
               <TextField
                 label="Start Time"
                 type="datetime-local"
-                value={localStorageFilters && localStorageFilters.startTime ? localStorageFilters.startTime : formValues.startTime}
+                value={formValues.startTime}
                 onChange={(event) => {
                   handleInputChange("startTime", event.target.value)
-                  let newLocalStorageFilters = { ...localStorageFilters, startTime: event.target.value };
-                  setLocalStorageFilters(newLocalStorageFilters);
-                  localStorage.setItem('filters', JSON.stringify(newLocalStorageFilters));
                 }}
                 required
                 fullWidth
@@ -308,12 +308,9 @@ const MeasurementForm = (props: any) => {
               <TextField
                 label="End Time"
                 type="datetime-local"
-                value={localStorageFilters && localStorageFilters.endTime ? localStorageFilters.endTime : formValues.endTime}
+                value={formValues.endTime}
                 onChange={(event) => {
                   handleInputChange("endTime", event.target.value)
-                  let newLocalStorageFilters = { ...localStorageFilters, endTime: event.target.value };
-                  setLocalStorageFilters(newLocalStorageFilters);
-                  localStorage.setItem('filters', JSON.stringify(newLocalStorageFilters));
                 }}
                 required
                 fullWidth
