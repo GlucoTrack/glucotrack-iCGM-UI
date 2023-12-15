@@ -13,20 +13,18 @@ import dayjs from "dayjs"
 const MeasurementForm = ({ page, ...props }: { page: string, [key: string]: any }) => {
   const dispatch = useDispatch()
   const theme = useTheme()
-  const [localStorageFilters, setLocalStorageFilters] = useState(JSON.parse(localStorage.getItem('filters_' + page) || '{}'));
-  //localStorage.clear();
-  //console.log("localStorageFilters", localStorageFilters);
+  const [localStorageKey, setLocalStorageKey] = useState(JSON.parse(localStorage.getItem('filters_' + page) || '{}'));
   const [errorMessage, setErrorMessage] = useState("")
   const [formValues, setFormValues] = useState({
-    deviceNames: localStorageFilters && localStorageFilters.deviceNames ? localStorageFilters.deviceNames : null as string[] | null,
-    groupName: localStorageFilters && localStorageFilters.groupName ? localStorageFilters.groupName : "",
+    deviceNames: localStorageKey && localStorageKey.deviceNames ? localStorageKey.deviceNames : null as string[] | null,
+    groupName: localStorageKey && localStorageKey.groupName ? localStorageKey.groupName : "",
     // startTime: "",
     // endTime: "",
     //* REMOVE below after testing and keep above
     // deviceNames: ["lab053", "lab055", "lab052"],
     // groupName: "",
-    startTime: localStorageFilters && localStorageFilters.startTime ? localStorageFilters.startTime : dayjs().subtract(30, "minutes").format("YYYY-MM-DDTHH:mm"),
-    endTime: localStorageFilters && localStorageFilters.endTime ? localStorageFilters.endTime : dayjs().format("YYYY-MM-DDTHH:mm"),
+    startTime: localStorageKey && localStorageKey.startTime ? localStorageKey.startTime : dayjs().subtract(30, "minutes").format("YYYY-MM-DDTHH:mm"),
+    endTime: localStorageKey && localStorageKey.endTime ? localStorageKey.endTime : dayjs().format("YYYY-MM-DDTHH:mm"),
   })
   const [savedFilters, setSavedFilters] = useState<string[]>(JSON.parse(localStorage.getItem('filterList_' + page) || '[]'));
   const [filterName, setFilterName] = useState<string>("");
@@ -114,8 +112,8 @@ const MeasurementForm = ({ page, ...props }: { page: string, [key: string]: any 
 
   useEffect(() => {
     if (formValues.deviceNames || formValues.groupName || formValues.startTime || formValues.endTime) {
-        let newLocalStorageFilters = { ...localStorageFilters, deviceNames: formValues.deviceNames, groupName: formValues.groupName, startTime: formValues.startTime, endTime: formValues.endTime };
-        setLocalStorageFilters(newLocalStorageFilters);
+        let newLocalStorageFilters = { ...localStorageKey, deviceNames: formValues.deviceNames, groupName: formValues.groupName, startTime: formValues.startTime, endTime: formValues.endTime };
+        setLocalStorageKey(newLocalStorageFilters);
         localStorage.setItem('filters_' + page, JSON.stringify(newLocalStorageFilters));
         setSelectedFilter(null);
       }
