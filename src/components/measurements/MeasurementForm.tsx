@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react"
 import { useDispatch } from "react-redux"
-import { Autocomplete, Box, Button, Divider, TextField, useTheme } from "@mui/material"
+import { Autocomplete, Box, Button,Divider, Checkbox, FormControlLabel, TextField, useTheme } from "@mui/material"
+
 import Grid from '@mui/system/Unstable_Grid';
 import { useGetDevicesQuery, useGetGroupsQuery } from "@/features/api/apiSlice"
 import Group from "@/interfaces/Group"
@@ -8,6 +9,8 @@ import Device from "@/interfaces/Device"
 import { setFilter } from "@/components/measurements/measurementsSlice"
 import Mobile from "@/interfaces/Mobile"
 import dayjs from "dayjs"
+import utc from "dayjs/plugin/utc"
+dayjs.extend(utc)
 
 //const MeasurementForm = (props: any, page: string) => {
 const MeasurementForm = ({ page, ...props }: { page: string, [key: string]: any }) => {
@@ -23,12 +26,13 @@ const MeasurementForm = ({ page, ...props }: { page: string, [key: string]: any 
     //* REMOVE below after testing and keep above
     // deviceNames: ["lab053", "lab055", "lab052"],
     // groupName: "",
-    startTime: localStorageKey && localStorageKey.startTime ? localStorageKey.startTime : dayjs().subtract(30, "minutes").format("YYYY-MM-DDTHH:mm"),
-    endTime: localStorageKey && localStorageKey.endTime ? localStorageKey.endTime : dayjs().format("YYYY-MM-DDTHH:mm"),
+    startTime: localStorageKey && localStorageKey.startTime ? localStorageKey.startTime : dayjs().utc().subtract(30, "minutes").format("YYYY-MM-DDTHH:mm"),
+    endTime: localStorageKey && localStorageKey.endTime ? localStorageKey.endTime : dayjs().utc().format("YYYY-MM-DDTHH:mm"),
   })
   const [savedFilters, setSavedFilters] = useState<string[]>(JSON.parse(localStorage.getItem('filterList_' + page) || '[]'));
   const [filterName, setFilterName] = useState<string>("");
   const [selectedFilter, setSelectedFilter] = useState(null);
+  const [realtime, setRealtime] = useState(false);
 
   const {
     data: deviceData,
@@ -123,8 +127,8 @@ const MeasurementForm = ({ page, ...props }: { page: string, [key: string]: any 
     setFormValues((prevFormValues) => {
       return {
         ...prevFormValues,
-        startTime: dayjs().subtract(minutes, "minutes").format("YYYY-MM-DDTHH:mm"),
-        endTime: dayjs().format("YYYY-MM-DDTHH:mm"),
+        startTime: dayjs().utc().subtract(minutes, "minutes").format("YYYY-MM-DDTHH:mm"),
+        endTime: dayjs().utc().format("YYYY-MM-DDTHH:mm"),
       }
     })
   }
@@ -320,6 +324,7 @@ const MeasurementForm = ({ page, ...props }: { page: string, [key: string]: any 
                 }}
                 required
                 fullWidth
+                disabled={realtime}
                 InputLabelProps={{
                   shrink:
                     formValues.startTime !== undefined &&
@@ -337,6 +342,7 @@ const MeasurementForm = ({ page, ...props }: { page: string, [key: string]: any 
                 }}
                 required
                 fullWidth
+                disabled={realtime}
                 InputLabelProps={{
                   shrink:
                     formValues.endTime !== undefined && formValues.endTime !== null,
@@ -353,6 +359,19 @@ const MeasurementForm = ({ page, ...props }: { page: string, [key: string]: any 
             <Button onClick={handle30Minutes} sx={{ width: 1, mb: 2 }} variant="outlined" color="primary">Past 30 minutes</Button>
             <Button onClick={handle1Hour} sx={{ width: 1, mb: 2 }} variant="outlined" color="primary">Past 1 hour</Button>
             <Button onClick={handle2Hours} sx={{ width: 1, mb: 2 }} variant="outlined" color="primary">Past 2 hour</Button>
+            <FormControlLabel control={
+              <Checkbox value={realtime} onChange={(event) => {
+                setRealtime(event.target.checked);
+                if (event.target.checked) {
+                  setFormValues((prevFormValues) => {
+                    return {
+                      ...prevFormValues,
+                      endTime: dayjs().utc().add(1, 'days').format("YYYY-MM-DDTHH:mm"),
+                    }
+                  })
+                }
+              }} />
+            } label="Realtime" />
           </Grid>
         </Grid>
         {errorMessage && (
