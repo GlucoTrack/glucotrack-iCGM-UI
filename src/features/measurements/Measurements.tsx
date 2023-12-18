@@ -31,7 +31,7 @@ const Measurements: React.FC = () => {
         // subtitle={`Queried measurements: ${status}`}
         subtitle={`Fill out your criteria and hit submit to see measurements`}
       />
-      <MeasurementForm query={deviceQuery} label={'Device Names'} />
+      <MeasurementForm query={deviceQuery} label={'Device Names'} page={'device'} />
       <MeasurementChart query={query} eventName={'new_measurement__'} />
     </Box>
   )

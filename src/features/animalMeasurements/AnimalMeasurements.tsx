@@ -34,7 +34,7 @@ const AnimalMeasurements: React.FC = () => {
         // subtitle={`Queried measurements: ${status}`}
         subtitle={`Fill out your criteria and hit submit to see measurements`}
       />
-      <MeasurementForm query={mobileQuery} label={'Mobile Names'} />
+      <MeasurementForm query={mobileQuery} label={'Mobile Names'} page={'mobile'} />
       <MeasurementChart query={query} eventName={'new_animal_measurement__'} />
     </Box>
   )

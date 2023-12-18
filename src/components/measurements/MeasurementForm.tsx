@@ -1,8 +1,9 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useDispatch } from "react-redux"
-import { Autocomplete, Box, Button, Checkbox, FormControlLabel, TextField, useTheme } from "@mui/material"
+import { Autocomplete, Box, Button,Divider, Checkbox, FormControlLabel, TextField, useTheme } from "@mui/material"
+
 import Grid from '@mui/system/Unstable_Grid';
-import { useGetGroupsQuery } from "@/features/api/apiSlice"
+import { useGetDevicesQuery, useGetGroupsQuery } from "@/features/api/apiSlice"
 import Group from "@/interfaces/Group"
 import Device from "@/interfaces/Device"
 import { setFilter } from "@/components/measurements/measurementsSlice"
@@ -11,23 +12,26 @@ import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
 dayjs.extend(utc)
 
-const MeasurementForm = (props: any) => {
+//const MeasurementForm = (props: any, page: string) => {
+const MeasurementForm = ({ page, ...props }: { page: string, [key: string]: any }) => {
   const dispatch = useDispatch()
   const theme = useTheme()
+  const [localStorageKey, setLocalStorageKey] = useState(JSON.parse(localStorage.getItem('filters_' + page) || '{}'));
   const [errorMessage, setErrorMessage] = useState("")
   const [formValues, setFormValues] = useState({
-    deviceNames: null as string[] | null,
-    groupName: "",
+    deviceNames: localStorageKey && localStorageKey.deviceNames ? localStorageKey.deviceNames : null as string[] | null,
+    groupName: localStorageKey && localStorageKey.groupName ? localStorageKey.groupName : "",
     // startTime: "",
     // endTime: "",
     //* REMOVE below after testing and keep above
     // deviceNames: ["lab053", "lab055", "lab052"],
     // groupName: "",
-    startTime: dayjs().utc().subtract(30, "minutes").format("YYYY-MM-DDTHH:mm"),
-    endTime: dayjs().utc().format("YYYY-MM-DDTHH:mm"),
-    startTime: dayjs().subtract(30, "minutes").format("YYYY-MM-DDTHH:mm"),
-    endTime: dayjs().format("YYYY-MM-DDTHH:mm"),
+    startTime: localStorageKey && localStorageKey.startTime ? localStorageKey.startTime : dayjs().utc().subtract(30, "minutes").format("YYYY-MM-DDTHH:mm"),
+    endTime: localStorageKey && localStorageKey.endTime ? localStorageKey.endTime : dayjs().utc().format("YYYY-MM-DDTHH:mm"),
   })
+  const [savedFilters, setSavedFilters] = useState<string[]>(JSON.parse(localStorage.getItem('filterList_' + page) || '[]'));
+  const [filterName, setFilterName] = useState<string>("");
+  const [selectedFilter, setSelectedFilter] = useState(null);
   const [realtime, setRealtime] = useState(false);
 
   const {
@@ -110,6 +114,15 @@ const MeasurementForm = (props: any) => {
     })
   }
 
+  useEffect(() => {
+    if (formValues.deviceNames || formValues.groupName || formValues.startTime || formValues.endTime) {
+        let newLocalStorageFilters = { ...localStorageKey, deviceNames: formValues.deviceNames, groupName: formValues.groupName, startTime: formValues.startTime, endTime: formValues.endTime };
+        setLocalStorageKey(newLocalStorageFilters);
+        localStorage.setItem('filters_' + page, JSON.stringify(newLocalStorageFilters));
+        setSelectedFilter(null);
+      }
+  }, [formValues]);
+
   const setPastMinutesRange = (minutes: number) => {
     setFormValues((prevFormValues) => {
       return {
@@ -189,8 +202,81 @@ const MeasurementForm = (props: any) => {
     }
   }
 
+  useEffect(() => {
+    if (savedFilters) {
+      console.log("savedFilters", savedFilters, page);
+      localStorage.setItem('filterList_' + page, JSON.stringify(savedFilters));
+    }
+  }, [savedFilters]);
+    
+  const handleSaveFilter = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!filterName) {
+      setErrorMessage("Please enter a name to save the filter");
+      return;
+    }
+    try {
+      setSavedFilters([...savedFilters, filterName]);
+      setErrorMessage("");
+      localStorage.setItem(filterName + '_' + page, JSON.stringify(formValues));      
+      setFilterName("");
+    } catch (error) {
+      setErrorMessage("Failed to save filter...");
+    }
+  }
+
+  const handleChangeFilter = (filterName: string) => {
+    try {
+      const savedFilter = localStorage.getItem(filterName + '_' + page);
+      if (savedFilter) {
+        setFormValues(JSON.parse(savedFilter));
+      }
+    } catch (error) {
+      setErrorMessage("Failed to load filter...");
+    }
+  }
+
   return (
-    <Box sx={{ flexGrow: 1, mb: 2 }}>
+    <Box sx={{ flexGrow: 1 }}>
+      <form 
+        onSubmit={handleSaveFilter}
+        style={{ marginBottom: 20 }}
+      >
+        <Grid container xs={12}>
+          <Grid xs={9}>
+            <Grid alignItems={"center"} container>
+              <TextField
+                label="Save filter as"
+                value={filterName}
+                onChange={(event) => setFilterName(event.target.value)}
+                style={{ marginRight: "1rem", width: "150px" }}
+              >
+              </TextField>
+              <Button type="submit" variant="outlined" color="primary">
+                Save
+              </Button>
+            </Grid>
+          </Grid>
+
+          <Grid xs={3}>
+            <Autocomplete
+              options={savedFilters ? savedFilters : []}
+              value={selectedFilter}
+              onChange={(event, newValue) => {
+                if (newValue !== null) {
+                  handleChangeFilter(newValue);
+                }
+              }}
+              renderInput={(params) => (
+                <TextField {...params} label="Filters" fullWidth />
+              )}
+            />
+          </Grid>
+        </Grid> 
+      </form>
+
+      <Divider sx={{ mt:3, mb: 3 }} />
+      
       <form onSubmit={handleSubmit}>
         <Grid container spacing={4}>
           <Grid container xs={9} spacing={2}>
@@ -201,7 +287,7 @@ const MeasurementForm = (props: any) => {
                 options={deviceNames ? deviceNames : []}
                 value={formValues.deviceNames ?? []}
                 onChange={(event, newValue) => {
-                  handleInputChange("deviceNames", newValue)
+                  handleInputChange("deviceNames", newValue);
                 }}
                 renderInput={(params) => (
                   <TextField {...params} label={props.label} fullWidth />
@@ -216,6 +302,9 @@ const MeasurementForm = (props: any) => {
                 loading={groupIsLoading || groupIsFetching}
                 options={groupName ? groupName : []}
                 value={formValues.groupName === "" ? null : formValues.groupName}
+                isOptionEqualToValue={(option, newValue) => {
+                  return option.id === newValue.id;
+                }}
                 onChange={(event, newValue) => {
                   handleInputChange("groupName", newValue !== null ? newValue : "")
                 }}
