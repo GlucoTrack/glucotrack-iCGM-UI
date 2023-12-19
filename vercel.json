@@ -1,3 +1,0 @@
-{
-  "ignoreCommand": "if [[ $VERCEL_GIT_COMMIT_REF == refs/pull/* ]]; then echo \"🛑 - Build cancelled\"; exit 0; fi"
-}
