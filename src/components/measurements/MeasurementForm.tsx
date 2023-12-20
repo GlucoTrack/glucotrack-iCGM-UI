@@ -193,6 +193,9 @@ const MeasurementForm = ({
         "filters_" + page,
         JSON.stringify(newLocalStorageFilters),
       )
+      handleSubmit(
+        new Event("submit") as unknown as React.FormEvent<HTMLFormElement>,
+      )
     }
   }, [formValues])
 
@@ -240,7 +243,7 @@ const MeasurementForm = ({
       return
     }
 
-    if (groupName) {
+    if (groupName && groupData && groupData.groups) {
       const groupObject = groupData.groups.find(
         (group: Group) => group.groupName === groupName,
       )
@@ -395,8 +398,8 @@ const MeasurementForm = ({
       <Divider sx={{ mt: 3, mb: 3 }} />
 
       <form onSubmit={handleSubmit}>
-        <Grid container spacing={4}>
-          <Grid container xs={9} spacing={2}>
+        <Grid container spacing={4} alignItems={"start"}>
+          <Grid container xs={8} spacing={2}>
             <Grid xs={5}>
               <Autocomplete
                 multiple
@@ -481,16 +484,16 @@ const MeasurementForm = ({
                 }}
               />
             </Grid>
-            <Grid xs={12}>
+            <Grid xs={12} display={"none"}>
               <Button type="submit" variant="contained" color="primary">
                 Submit
               </Button>
             </Grid>
           </Grid>
-          <Grid xs={3}>
+          <Grid xs={4}>
             <Button
               onClick={handle30Minutes}
-              sx={{ width: 1, mb: 2 }}
+              sx={{ width: 1, mb: 1 }}
               variant="outlined"
               color="primary"
             >
@@ -498,7 +501,7 @@ const MeasurementForm = ({
             </Button>
             <Button
               onClick={handle1Hour}
-              sx={{ width: 1, mb: 2 }}
+              sx={{ width: 1, mb: 1 }}
               variant="outlined"
               color="primary"
             >
@@ -506,7 +509,7 @@ const MeasurementForm = ({
             </Button>
             <Button
               onClick={handle2Hours}
-              sx={{ width: 1, mb: 2 }}
+              sx={{ width: 1, mb: 0 }}
               variant="outlined"
               color="primary"
             >
