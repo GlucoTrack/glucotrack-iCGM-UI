@@ -1,8 +1,21 @@
 import React, { useEffect, useState } from "react"
 import { useDispatch } from "react-redux"
-import { Autocomplete, Box, Button,Divider, Checkbox, FormControlLabel, TextField, useTheme } from "@mui/material"
-
-import Grid from '@mui/system/Unstable_Grid';
+import {
+  Autocomplete,
+  Box,
+  Button,
+  Divider,
+  Checkbox,
+  FormControlLabel,
+  TextField,
+  useTheme,
+  IconButton,
+} from "@mui/material"
+import {
+  BookmarkRemoveOutlined as RemoveFilter,
+  BookmarkAddOutlined as AddFilter,
+} from "@mui/icons-material"
+import Grid from "@mui/system/Unstable_Grid"
 import { useGetDevicesQuery, useGetGroupsQuery } from "@/features/api/apiSlice"
 import Group from "@/interfaces/Group"
 import Device from "@/interfaces/Device"
@@ -13,26 +26,54 @@ import utc from "dayjs/plugin/utc"
 dayjs.extend(utc)
 
 //const MeasurementForm = (props: any, page: string) => {
-const MeasurementForm = ({ page, ...props }: { page: string, [key: string]: any }) => {
+const MeasurementForm = ({
+  page,
+  ...props
+}: {
+  page: string
+  [key: string]: any
+}) => {
   const dispatch = useDispatch()
   const theme = useTheme()
-  const [localStorageKey, setLocalStorageKey] = useState(JSON.parse(localStorage.getItem('filters_' + page) || '{}'));
+  const [localStorageKey, setLocalStorageKey] = useState(
+    JSON.parse(localStorage.getItem("filters_" + page) || "{}"),
+  )
   const [errorMessage, setErrorMessage] = useState("")
   const [formValues, setFormValues] = useState({
-    deviceNames: localStorageKey && localStorageKey.deviceNames ? localStorageKey.deviceNames : null as string[] | null,
-    groupName: localStorageKey && localStorageKey.groupName ? localStorageKey.groupName : "",
+    deviceNames:
+      localStorageKey && localStorageKey.deviceNames
+        ? localStorageKey.deviceNames
+        : (null as string[] | null),
+    groupName:
+      localStorageKey && localStorageKey.groupName
+        ? localStorageKey.groupName
+        : "",
     // startTime: "",
     // endTime: "",
     //* REMOVE below after testing and keep above
     // deviceNames: ["lab053", "lab055", "lab052"],
     // groupName: "",
-    startTime: localStorageKey && localStorageKey.startTime ? localStorageKey.startTime : dayjs().utc().subtract(30, "minutes").format("YYYY-MM-DDTHH:mm"),
-    endTime: localStorageKey && localStorageKey.endTime ? localStorageKey.endTime : dayjs().utc().format("YYYY-MM-DDTHH:mm"),
+    startTime:
+      localStorageKey && localStorageKey.startTime
+        ? localStorageKey.startTime
+        : dayjs().utc().subtract(30, "minutes").format("YYYY-MM-DDTHH:mm"),
+    endTime:
+      localStorageKey && localStorageKey.endTime
+        ? localStorageKey.endTime
+        : dayjs().utc().format("YYYY-MM-DDTHH:mm"),
+    realtime:
+      localStorageKey && localStorageKey.realtime
+        ? localStorageKey.realtime
+        : false,
   })
-  const [savedFilters, setSavedFilters] = useState<string[]>(JSON.parse(localStorage.getItem('filterList_' + page) || '[]'));
-  const [filterName, setFilterName] = useState<string>("");
-  const [selectedFilter, setSelectedFilter] = useState(null);
-  const [realtime, setRealtime] = useState(false);
+  const [savedFilters, setSavedFilters] = useState<string[]>(
+    JSON.parse(localStorage.getItem("filterList_" + page) || "[]"),
+  )
+  const [filterName, setFilterName] = useState<string>("")
+  const [selectedFilter, setSelectedFilter] = useState(
+    localStorage.getItem("selected_filter_" + page) || null,
+  )
+  const [filterApplied, setFilterApplied] = useState(selectedFilter !== null)
 
   const {
     data: deviceData,
@@ -90,7 +131,7 @@ const MeasurementForm = ({ page, ...props }: { page: string, [key: string]: any 
 
   const handleInputChange = (
     field: string,
-    value: string | string[] | null,
+    value: string | string[] | boolean | null,
   ) => {
     setFormValues((prevFormValues) => {
       if (field === "deviceNames") {
@@ -105,6 +146,19 @@ const MeasurementForm = ({ page, ...props }: { page: string, [key: string]: any 
           [field]: value !== null ? (value as string) : "",
           deviceNames: [],
         }
+      } else if (field === "realtime") {
+        if (value !== null && value === true) {
+          return {
+            ...prevFormValues,
+            [field]: true,
+            endTime: dayjs().utc().add(1, "days").format("YYYY-MM-DDTHH:mm"),
+          }
+        } else {
+          return {
+            ...prevFormValues,
+            [field]: false,
+          }
+        }
       } else {
         return {
           ...prevFormValues,
@@ -112,22 +166,47 @@ const MeasurementForm = ({ page, ...props }: { page: string, [key: string]: any 
         }
       }
     })
+    if (filterApplied) {
+      setSelectedFilter(null)
+      setFilterApplied(false)
+    }
   }
 
   useEffect(() => {
-    if (formValues.deviceNames || formValues.groupName || formValues.startTime || formValues.endTime) {
-        let newLocalStorageFilters = { ...localStorageKey, deviceNames: formValues.deviceNames, groupName: formValues.groupName, startTime: formValues.startTime, endTime: formValues.endTime };
-        setLocalStorageKey(newLocalStorageFilters);
-        localStorage.setItem('filters_' + page, JSON.stringify(newLocalStorageFilters));
-        setSelectedFilter(null);
+    if (
+      formValues.deviceNames ||
+      formValues.groupName ||
+      formValues.startTime ||
+      formValues.endTime ||
+      formValues.realtime
+    ) {
+      let newLocalStorageFilters = {
+        ...localStorageKey,
+        deviceNames: formValues.deviceNames,
+        groupName: formValues.groupName,
+        startTime: formValues.startTime,
+        endTime: formValues.endTime,
+        realtime: formValues.realtime,
       }
-  }, [formValues]);
+      setLocalStorageKey(newLocalStorageFilters)
+      localStorage.setItem(
+        "filters_" + page,
+        JSON.stringify(newLocalStorageFilters),
+      )
+      handleSubmit(
+        new Event("submit") as unknown as React.FormEvent<HTMLFormElement>,
+      )
+    }
+  }, [formValues])
 
   const setPastMinutesRange = (minutes: number) => {
     setFormValues((prevFormValues) => {
       return {
         ...prevFormValues,
-        startTime: dayjs().utc().subtract(minutes, "minutes").format("YYYY-MM-DDTHH:mm"),
+        startTime: dayjs()
+          .utc()
+          .subtract(minutes, "minutes")
+          .format("YYYY-MM-DDTHH:mm"),
         endTime: dayjs().utc().format("YYYY-MM-DDTHH:mm"),
       }
     })
@@ -148,7 +227,7 @@ const MeasurementForm = ({ page, ...props }: { page: string, [key: string]: any 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    const { deviceNames, groupName, startTime, endTime } = formValues
+    const { deviceNames, groupName, startTime, endTime, realtime } = formValues
     let deviceNamesFromGroup: string[] = []
 
     if (
@@ -164,7 +243,7 @@ const MeasurementForm = ({ page, ...props }: { page: string, [key: string]: any 
       return
     }
 
-    if (groupName) {
+    if (groupName && groupData && groupData.groups) {
       const groupObject = groupData.groups.find(
         (group: Group) => group.groupName === groupName,
       )
@@ -188,11 +267,12 @@ const MeasurementForm = ({ page, ...props }: { page: string, [key: string]: any 
               deviceNamesFromGroup.length > 0
                 ? deviceNamesFromGroup
                 : deviceNames && deviceNames.length > 0
-                  ? deviceNames
-                  : [],
+                ? deviceNames
+                : [],
             groupName: groupName ? groupName : "",
             startTime,
             endTime,
+            realtime,
           }),
         )
         setErrorMessage("")
@@ -204,44 +284,61 @@ const MeasurementForm = ({ page, ...props }: { page: string, [key: string]: any 
 
   useEffect(() => {
     if (savedFilters) {
-      console.log("savedFilters", savedFilters, page);
-      localStorage.setItem('filterList_' + page, JSON.stringify(savedFilters));
+      localStorage.setItem("filterList_" + page, JSON.stringify(savedFilters))
     }
-  }, [savedFilters]);
-    
+  }, [savedFilters])
+
   const handleSaveFilter = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+    event.preventDefault()
     if (!filterName) {
-      setErrorMessage("Please enter a name to save the filter");
-      return;
+      setErrorMessage("Please enter a name to save the filter")
+      return
     }
     try {
-      setSavedFilters([...savedFilters, filterName]);
-      setErrorMessage("");
-      localStorage.setItem(filterName + '_' + page, JSON.stringify(formValues));      
-      setFilterName("");
+      const newSavedFilters = [...savedFilters, filterName]
+      newSavedFilters.sort((a, b) => a.localeCompare(b))
+      setSavedFilters(newSavedFilters)
+      localStorage.setItem("savedFilters", JSON.stringify(newSavedFilters))
+      localStorage.setItem(filterName + "_" + page, JSON.stringify(formValues))
+      setSelectedFilter(filterName)
+      setErrorMessage("")
+      setFilterName("")
     } catch (error) {
-      setErrorMessage("Failed to save filter...");
+      setErrorMessage("Failed to save filter...")
     }
   }
 
+  useEffect(() => {
+    if (selectedFilter) {
+      localStorage.setItem("selected_filter_" + page, selectedFilter)
+      setFilterApplied(true)
+    } else {
+      localStorage.removeItem("selected_filter_" + page)
+    }
+  }, [selectedFilter])
+
   const handleChangeFilter = (filterName: string) => {
     try {
-      const savedFilter = localStorage.getItem(filterName + '_' + page);
+      const savedFilter = localStorage.getItem(filterName + "_" + page)
       if (savedFilter) {
-        setFormValues(JSON.parse(savedFilter));
+        setFormValues(JSON.parse(savedFilter))
+        setSelectedFilter(filterName)
       }
     } catch (error) {
-      setErrorMessage("Failed to load filter...");
+      setErrorMessage("Failed to load filter...")
     }
+  }
+
+  const handleDeleteFilter = (deviceToDelete: any) => {
+    setSavedFilters((prevFilters) =>
+      prevFilters.filter((device) => device !== deviceToDelete),
+    )
+    setSelectedFilter(null)
   }
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <form 
-        onSubmit={handleSaveFilter}
-        style={{ marginBottom: 20 }}
-      >
+      <form onSubmit={handleSaveFilter} style={{ marginBottom: 20 }}>
         <Grid container xs={12}>
           <Grid xs={9}>
             <Grid alignItems={"center"} container>
@@ -250,10 +347,9 @@ const MeasurementForm = ({ page, ...props }: { page: string, [key: string]: any 
                 value={filterName}
                 onChange={(event) => setFilterName(event.target.value)}
                 style={{ marginRight: "1rem", width: "150px" }}
-              >
-              </TextField>
+              ></TextField>
               <Button type="submit" variant="outlined" color="primary">
-                Save
+                <AddFilter />
               </Button>
             </Grid>
           </Grid>
@@ -264,22 +360,46 @@ const MeasurementForm = ({ page, ...props }: { page: string, [key: string]: any 
               value={selectedFilter}
               onChange={(event, newValue) => {
                 if (newValue !== null) {
-                  handleChangeFilter(newValue);
+                  handleChangeFilter(newValue)
+                } else {
+                  setSelectedFilter(null)
                 }
               }}
               renderInput={(params) => (
-                <TextField {...params} label="Filters" fullWidth />
+                <TextField
+                  {...params}
+                  label="Filters"
+                  fullWidth
+                  InputProps={{
+                    ...params.InputProps,
+                    endAdornment: (
+                      <React.Fragment>
+                        {params.InputProps.endAdornment}
+                        {selectedFilter && (
+                          <IconButton
+                            title="Delete filter"
+                            onClick={() =>
+                              handleDeleteFilter(params.inputProps.value)
+                            }
+                          >
+                            <RemoveFilter />
+                          </IconButton>
+                        )}
+                      </React.Fragment>
+                    ),
+                  }}
+                />
               )}
             />
           </Grid>
-        </Grid> 
+        </Grid>
       </form>
 
-      <Divider sx={{ mt:3, mb: 3 }} />
-      
+      <Divider sx={{ mt: 3, mb: 3 }} />
+
       <form onSubmit={handleSubmit}>
-        <Grid container spacing={4}>
-          <Grid container xs={9} spacing={2}>
+        <Grid container spacing={4} alignItems={"start"}>
+          <Grid container xs={8} spacing={2}>
             <Grid xs={5}>
               <Autocomplete
                 multiple
@@ -287,7 +407,7 @@ const MeasurementForm = ({ page, ...props }: { page: string, [key: string]: any 
                 options={deviceNames ? deviceNames : []}
                 value={formValues.deviceNames ?? []}
                 onChange={(event, newValue) => {
-                  handleInputChange("deviceNames", newValue);
+                  handleInputChange("deviceNames", newValue)
                 }}
                 renderInput={(params) => (
                   <TextField {...params} label={props.label} fullWidth />
@@ -295,18 +415,32 @@ const MeasurementForm = ({ page, ...props }: { page: string, [key: string]: any 
               />
             </Grid>
             <Grid xs={2}>
-              <Box sx={{ display: 'flex', height: 1, justifyContent: 'center', alignItems: 'center' }}>OR</Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  height: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                OR
+              </Box>
             </Grid>
             <Grid xs={5}>
               <Autocomplete
                 loading={groupIsLoading || groupIsFetching}
                 options={groupName ? groupName : []}
-                value={formValues.groupName === "" ? null : formValues.groupName}
+                value={
+                  formValues.groupName === "" ? null : formValues.groupName
+                }
                 isOptionEqualToValue={(option, newValue) => {
-                  return option.id === newValue.id;
+                  return option.id === newValue.id
                 }}
                 onChange={(event, newValue) => {
-                  handleInputChange("groupName", newValue !== null ? newValue : "")
+                  handleInputChange(
+                    "groupName",
+                    newValue !== null ? newValue : "",
+                  )
                 }}
                 renderInput={(params) => (
                   <TextField {...params} label="Group Name" fullWidth />
@@ -324,7 +458,7 @@ const MeasurementForm = ({ page, ...props }: { page: string, [key: string]: any 
                 }}
                 required
                 fullWidth
-                disabled={realtime}
+                disabled={formValues.realtime}
                 InputLabelProps={{
                   shrink:
                     formValues.startTime !== undefined &&
@@ -342,36 +476,56 @@ const MeasurementForm = ({ page, ...props }: { page: string, [key: string]: any 
                 }}
                 required
                 fullWidth
-                disabled={realtime}
+                disabled={formValues.realtime}
                 InputLabelProps={{
                   shrink:
-                    formValues.endTime !== undefined && formValues.endTime !== null,
+                    formValues.endTime !== undefined &&
+                    formValues.endTime !== null,
                 }}
               />
             </Grid>
-            <Grid xs={12}>
+            <Grid xs={12} display={"none"}>
               <Button type="submit" variant="contained" color="primary">
                 Submit
               </Button>
             </Grid>
           </Grid>
-          <Grid xs={3}>
-            <Button onClick={handle30Minutes} sx={{ width: 1, mb: 2 }} variant="outlined" color="primary">Past 30 minutes</Button>
-            <Button onClick={handle1Hour} sx={{ width: 1, mb: 2 }} variant="outlined" color="primary">Past 1 hour</Button>
-            <Button onClick={handle2Hours} sx={{ width: 1, mb: 2 }} variant="outlined" color="primary">Past 2 hour</Button>
-            <FormControlLabel control={
-              <Checkbox value={realtime} onChange={(event) => {
-                setRealtime(event.target.checked);
-                if (event.target.checked) {
-                  setFormValues((prevFormValues) => {
-                    return {
-                      ...prevFormValues,
-                      endTime: dayjs().utc().add(1, 'days').format("YYYY-MM-DDTHH:mm"),
-                    }
-                  })
-                }
-              }} />
-            } label="Realtime" />
+          <Grid xs={4}>
+            <Button
+              onClick={handle30Minutes}
+              sx={{ width: 1, mb: 1 }}
+              variant="outlined"
+              color="primary"
+            >
+              Past 30 minutes
+            </Button>
+            <Button
+              onClick={handle1Hour}
+              sx={{ width: 1, mb: 1 }}
+              variant="outlined"
+              color="primary"
+            >
+              Past 1 hour
+            </Button>
+            <Button
+              onClick={handle2Hours}
+              sx={{ width: 1, mb: 0 }}
+              variant="outlined"
+              color="primary"
+            >
+              Past 2 hour
+            </Button>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={formValues.realtime || false}
+                  onChange={(event) => {
+                    handleInputChange("realtime", event.target.checked)
+                  }}
+                />
+              }
+              label="Realtime"
+            />
           </Grid>
         </Grid>
         {errorMessage && (
@@ -381,7 +535,7 @@ const MeasurementForm = ({ page, ...props }: { page: string, [key: string]: any 
         )}
         {deviceContent}
         {groupContent}
-      </form >
+      </form>
     </Box>
   )
 }
