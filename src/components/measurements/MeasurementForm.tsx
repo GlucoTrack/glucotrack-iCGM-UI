@@ -58,6 +58,10 @@ const MeasurementForm = ({
       localStorageKey && localStorageKey.endTime
         ? localStorageKey.endTime
         : dayjs().utc().format("YYYY-MM-DDTHH:mm"),
+    realtime:
+      localStorageKey && localStorageKey.realtime
+        ? localStorageKey.realtime
+        : false,
   })
   const [savedFilters, setSavedFilters] = useState<string[]>(
     JSON.parse(localStorage.getItem("filterList_" + page) || "[]"),
@@ -65,9 +69,6 @@ const MeasurementForm = ({
   const [filterName, setFilterName] = useState<string>("")
   const [selectedFilter, setSelectedFilter] = useState(
     localStorage.getItem("selected_filter_" + page) || null,
-  )
-  const [realtime, setRealtime] = useState(
-    localStorage.getItem("realtime_" + page) === "true" || false,
   )
 
   const {
@@ -155,7 +156,8 @@ const MeasurementForm = ({
       formValues.deviceNames ||
       formValues.groupName ||
       formValues.startTime ||
-      formValues.endTime
+      formValues.endTime ||
+      formValues.realtime
     ) {
       let newLocalStorageFilters = {
         ...localStorageKey,
@@ -163,12 +165,19 @@ const MeasurementForm = ({
         groupName: formValues.groupName,
         startTime: formValues.startTime,
         endTime: formValues.endTime,
+        realtime: formValues.realtime,
       }
       setLocalStorageKey(newLocalStorageFilters)
       localStorage.setItem(
         "filters_" + page,
         JSON.stringify(newLocalStorageFilters),
       )
+    }
+
+    if (selectedFilter) {
+      console.log("selectedFilter", selectedFilter)
+      setSelectedFilter(null)
+      localStorage.removeItem("selected_filter_" + page)
     }
   }, [formValues])
 
@@ -200,7 +209,7 @@ const MeasurementForm = ({
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    const { deviceNames, groupName, startTime, endTime } = formValues
+    const { deviceNames, groupName, startTime, endTime, realtime } = formValues
     let deviceNamesFromGroup: string[] = []
 
     if (
@@ -245,6 +254,7 @@ const MeasurementForm = ({
             groupName: groupName ? groupName : "",
             startTime,
             endTime,
+            realtime,
           }),
         )
         setErrorMessage("")
@@ -256,7 +266,6 @@ const MeasurementForm = ({
 
   useEffect(() => {
     if (savedFilters) {
-      //console.log("savedFilters", savedFilters, page);
       localStorage.setItem("filterList_" + page, JSON.stringify(savedFilters))
     }
   }, [savedFilters])
@@ -268,9 +277,13 @@ const MeasurementForm = ({
       return
     }
     try {
-      setSavedFilters([...savedFilters, filterName])
-      setErrorMessage("")
+      const newSavedFilters = [...savedFilters, filterName]
+      newSavedFilters.sort((a, b) => a.localeCompare(b))
+      setSavedFilters(newSavedFilters)
+      localStorage.setItem("savedFilters", JSON.stringify(newSavedFilters))
       localStorage.setItem(filterName + "_" + page, JSON.stringify(formValues))
+      setSelectedFilter(filterName)
+      setErrorMessage("")
       setFilterName("")
     } catch (error) {
       setErrorMessage("Failed to save filter...")
@@ -298,17 +311,11 @@ const MeasurementForm = ({
   }
 
   const handleDeleteFilter = (deviceToDelete: any) => {
-    console.log("handleDeleteFilter", deviceToDelete)
     setSavedFilters((prevFilters) =>
       prevFilters.filter((device) => device !== deviceToDelete),
     )
     setSelectedFilter(null)
   }
-
-  useEffect(() => {
-    localStorage.setItem("realtime_" + page, realtime ? "true" : "false")
-    console.log("realtime", realtime, localStorage.getItem("realtime_" + page))
-  }, [realtime])
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -432,7 +439,7 @@ const MeasurementForm = ({
                 }}
                 required
                 fullWidth
-                disabled={realtime}
+                disabled={formValues.realtime}
                 InputLabelProps={{
                   shrink:
                     formValues.startTime !== undefined &&
@@ -450,7 +457,7 @@ const MeasurementForm = ({
                 }}
                 required
                 fullWidth
-                disabled={realtime}
+                disabled={formValues.realtime}
                 InputLabelProps={{
                   shrink:
                     formValues.endTime !== undefined &&
@@ -492,17 +499,24 @@ const MeasurementForm = ({
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={realtime}
+                  checked={formValues.realtime || false}
                   onChange={(event) => {
-                    setRealtime(event.target.checked)
                     if (event.target.checked) {
                       setFormValues((prevFormValues) => {
                         return {
                           ...prevFormValues,
+                          realtime: event.target.checked,
                           endTime: dayjs()
                             .utc()
                             .add(1, "days")
                             .format("YYYY-MM-DDTHH:mm"),
+                        }
+                      })
+                    } else {
+                      setFormValues((prevFormValues) => {
+                        return {
+                          ...prevFormValues,
+                          realtime: event.target.checked,
                         }
                       })
                     }
