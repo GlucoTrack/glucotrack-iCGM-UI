@@ -11,7 +11,10 @@ import {
   useTheme,
   IconButton,
 } from "@mui/material"
-import DeleteIcon from "@mui/icons-material/BookmarkRemoveOutlined"
+import {
+  BookmarkRemoveOutlined as RemoveFilter,
+  BookmarkAddOutlined as AddFilter,
+} from "@mui/icons-material"
 import Grid from "@mui/system/Unstable_Grid"
 import { useGetDevicesQuery, useGetGroupsQuery } from "@/features/api/apiSlice"
 import Group from "@/interfaces/Group"
@@ -70,6 +73,7 @@ const MeasurementForm = ({
   const [selectedFilter, setSelectedFilter] = useState(
     localStorage.getItem("selected_filter_" + page) || null,
   )
+  const [filterApplied, setFilterApplied] = useState(selectedFilter !== null)
 
   const {
     data: deviceData,
@@ -127,7 +131,7 @@ const MeasurementForm = ({
 
   const handleInputChange = (
     field: string,
-    value: string | string[] | null,
+    value: string | string[] | boolean | null,
   ) => {
     setFormValues((prevFormValues) => {
       if (field === "deviceNames") {
@@ -142,6 +146,19 @@ const MeasurementForm = ({
           [field]: value !== null ? (value as string) : "",
           deviceNames: [],
         }
+      } else if (field === "realtime") {
+        if (value !== null && value === true) {
+          return {
+            ...prevFormValues,
+            [field]: true,
+            endTime: dayjs().utc().add(1, "days").format("YYYY-MM-DDTHH:mm"),
+          }
+        } else {
+          return {
+            ...prevFormValues,
+            [field]: false,
+          }
+        }
       } else {
         return {
           ...prevFormValues,
@@ -149,6 +166,10 @@ const MeasurementForm = ({
         }
       }
     })
+    if (filterApplied) {
+      setSelectedFilter(null)
+      setFilterApplied(false)
+    }
   }
 
   useEffect(() => {
@@ -172,12 +193,6 @@ const MeasurementForm = ({
         "filters_" + page,
         JSON.stringify(newLocalStorageFilters),
       )
-    }
-
-    if (selectedFilter) {
-      console.log("selectedFilter", selectedFilter)
-      setSelectedFilter(null)
-      localStorage.removeItem("selected_filter_" + page)
     }
   }, [formValues])
 
@@ -293,6 +308,7 @@ const MeasurementForm = ({
   useEffect(() => {
     if (selectedFilter) {
       localStorage.setItem("selected_filter_" + page, selectedFilter)
+      setFilterApplied(true)
     } else {
       localStorage.removeItem("selected_filter_" + page)
     }
@@ -330,7 +346,7 @@ const MeasurementForm = ({
                 style={{ marginRight: "1rem", width: "150px" }}
               ></TextField>
               <Button type="submit" variant="outlined" color="primary">
-                Save
+                <AddFilter />
               </Button>
             </Grid>
           </Grid>
@@ -363,7 +379,7 @@ const MeasurementForm = ({
                               handleDeleteFilter(params.inputProps.value)
                             }
                           >
-                            <DeleteIcon />
+                            <RemoveFilter />
                           </IconButton>
                         )}
                       </React.Fragment>
@@ -501,25 +517,7 @@ const MeasurementForm = ({
                 <Checkbox
                   checked={formValues.realtime || false}
                   onChange={(event) => {
-                    if (event.target.checked) {
-                      setFormValues((prevFormValues) => {
-                        return {
-                          ...prevFormValues,
-                          realtime: event.target.checked,
-                          endTime: dayjs()
-                            .utc()
-                            .add(1, "days")
-                            .format("YYYY-MM-DDTHH:mm"),
-                        }
-                      })
-                    } else {
-                      setFormValues((prevFormValues) => {
-                        return {
-                          ...prevFormValues,
-                          realtime: event.target.checked,
-                        }
-                      })
-                    }
+                    handleInputChange("realtime", event.target.checked)
                   }}
                 />
               }
