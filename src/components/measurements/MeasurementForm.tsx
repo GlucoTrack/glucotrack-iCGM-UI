@@ -406,6 +406,9 @@ const MeasurementForm = ({
                 loading={deviceIsLoading || deviceIsFetching}
                 options={deviceNames ? deviceNames : []}
                 value={formValues.deviceNames ?? []}
+                isOptionEqualToValue={(option, newValue) => {
+                  return option.id === newValue.id
+                }}
                 onChange={(event, newValue) => {
                   handleInputChange("deviceNames", newValue)
                 }}
