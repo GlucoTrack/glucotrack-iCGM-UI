@@ -56,11 +56,11 @@ const MeasurementForm = ({
     startTime:
       localStorageKey && localStorageKey.startTime
         ? localStorageKey.startTime
-        : dayjs().utc().subtract(30, "minutes").format("YYYY-MM-DDTHH:mm"),
+        : dayjs().subtract(30, "minutes").format("YYYY-MM-DDTHH:mm"),
     endTime:
       localStorageKey && localStorageKey.endTime
         ? localStorageKey.endTime
-        : dayjs().utc().format("YYYY-MM-DDTHH:mm"),
+        : dayjs().format("YYYY-MM-DDTHH:mm"),
     realtime:
       localStorageKey && localStorageKey.realtime
         ? localStorageKey.realtime
@@ -151,7 +151,7 @@ const MeasurementForm = ({
           return {
             ...prevFormValues,
             [field]: true,
-            endTime: dayjs().utc().add(1, "days").format("YYYY-MM-DDTHH:mm"),
+            endTime: dayjs().add(1, "days").format("YYYY-MM-DDTHH:mm"),
           }
         } else {
           return {
@@ -204,10 +204,9 @@ const MeasurementForm = ({
       return {
         ...prevFormValues,
         startTime: dayjs()
-          .utc()
           .subtract(minutes, "minutes")
           .format("YYYY-MM-DDTHH:mm"),
-        endTime: dayjs().utc().format("YYYY-MM-DDTHH:mm"),
+        endTime: dayjs().format("YYYY-MM-DDTHH:mm"),
       }
     })
   }
@@ -229,6 +228,9 @@ const MeasurementForm = ({
 
     const { deviceNames, groupName, startTime, endTime, realtime } = formValues
     let deviceNamesFromGroup: string[] = []
+
+    const utcStartTime = dayjs(startTime).utc().format("YYYY-MM-DDTHH:mm")
+    const utcEndTime = dayjs(endTime).utc().format("YYYY-MM-DDTHH:mm")
 
     if (
       (deviceNames && deviceNames.length > 0 && groupName) ||
@@ -267,11 +269,11 @@ const MeasurementForm = ({
               deviceNamesFromGroup.length > 0
                 ? deviceNamesFromGroup
                 : deviceNames && deviceNames.length > 0
-                ? deviceNames
-                : [],
+                  ? deviceNames
+                  : [],
             groupName: groupName ? groupName : "",
-            startTime,
-            endTime,
+            startTime: utcStartTime,
+            endTime: utcEndTime,
             realtime,
           }),
         )

@@ -15,6 +15,8 @@ import {
 import MeasurementGrid from "./MeasurementGrid"
 import { socket } from '../../utils/socket'
 import dayjs from "dayjs"
+import utc from "dayjs/plugin/utc"
+dayjs.extend(utc)
 
 const dateFormatter = (date: any) => {
   if (date) {
@@ -156,7 +158,7 @@ const MeasurementChart = (props: any) => {
         setTempEndZoomArea('')
         return
       }
-      
+
       setEndZoomArea(tempEndZoomArea)
       setStartZoomArea(tempStartZoomArea)
       setTempStartZoomArea('')
@@ -173,7 +175,7 @@ const MeasurementChart = (props: any) => {
       for (const deviceName of deviceNames) {
         socket.on(props.eventName + deviceName, (data: any) => {
           let date = new Date(data.date)
-          if (date >= new Date(startTime) && date <= new Date(endTime)) {
+          if (date >= dayjs(startTime).utc().toDate() && date <= dayjs(endTime).utc().toDate()) {
             setMeasurements((oldMeasurements: any) => {
               let newMeasurements = []
               for (let measurement of oldMeasurements) {
