@@ -229,8 +229,8 @@ const MeasurementForm = ({
     const { deviceNames, groupName, startTime, endTime, realtime } = formValues
     let deviceNamesFromGroup: string[] = []
 
-    const utcStartTime = dayjs(startTime).utc().format("YYYY-MM-DDTHH:mm")
-    const utcEndTime = dayjs(endTime).utc().format("YYYY-MM-DDTHH:mm")
+    const utcStartTime = dayjs(startTime).utc().toISOString()
+    const utcEndTime = dayjs(endTime).utc().toISOString()
 
     if (
       (deviceNames && deviceNames.length > 0 && groupName) ||
