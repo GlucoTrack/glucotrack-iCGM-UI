@@ -175,7 +175,7 @@ const MeasurementChart = (props: any) => {
       for (const deviceName of deviceNames) {
         socket.on(props.eventName + deviceName, (data: any) => {
           let date = new Date(data.date)
-          if (date >= dayjs(startTime + 'Z').utc().toDate() && date <= dayjs(endTime + 'Z').utc().toDate()) {
+          if (date >= dayjs(startTime).utc().toDate() && date <= dayjs(endTime).utc().toDate()) {
             setMeasurements((oldMeasurements: any) => {
               let newMeasurements = []
               for (let measurement of oldMeasurements) {
