@@ -21,6 +21,8 @@ import Users from "@/features/users/Users"
 import New from "@/features/new/New"
 import { useAppSelector } from "@/hooks/useStore"
 
+import "./index.css"
+
 function App() {
   const mode = useAppSelector((state) => state.navbar.mode)
   let theme = useMemo(() => createTheme(themeSettings(mode)), [mode])
