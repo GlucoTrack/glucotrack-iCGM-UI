@@ -5,6 +5,7 @@ interface MeasurementState {
   groupName: string
   startTime: string
   endTime: string
+  realtime: boolean
 }
 
 const initialState: MeasurementState = {
@@ -12,6 +13,7 @@ const initialState: MeasurementState = {
   groupName: "",
   startTime: "",
   endTime: "",
+  realtime: false,
 }
 
 export const measurementSlice = createSlice({
@@ -19,11 +21,12 @@ export const measurementSlice = createSlice({
   initialState,
   reducers: {
     setFilter: (state, action: PayloadAction<MeasurementState>) => {
-      const { deviceNames, groupName, startTime, endTime } = action.payload
+      const { deviceNames, groupName, startTime, endTime, realtime } = action.payload
       state.deviceNames = deviceNames
       state.groupName = groupName
       state.startTime = startTime
       state.endTime = endTime
+      state.realtime = realtime
     },
     resetFilter: (state) => {
       return initialState

@@ -5,6 +5,7 @@ import MeasurementForm from "@/components/measurements/MeasurementForm"
 import { useAppSelector } from "@/hooks/useStore"
 import { useGetMeasurementsByDeviceNamesQuery } from "@/features/api/apiSlice"
 import MeasurementChart from "@/components/measurements/MeasurementChart"
+import { useGetDevicesQuery } from "@/features/api/apiSlice"
 
 const Measurements: React.FC = () => {
   const deviceNames = useAppSelector((state) => state.measurements.deviceNames)
@@ -21,6 +22,7 @@ const Measurements: React.FC = () => {
       endTime: endTime,
     }, { skip: deviceNamesString.length === 0 })
 
+  const deviceQuery = useGetDevicesQuery({})
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
@@ -29,8 +31,8 @@ const Measurements: React.FC = () => {
         // subtitle={`Queried measurements: ${status}`}
         subtitle={`Fill out your criteria and hit submit to see measurements`}
       />
-      <MeasurementForm />
-      <MeasurementChart query={query} />
+      <MeasurementForm query={deviceQuery} label={'Device Names'} page={'device'} />
+      <MeasurementChart query={query} eventName={'new_measurement__'} />
     </Box>
   )
 }
