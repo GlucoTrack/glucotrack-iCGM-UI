@@ -223,6 +223,10 @@ const MeasurementForm = ({
     setPastMinutesRange(120)
   }
 
+  const handle24Hours = () => {
+    setPastMinutesRange(1440)
+  }
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
@@ -243,6 +247,16 @@ const MeasurementForm = ({
     if (!startTime || !endTime) {
       setErrorMessage("Please select start and end date")
       return
+    }
+
+    if (startTime && endTime) {
+      const start = new Date(startTime)
+      const end = new Date(endTime)
+      const diffHours = Math.abs(end.getTime() - start.getTime()) / 3600000 // Convert milliseconds to hours
+      if (diffHours > 24) {
+        setErrorMessage("The time difference should not be more than 24 hours")
+        return
+      }
     }
 
     if (groupName && groupData && groupData.groups) {
@@ -269,8 +283,8 @@ const MeasurementForm = ({
               deviceNamesFromGroup.length > 0
                 ? deviceNamesFromGroup
                 : deviceNames && deviceNames.length > 0
-                  ? deviceNames
-                  : [],
+                ? deviceNames
+                : [],
             groupName: groupName ? groupName : "",
             startTime: utcStartTime,
             endTime: utcEndTime,
@@ -408,9 +422,6 @@ const MeasurementForm = ({
                 loading={deviceIsLoading || deviceIsFetching}
                 options={deviceNames ? deviceNames : []}
                 value={formValues.deviceNames ?? []}
-                isOptionEqualToValue={(option, newValue) => {
-                  return option.id === newValue.id
-                }}
                 onChange={(event, newValue) => {
                   handleInputChange("deviceNames", newValue)
                 }}
@@ -496,30 +507,48 @@ const MeasurementForm = ({
             </Grid>
           </Grid>
           <Grid xs={4}>
-            <Button
-              onClick={handle30Minutes}
-              sx={{ width: 1, mb: 1 }}
-              variant="outlined"
-              color="primary"
-            >
-              Past 30 minutes
-            </Button>
-            <Button
-              onClick={handle1Hour}
-              sx={{ width: 1, mb: 1 }}
-              variant="outlined"
-              color="primary"
-            >
-              Past 1 hour
-            </Button>
-            <Button
-              onClick={handle2Hours}
-              sx={{ width: 1, mb: 0 }}
-              variant="outlined"
-              color="primary"
-            >
-              Past 2 hour
-            </Button>
+            <Grid container spacing={1}>
+              <Grid xs={6}>
+                <Button
+                  onClick={handle30Minutes}
+                  sx={{ width: 1, mb: 1 }}
+                  variant="outlined"
+                  color="primary"
+                >
+                  Past 30 minutes
+                </Button>
+              </Grid>
+              <Grid xs={6}>
+                <Button
+                  onClick={handle1Hour}
+                  sx={{ width: 1, mb: 1 }}
+                  variant="outlined"
+                  color="primary"
+                >
+                  Past 1 hour
+                </Button>
+              </Grid>
+              <Grid xs={6}>
+                <Button
+                  onClick={handle2Hours}
+                  sx={{ width: 1, mb: 1 }}
+                  variant="outlined"
+                  color="primary"
+                >
+                  Past 2 hours
+                </Button>
+              </Grid>
+              <Grid xs={6}>
+                <Button
+                  onClick={handle24Hours}
+                  sx={{ width: 1, mb: 0 }}
+                  variant="outlined"
+                  color="primary"
+                >
+                  Past 24 hours
+                </Button>
+              </Grid>
+            </Grid>
             <FormControlLabel
               control={
                 <Checkbox
