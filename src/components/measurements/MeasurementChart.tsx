@@ -20,7 +20,7 @@ dayjs.extend(utc)
 
 const dateFormatter = (date: any) => {
   if (date) {
-    return dayjs(date).format('YYYY-MM-DD HH:mm:ss')
+    return dayjs(date).format('YY-MM-DD HH:mm:ss')
   }
   return date
 }
@@ -218,7 +218,7 @@ const MeasurementChart = (props: any) => {
 
     content = (
       <>
-        <Box style={{ userSelect: 'none' }}>
+        <Box style={{ userSelect: 'none', marginTop: 30 }}>
           {isZoomed && <Button variant="contained" color="primary" onClick={handleZoomOut} sx={{ mb: 3, alignItems: 'center' }}>Zoom Out</Button>}
           <ResponsiveContainer height={500} width={"100%"}>
             <LineChart
@@ -233,11 +233,14 @@ const MeasurementChart = (props: any) => {
                 dataKey="date"
                 tickFormatter={dateFormatter}
                 type="category"
+                angle={-25}
+                fontSize={12}
+                tick={{ dy: 20 }}
                 allowDuplicatedCategory={false}
               />
               <YAxis dataKey={"current"} />
               <Tooltip content={<CustomTooltip />} />
-              <Legend />
+              <Legend  />
 
               {showZoomBox && (
                 <ReferenceArea
