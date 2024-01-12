@@ -78,7 +78,7 @@ const AddGroup: React.FC = () => {
     <Box display="flex" flexDirection="column" height="85vh">
       <Header
         title="Add a new group"
-        subtitle="(add multiple devices by separating Device Names with a space)"
+        subtitle="(add multiple devices by separating Device Names with a comma)"
       />
       <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">
         <form onSubmit={handleSubmit}>
