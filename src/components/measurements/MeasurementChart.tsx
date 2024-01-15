@@ -20,6 +20,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
+import chroma from "chroma-js"
 import MeasurementGrid from "./MeasurementGrid"
 import Grid from "@mui/system/Unstable_Grid"
 import { socket } from "../../utils/socket"
@@ -86,18 +87,16 @@ const MeasurementChart = ({ ...props }) => {
   }
 
   const getRandomColor = useCallback((): string => {
-    const letters = "0123456789ABCDEF"
-    let color = "#"
-    const limit = isDarkMode ? 4 : 8
+    const baseColor = chroma("blue")
+    const hueVariation = Math.random() * 360
 
-    for (let i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 16)]
-    }
+    // Adjust the lightness based on the theme
+    const lightness = isDarkMode ? 75 : 50
 
-    const brightness = parseInt(color.substring(1), 16)
-    if (brightness > parseInt("FFFFFF", 16) / limit) {
-      return getRandomColor()
-    }
+    const color = baseColor
+      .set("hsl.h", hueVariation)
+      .set("hsl.l", lightness / 100)
+      .hex()
 
     return color
   }, [isDarkMode])
@@ -139,7 +138,6 @@ const MeasurementChart = ({ ...props }) => {
         if (isZoomed) {
           let startDate = new Date(startZoomArea)
           let endDate = new Date(endZoomArea)
-          console.log(startDate, endDate)
           if (startDate > endDate) {
             let temp = startDate
             startDate = endDate
@@ -276,7 +274,8 @@ const MeasurementChart = ({ ...props }) => {
       </p>
     )
   } else if (isSuccess) {
-    console.log("filteredMeasurements", filteredMeasurements)
+    const measurementsData =
+      filteredMeasurements[0]?.data ?? filteredMeasurements
     content = (
       <>
         <Box style={{ userSelect: "none", marginTop: 30 }}>
@@ -292,7 +291,7 @@ const MeasurementChart = ({ ...props }) => {
           )}
           <ResponsiveContainer height={500} width={"100%"}>
             <LineChart
-              data={filteredMeasurements[0]?.data ?? filteredMeasurements}
+              data={measurementsData}
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
@@ -306,14 +305,16 @@ const MeasurementChart = ({ ...props }) => {
                 angle={-25}
                 fontSize={12}
                 tick={{ dy: 20 }}
+                interval={Math.floor(measurementsData.length / 20)}
                 allowDuplicatedCategory={false}
+                height={50}
               />
               <YAxis
                 dataKey="current"
                 domain={[chartSettings.yAxisMin, chartSettings.yAxisMax]}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Legend />
+              <Legend verticalAlign="top" height={36} />
 
               {showZoomBox && (
                 <ReferenceArea
