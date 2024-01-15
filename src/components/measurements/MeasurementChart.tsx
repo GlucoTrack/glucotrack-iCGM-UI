@@ -139,6 +139,7 @@ const MeasurementChart = ({ ...props }) => {
         if (isZoomed) {
           let startDate = new Date(startZoomArea)
           let endDate = new Date(endZoomArea)
+          console.log(startDate, endDate)
           if (startDate > endDate) {
             let temp = startDate
             startDate = endDate
@@ -275,6 +276,7 @@ const MeasurementChart = ({ ...props }) => {
       </p>
     )
   } else if (isSuccess) {
+    console.log("filteredMeasurements", filteredMeasurements)
     content = (
       <>
         <Box style={{ userSelect: "none", marginTop: 30 }}>
@@ -290,7 +292,7 @@ const MeasurementChart = ({ ...props }) => {
           )}
           <ResponsiveContainer height={500} width={"100%"}>
             <LineChart
-              data={filteredMeasurements}
+              data={filteredMeasurements[0]?.data ?? filteredMeasurements}
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
