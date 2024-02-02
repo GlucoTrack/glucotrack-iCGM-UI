@@ -332,7 +332,7 @@ const MeasurementChart = ({ ...props }) => {
                   name={measurement.name}
                   stroke={lineColors[index]}
                   strokeWidth={2}
-                  dot={{ r: 4 }}
+                  dot={{ r: 2 }}
                   connectNulls
                 />
               ))}
