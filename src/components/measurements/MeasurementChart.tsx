@@ -1,5 +1,13 @@
 import React, { useCallback, useEffect, useState } from "react"
-import { Box, useTheme, Button, Paper } from "@mui/material"
+import {
+  Box,
+  useTheme,
+  Button,
+  Paper,
+  TextField,
+  Select,
+  MenuItem,
+} from "@mui/material"
 import { useAppSelector } from "@/hooks/useStore"
 import {
   CartesianGrid,
@@ -12,18 +20,13 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
+import chroma from "chroma-js"
 import MeasurementGrid from "./MeasurementGrid"
-import { socket } from '../../utils/socket'
+import Grid from "@mui/system/Unstable_Grid"
+import { socket } from "../../utils/socket"
 import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
 dayjs.extend(utc)
-
-const dateFormatter = (date: any) => {
-  if (date) {
-    return dayjs(date).format('YY-MM-DD HH:mm:ss')
-  }
-  return date
-}
 
 function CustomTooltip({ payload, label, active }: any) {
   if (active && payload && payload.length) {
@@ -32,18 +35,21 @@ function CustomTooltip({ payload, label, active }: any) {
       <Paper elevation={3} sx={{ p: 2 }}>
         <h4>{pl.name}</h4>
         <p>
-          {dayjs(label).format('YYYY-MM-DD HH:mm:ss')}<br />
-          Current: {pl.payload.current}<br />
-          Voltage: {pl.payload.voltage}<br />
+          {dayjs(label).format("YYYY-MM-DD HH:mm:ss")}
+          <br />
+          Current: {pl.payload.current}
+          <br />
+          Voltage: {pl.payload.voltage}
+          <br />
         </p>
       </Paper>
-    );
+    )
   }
 
-  return null;
+  return null
 }
 
-const MeasurementChart = (props: any) => {
+const MeasurementChart = ({ ...props }) => {
   const theme = useTheme()
   const isDarkMode = theme.palette.mode === "dark"
   const [lineColors, setLineColors] = useState<string[]>([])
@@ -52,24 +58,45 @@ const MeasurementChart = (props: any) => {
   const deviceNames: string[] = useAppSelector(
     (state) => state.measurements.deviceNames,
   )
-
   const devicesDepts = JSON.stringify(deviceNames)
-
   const { data, isFetching, isLoading, isSuccess, isError, error } = props.query
+  const [localStorageKey, setLocalStorageKey] = useState(
+    JSON.parse(localStorage.getItem("chart_settings_" + props.page) || "{}"),
+  )
+
+  const [chartSettings, setChartSettings] = useState({
+    xAxisFormat:
+      localStorageKey && localStorageKey.xAxisFormat
+        ? localStorageKey.xAxisFormat
+        : "YY-MM-DD HH:mm:ss",
+    yAxisMin:
+      localStorageKey && localStorageKey.yAxisMin
+        ? localStorageKey.yAxisMin
+        : 0,
+    yAxisMax:
+      localStorageKey && localStorageKey.yAxisMax
+        ? localStorageKey.yAxisMax
+        : 0,
+  })
+
+  const dateFormatter = (date: any) => {
+    if (date) {
+      return dayjs(date).format(chartSettings.xAxisFormat)
+    }
+    return date
+  }
 
   const getRandomColor = useCallback((): string => {
-    const letters = "0123456789ABCDEF"
-    let color = "#"
-    const limit = isDarkMode ? 4 : 8
+    const baseColor = chroma("blue")
+    const hueVariation = Math.random() * 360
 
-    for (let i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 16)]
-    }
+    // Adjust the lightness based on the theme
+    const lightness = isDarkMode ? 75 : 50
 
-    const brightness = parseInt(color.substring(1), 16)
-    if (brightness > parseInt("FFFFFF", 16) / limit) {
-      return getRandomColor()
-    }
+    const color = baseColor
+      .set("hsl.h", hueVariation)
+      .set("hsl.l", lightness / 100)
+      .hex()
 
     return color
   }, [isDarkMode])
@@ -84,28 +111,25 @@ const MeasurementChart = (props: any) => {
 
   useEffect(() => {
     if (data?.measurements) {
-      setMeasurements(data.measurements);
+      setMeasurements(data.measurements)
       setIsZoomed(false)
-      setStartZoomArea('')
-      setEndZoomArea('')
-      setTempStartZoomArea('')
-      setTempEndZoomArea('')
+      setStartZoomArea("")
+      setEndZoomArea("")
+      setTempStartZoomArea("")
+      setTempEndZoomArea("")
     }
-  }, [data?.measurements]);
+  }, [data?.measurements])
 
-
-  const [tempStartZoomArea, setTempStartZoomArea] = useState<string>('')
-  const [tempEndZoomArea, setTempEndZoomArea] = useState<string>('')
-  const [startZoomArea, setStartZoomArea] = useState<string>('')
-  const [endZoomArea, setEndZoomArea] = useState<string>('')
+  const [tempStartZoomArea, setTempStartZoomArea] = useState<string>("")
+  const [tempEndZoomArea, setTempEndZoomArea] = useState<string>("")
+  const [startZoomArea, setStartZoomArea] = useState<string>("")
+  const [endZoomArea, setEndZoomArea] = useState<string>("")
 
   // flag if currently zooming (press and drag)
   const [isZooming, setIsZooming] = useState(false)
 
   // flag to show the zooming area (ReferenceArea)
-  const showZoomBox =
-    isZooming && tempStartZoomArea && tempEndZoomArea
-
+  const showZoomBox = isZooming && tempStartZoomArea && tempEndZoomArea
 
   const filteredMeasurements = measurements.map((measurement: any) => {
     return {
@@ -122,25 +146,25 @@ const MeasurementChart = (props: any) => {
           let date = new Date(d.date)
           return date >= startDate && date <= endDate
         } else {
-          return true;
+          return true
         }
-      })
+      }),
     }
   })
 
   // reset the states on zoom out
   function handleZoomOut() {
     setIsZoomed(false)
-    setStartZoomArea('')
-    setEndZoomArea('')
-    setTempStartZoomArea('')
-    setTempEndZoomArea('')
+    setStartZoomArea("")
+    setEndZoomArea("")
+    setTempStartZoomArea("")
+    setTempEndZoomArea("")
   }
 
   function handleMouseDown(e: any) {
     setIsZooming(true)
     setTempStartZoomArea(e.activeLabel)
-    setTempEndZoomArea('')
+    setTempEndZoomArea("")
   }
 
   function handleMouseMove(e: any) {
@@ -151,23 +175,55 @@ const MeasurementChart = (props: any) => {
 
   function handleMouseUp(e: any) {
     if (isZooming) {
-      setIsZooming(false);
+      setIsZooming(false)
 
-      if (tempStartZoomArea === tempEndZoomArea || tempStartZoomArea === '') {
-        setTempStartZoomArea('')
-        setTempEndZoomArea('')
+      if (tempStartZoomArea === tempEndZoomArea || tempStartZoomArea === "") {
+        setTempStartZoomArea("")
+        setTempEndZoomArea("")
         return
       }
 
       setEndZoomArea(tempEndZoomArea)
       setStartZoomArea(tempStartZoomArea)
-      setTempStartZoomArea('')
-      setTempEndZoomArea('')
+      setTempStartZoomArea("")
+      setTempEndZoomArea("")
 
       setIsZoomed(true)
     }
   }
 
+  const handleSettingChange = (field: string, value: string | Number) => {
+    setChartSettings((prevSettings) => {
+      return {
+        ...prevSettings,
+        [field]: value !== null ? value : "",
+      }
+    })
+  }
+
+  const updateYAxisMin = (newMin: number) => {
+    setChartSettings({ ...chartSettings, yAxisMin: newMin })
+  }
+
+  useEffect(() => {
+    if (
+      chartSettings.xAxisFormat ||
+      chartSettings.yAxisMin ||
+      chartSettings.yAxisMax
+    ) {
+      let newChartSettings = {
+        ...localStorageKey,
+        xAxisFormat: chartSettings.xAxisFormat,
+        yAxisMin: chartSettings.yAxisMin,
+        yAxisMax: chartSettings.yAxisMax,
+      }
+      setLocalStorageKey(newChartSettings)
+      localStorage.setItem(
+        "chart_settings_" + props.page,
+        JSON.stringify(newChartSettings),
+      )
+    }
+  }, [chartSettings])
 
   // Handle new measurements events
   useEffect(() => {
@@ -175,13 +231,16 @@ const MeasurementChart = (props: any) => {
       for (const deviceName of deviceNames) {
         socket.on(props.eventName + deviceName, (data: any) => {
           let date = new Date(data.date)
-          if (date >= dayjs(startTime).utc().toDate() && date <= dayjs(endTime).utc().toDate()) {
+          if (
+            date >= dayjs(startTime).utc().toDate() &&
+            date <= dayjs(endTime).utc().toDate()
+          ) {
             setMeasurements((oldMeasurements: any) => {
               let newMeasurements = []
               for (let measurement of oldMeasurements) {
                 if (measurement.name === data.deviceName) {
                   let newMeasurement = { ...measurement }
-                  newMeasurement.data = [...measurement.data, data];
+                  newMeasurement.data = [...measurement.data, data]
                   newMeasurements.push(newMeasurement)
                 } else {
                   newMeasurements.push(measurement)
@@ -215,14 +274,24 @@ const MeasurementChart = (props: any) => {
       </p>
     )
   } else if (isSuccess) {
-
+    const measurementsData =
+      filteredMeasurements[0]?.data ?? filteredMeasurements
     content = (
       <>
-        <Box style={{ userSelect: 'none', marginTop: 30 }}>
-          {isZoomed && <Button variant="contained" color="primary" onClick={handleZoomOut} sx={{ mb: 3, alignItems: 'center' }}>Zoom Out</Button>}
+        <Box style={{ userSelect: "none", marginTop: 30 }}>
+          {isZoomed && (
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleZoomOut}
+              sx={{ mb: 3, alignItems: "center" }}
+            >
+              Zoom Out
+            </Button>
+          )}
           <ResponsiveContainer height={500} width={"100%"}>
             <LineChart
-              data={filteredMeasurements}
+              data={measurementsData}
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
@@ -236,11 +305,16 @@ const MeasurementChart = (props: any) => {
                 angle={-25}
                 fontSize={12}
                 tick={{ dy: 20 }}
+                interval={Math.floor(measurementsData.length / 20)}
                 allowDuplicatedCategory={false}
+                height={50}
               />
-              <YAxis dataKey={"current"} />
+              <YAxis
+                dataKey="current"
+                domain={[chartSettings.yAxisMin, chartSettings.yAxisMax]}
+              />
               <Tooltip content={<CustomTooltip />} />
-              <Legend  />
+              <Legend verticalAlign="top" height={36} />
 
               {showZoomBox && (
                 <ReferenceArea
@@ -262,9 +336,54 @@ const MeasurementChart = (props: any) => {
                   connectNulls
                 />
               ))}
-
             </LineChart>
           </ResponsiveContainer>
+
+          <Grid container spacing={3} lg={6}>
+            <Grid xs={6}>
+              <Select
+                label="X-Axis Format"
+                value={chartSettings.xAxisFormat}
+                onChange={(event) => {
+                  handleSettingChange("xAxisFormat", event.target.value)
+                }}
+                sx={{ width: 1, mt: 4 }}
+              >
+                <MenuItem value="YY-MM-DD HH:mm:ss">YY-MM-DD HH:mm:ss</MenuItem>
+                <MenuItem value="MM-DD HH:mm:ss">MM-DD HH:mm:ss</MenuItem>
+                <MenuItem value="DD HH:mm:ss">DD HH:mm:ss</MenuItem>
+                <MenuItem value="HH:mm:ss">HH:mm:ss</MenuItem>
+              </Select>
+            </Grid>
+            <Grid xs={3}>
+              <TextField
+                label="Y-Axis Min"
+                type="number"
+                defaultValue={chartSettings.yAxisMin}
+                onBlur={(event) => {
+                  if (event.target.value) {
+                    handleSettingChange("yAxisMin", Number(event.target.value))
+                  }
+                }}
+                sx={{ width: 1, mt: 4 }}
+                fullWidth
+              />
+            </Grid>
+            <Grid xs={3}>
+              <TextField
+                label="Y-Axis Max"
+                type="number"
+                defaultValue={chartSettings.yAxisMax}
+                onBlur={(event) => {
+                  if (event.target.value) {
+                    handleSettingChange("yAxisMax", Number(event.target.value))
+                  }
+                }}
+                sx={{ width: 1, mt: 4 }}
+                fullWidth
+              />
+            </Grid>
+          </Grid>
         </Box>
         <Box>
           <MeasurementGrid measurements={filteredMeasurements} />
@@ -272,9 +391,7 @@ const MeasurementChart = (props: any) => {
       </>
     )
   }
-  return <Box>
-    {content}
-  </Box>
+  return <Box>{content}</Box>
 }
 
 export default MeasurementChart
