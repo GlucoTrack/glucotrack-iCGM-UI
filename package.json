@@ -1,7 +1,7 @@
 {
   "name": "vite-template-redux",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.0.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -21,6 +21,7 @@
     "@mui/x-data-grid": "^6.6.0",
     "@reduxjs/toolkit": "^1.8.1",
     "@vitejs/plugin-react": "^4.2.1",
+    "chroma-js": "^2.1.0",
     "dayjs": "^1.11.10",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -36,6 +37,7 @@
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.2.5",
+    "@types/chroma-js": "^2.4.3",
     "@types/node": "^20.2.5",
     "@types/react": "^18.0.15",
     "@types/react-dom": "^18.2.4",
