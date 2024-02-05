@@ -201,10 +201,6 @@ const MeasurementChart = ({ ...props }) => {
     })
   }
 
-  const updateYAxisMin = (newMin: number) => {
-    setChartSettings({ ...chartSettings, yAxisMin: newMin })
-  }
-
   useEffect(() => {
     if (
       chartSettings.xAxisFormat ||
@@ -311,6 +307,7 @@ const MeasurementChart = ({ ...props }) => {
               />
               <YAxis
                 dataKey="current"
+                type="number"
                 domain={[chartSettings.yAxisMin, chartSettings.yAxisMax]}
               />
               <Tooltip content={<CustomTooltip />} />
@@ -343,6 +340,7 @@ const MeasurementChart = ({ ...props }) => {
             <Grid xs={6}>
               <Select
                 label="X-Axis Format"
+                type="string"
                 value={chartSettings.xAxisFormat}
                 onChange={(event) => {
                   handleSettingChange("xAxisFormat", event.target.value)
