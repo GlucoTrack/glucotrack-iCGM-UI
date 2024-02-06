@@ -26,6 +26,7 @@ import Grid from "@mui/system/Unstable_Grid"
 import { socket } from "../../utils/socket"
 import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
+import { get } from "http"
 dayjs.extend(utc)
 
 function CustomTooltip({ payload, label, active }: any) {
@@ -64,28 +65,6 @@ const MeasurementChart = ({ ...props }) => {
     JSON.parse(localStorage.getItem("chart_settings_" + props.page) || "{}"),
   )
 
-  const [chartSettings, setChartSettings] = useState({
-    xAxisFormat:
-      localStorageKey && localStorageKey.xAxisFormat
-        ? localStorageKey.xAxisFormat
-        : "YY-MM-DD HH:mm:ss",
-    yAxisMin:
-      localStorageKey && localStorageKey.yAxisMin
-        ? localStorageKey.yAxisMin
-        : 0,
-    yAxisMax:
-      localStorageKey && localStorageKey.yAxisMax
-        ? localStorageKey.yAxisMax
-        : 0,
-  })
-
-  const dateFormatter = (date: any) => {
-    if (date) {
-      return dayjs(date).format(chartSettings.xAxisFormat)
-    }
-    return date
-  }
-
   const getRandomColor = useCallback((): string => {
     const baseColor = chroma("blue")
     const hueVariation = Math.random() * 360
@@ -108,6 +87,8 @@ const MeasurementChart = ({ ...props }) => {
 
   const [isZoomed, setIsZoomed] = useState(false)
   const [measurements, setMeasurements] = useState<any>([])
+  const [yAxisMin, setYAxisMin] = useState<Number>();
+  const [yAxisMax, setYAxisMax] = useState<Number>();
 
   useEffect(() => {
     if (data?.measurements) {
@@ -152,6 +133,46 @@ const MeasurementChart = ({ ...props }) => {
     }
   })
 
+  useEffect(() => {
+    if (filteredMeasurements.length > 0) {
+      const currentData = filteredMeasurements[0]?.data.map((d: any) => d.current);
+      const minValue = Math.min(...currentData);
+      const maxValue = Math.max(...currentData);
+
+      if (yAxisMin === undefined) {
+        const tempMin = localStorageKey?.yAxisMin;
+        setYAxisMin(tempMin && tempMin < minValue ? tempMin : minValue.toFixed(2));
+      }
+
+      if (yAxisMax === undefined) {
+        const tempMax = localStorageKey?.yAxisMax;
+        setYAxisMax(tempMax && tempMax > maxValue ? tempMax : maxValue.toFixed(2));
+      }
+    }
+  }, [filteredMeasurements]); 
+  
+  const [chartSettings, setChartSettings] = useState({
+    xAxisFormat:
+      localStorageKey && localStorageKey.xAxisFormat
+        ? localStorageKey.xAxisFormat
+        : "YY-MM-DD HH:mm:ss",
+    yAxisMin:
+      localStorageKey && localStorageKey.yAxisMin
+        ? localStorageKey.yAxisMin
+        : 0,
+    yAxisMax:
+      localStorageKey && localStorageKey.yAxisMax
+        ? localStorageKey.yAxisMax
+        : 0,
+  })
+
+  const dateFormatter = (date: any) => {
+    if (date) {
+      return dayjs(date).format(chartSettings.xAxisFormat)
+    }
+    return date
+  }
+
   // reset the states on zoom out
   function handleZoomOut() {
     setIsZoomed(false)
@@ -192,18 +213,40 @@ const MeasurementChart = ({ ...props }) => {
     }
   }
 
-  const handleSettingChange = (field: string, value: string | Number) => {
-    setChartSettings((prevSettings) => {
-      return {
-        ...prevSettings,
-        [field]: value !== null ? value : "",
-      }
-    })
+  function formatValue(value: number) {
+    if (value >= 1000000) {
+      return (value / 1000000).toFixed(1) + 'M';
+    } else if (value >= 1000) {
+      return (value / 1000).toFixed(1) + 'k';
+    } else {
+      return value.toFixed(2);
+    }
   }
 
-  const updateYAxisMin = (newMin: number) => {
-    setChartSettings({ ...chartSettings, yAxisMin: newMin })
-  }
+  const handleSettingChange = (field: string, value: string | number) => {
+    setChartSettings((prevSettings) => {
+      let newValue = value;
+
+      if (field === 'yAxisMin' || field === 'yAxisMax') {
+        const dataValues = filteredMeasurements[0]?.data.map((d: any) => d.current);
+        const extremeValue = field === 'yAxisMin' ? Math.min(...dataValues) : Math.max(...dataValues);
+
+        if ((field === 'yAxisMin' && Number(newValue) > extremeValue) || (field === 'yAxisMax' && Number(newValue) < extremeValue)) {
+          newValue = extremeValue;
+        }
+
+        const setter = field === 'yAxisMin' ? setYAxisMin : setYAxisMax;
+        setter(parseFloat(Number(newValue).toFixed(2)));
+      }
+
+      console.log('newValue', newValue);
+
+      return {
+        ...prevSettings,
+        [field]: newValue !== null ? newValue : '',
+      };
+    });
+  };
 
   useEffect(() => {
     if (
@@ -273,9 +316,9 @@ const MeasurementChart = ({ ...props }) => {
         {errorMessageParsed.data.message}
       </p>
     )
-  } else if (isSuccess) {
-    const measurementsData =
-      filteredMeasurements[0]?.data ?? filteredMeasurements
+  } else if (isSuccess) {   
+    const measurementsData = filteredMeasurements[0]?.data ?? filteredMeasurements;
+
     content = (
       <>
         <Box style={{ userSelect: "none", marginTop: 30 }}>
@@ -311,6 +354,7 @@ const MeasurementChart = ({ ...props }) => {
               />
               <YAxis
                 dataKey="current"
+                tickFormatter={(value) => formatValue(value)}
                 domain={[chartSettings.yAxisMin, chartSettings.yAxisMax]}
               />
               <Tooltip content={<CustomTooltip />} />
@@ -359,12 +403,9 @@ const MeasurementChart = ({ ...props }) => {
               <TextField
                 label="Y-Axis Min"
                 type="number"
-                defaultValue={chartSettings.yAxisMin}
-                onBlur={(event) => {
-                  if (event.target.value) {
-                    handleSettingChange("yAxisMin", Number(event.target.value))
-                  }
-                }}
+                value={yAxisMin !== undefined ? yAxisMin : 0}
+                onChange={(event) => setYAxisMin(Number(event.target.value))}
+                onBlur={() => handleSettingChange("yAxisMin", Number(yAxisMin))}
                 sx={{ width: 1, mt: 4 }}
                 fullWidth
               />
@@ -373,12 +414,9 @@ const MeasurementChart = ({ ...props }) => {
               <TextField
                 label="Y-Axis Max"
                 type="number"
-                defaultValue={chartSettings.yAxisMax}
-                onBlur={(event) => {
-                  if (event.target.value) {
-                    handleSettingChange("yAxisMax", Number(event.target.value))
-                  }
-                }}
+                value={yAxisMax !== undefined ? yAxisMax : 0}
+                onChange={(event) => setYAxisMax(Number(event.target.value))}
+                onBlur={() => handleSettingChange("yAxisMax", Number(yAxisMax))}
                 sx={{ width: 1, mt: 4 }}
                 fullWidth
               />
