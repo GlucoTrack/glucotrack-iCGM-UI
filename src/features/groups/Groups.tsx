@@ -29,13 +29,12 @@ const Groups: React.FC = () => {
       groupDescription,
       deviceNames,
     } = params.row
-    const deviceNamesString = deviceNames.join(" ")
 
     dispatch(
       setGroup({
         groupName,
         groupDescription,
-        deviceNames: deviceNamesString,
+        deviceNames,
       }),
     )
     navigate(`edit/${groupId}`)
@@ -80,3 +79,4 @@ const Groups: React.FC = () => {
 }
 
 export default Groups
+
