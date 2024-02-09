@@ -165,7 +165,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                           color:
                             active === lcText
                               ? theme.palette.primary.main
-                              : theme.palette.grey[400],
+                              : theme.palette.text.primary,
                         }}
                       >
                         {icon}
@@ -175,7 +175,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                           color:
                             active === lcText
                               ? theme.palette.primary.main
-                              : theme.palette.grey[400],
+                              : theme.palette.text.primary,
                         }}
                         primary={text}
                       ></ListItemText>

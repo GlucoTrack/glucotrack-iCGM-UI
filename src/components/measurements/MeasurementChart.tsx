@@ -66,18 +66,7 @@ const MeasurementChart = ({ ...props }) => {
   )
 
   const getRandomColor = useCallback((): string => {
-    const baseColor = chroma("blue")
-    const hueVariation = Math.random() * 360
-
-    // Adjust the lightness based on the theme
-    const lightness = isDarkMode ? 75 : 50
-
-    const color = baseColor
-      .set("hsl.h", hueVariation)
-      .set("hsl.l", lightness / 100)
-      .hex()
-
-    return color
+    return isDarkMode ? '#92B1F8' : '#4661B1'
   }, [isDarkMode])
 
   useEffect(() => {
@@ -377,6 +366,7 @@ const MeasurementChart = ({ ...props }) => {
                   stroke={lineColors[index]}
                   strokeWidth={2}
                   dot={{ r: 2 }}
+                  isAnimationActive={false}
                   connectNulls
                 />
               ))}

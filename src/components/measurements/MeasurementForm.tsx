@@ -151,6 +151,7 @@ const MeasurementForm = ({
           return {
             ...prevFormValues,
             [field]: true,
+            startTime: dayjs().format("YYYY-MM-DDTHH:mm"),
             endTime: dayjs().add(1, "days").format("YYYY-MM-DDTHH:mm"),
           }
         } else {
@@ -193,9 +194,9 @@ const MeasurementForm = ({
         "filters_" + page,
         JSON.stringify(newLocalStorageFilters),
       )
-      handleSubmit(
+      /*handleSubmit(
         new Event("submit") as unknown as React.FormEvent<HTMLFormElement>,
-      )
+      )*/
     }
   }, [formValues])
 
@@ -500,7 +501,7 @@ const MeasurementForm = ({
                 }}
               />
             </Grid>
-            <Grid xs={12} display={"none"}>
+            <Grid xs={12}>
               <Button type="submit" variant="contained" color="primary">
                 Submit
               </Button>
