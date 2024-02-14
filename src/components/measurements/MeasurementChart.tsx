@@ -56,6 +56,7 @@ const MeasurementChart = ({ ...props }) => {
   const [lineColors, setLineColors] = useState<string[]>([])
   const startTime = useAppSelector((state) => state.measurements.startTime)
   const endTime = useAppSelector((state) => state.measurements.endTime)
+  const realtime = useAppSelector((state) => state.measurements.realtime)
   const deviceNames: string[] = useAppSelector(
     (state) => state.measurements.deviceNames,
   )
@@ -138,8 +139,8 @@ const MeasurementChart = ({ ...props }) => {
         setYAxisMax(tempMax && tempMax > maxValue ? tempMax : maxValue.toFixed(2));
       }
     }
-  }, [filteredMeasurements]); 
-  
+  }, [filteredMeasurements]);
+
   const [chartSettings, setChartSettings] = useState({
     xAxisFormat:
       localStorageKey && localStorageKey.xAxisFormat
@@ -260,28 +261,34 @@ const MeasurementChart = ({ ...props }) => {
   // Handle new measurements events
   useEffect(() => {
     if (props.eventName) {
-      for (const deviceName of deviceNames) {
-        socket.on(props.eventName + deviceName, (data: any) => {
-          let date = new Date(data.date)
-          if (
-            date >= dayjs(startTime).utc().toDate() &&
-            date <= dayjs(endTime).utc().toDate()
-          ) {
-            setMeasurements((oldMeasurements: any) => {
-              let newMeasurements = []
-              for (let measurement of oldMeasurements) {
-                if (measurement.name === data.deviceName) {
-                  let newMeasurement = { ...measurement }
-                  newMeasurement.data = [...measurement.data, data]
-                  newMeasurements.push(newMeasurement)
-                } else {
-                  newMeasurements.push(measurement)
+      if (realtime) {
+        for (const deviceName of deviceNames) {
+          socket.on(props.eventName + deviceName, (data: any) => {
+            let date = new Date(data.date)
+            if (
+              date >= dayjs(startTime).utc().toDate() &&
+              date <= dayjs(endTime).utc().toDate()
+            ) {
+              setMeasurements((oldMeasurements: any) => {
+                let newMeasurements = []
+                for (let measurement of oldMeasurements) {
+                  if (measurement.name === data.deviceName) {
+                    let newMeasurement = { ...measurement }
+                    newMeasurement.data = [...measurement.data, data]
+                    newMeasurements.push(newMeasurement)
+                  } else {
+                    newMeasurements.push(measurement)
+                  }
                 }
-              }
-              return newMeasurements
-            })
-          }
-        })
+                return newMeasurements
+              })
+            }
+          })
+        }
+      } else {
+        for (const deviceName of deviceNames) {
+          socket.off(props.eventName + deviceName)
+        }
       }
     }
 
@@ -290,7 +297,7 @@ const MeasurementChart = ({ ...props }) => {
         socket.off(props.eventName + deviceName)
       }
     }
-  }, [devicesDepts, deviceNames, props.eventName, startTime, endTime])
+  }, [devicesDepts, deviceNames, props.eventName, startTime, endTime, realtime])
 
   let content: JSX.Element | null = null
   if (isFetching) {
@@ -305,7 +312,7 @@ const MeasurementChart = ({ ...props }) => {
         {errorMessageParsed.data.message}
       </p>
     )
-  } else if (isSuccess) {   
+  } else if (isSuccess) {
     const measurementsData = filteredMeasurements[0]?.data ?? filteredMeasurements;
 
     content = (
