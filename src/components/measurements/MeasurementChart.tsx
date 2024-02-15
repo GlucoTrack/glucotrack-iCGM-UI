@@ -31,18 +31,17 @@ dayjs.extend(utc)
 
 function CustomTooltip({ payload, label, active }: any) {
   if (active && payload && payload.length) {
-    const pl = payload[0]
     return (
       <Paper elevation={3} sx={{ p: 2 }}>
-        <h4>{pl.name}</h4>
+        <h4>{dayjs(label).format("YYYY-MM-DD HH:mm:ss")}</h4>
+        {payload.map((pl: any, index: number) => (
         <p>
-          {dayjs(label).format("YYYY-MM-DD HH:mm:ss")}
+          {pl.name}
           <br />
-          Current: {pl.payload.current}
-          <br />
-          Voltage: {pl.payload.voltage}
-          <br />
+          Current: {pl.payload[pl.name]}
+          <br />          
         </p>
+        ))}
       </Paper>
     )
   }
