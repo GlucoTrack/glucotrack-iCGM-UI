@@ -66,14 +66,20 @@ const MeasurementChart = ({ ...props }) => {
     JSON.parse(localStorage.getItem("chart_settings_" + props.page) || "{}"),
   )
 
-  const getRandomColor = useCallback((): string => {
-    return isDarkMode ? '#92B1F8' : '#4661B1'
-  }, [isDarkMode])
+  const generateDeviceColors = (deviceNames: string[]) => {
+    const colorScale = chroma.scale(['red', 'blue']).mode('lch').colors(deviceNames.length);
+
+    return deviceNames.reduce((colors, deviceName, index) => {
+      colors[deviceName] = colorScale[index];
+      return colors;
+    }, {} as Record<string, string>);
+  };
 
   useEffect(() => {
-    const colors = deviceNames.map(() => getRandomColor())
-    setLineColors(colors)
-  }, [deviceNames, getRandomColor])
+    const newDeviceColors = generateDeviceColors(deviceNames);
+    const colors = Object.values(newDeviceColors);
+    setLineColors(colors);
+  }, [deviceNames]);
 
   const [isZoomed, setIsZoomed] = useState(false)
   const [measurements, setMeasurements] = useState<any>([])
@@ -403,7 +409,6 @@ const MeasurementChart = ({ ...props }) => {
                 <Line
                   //key={`l_${measurement.name}_${measurement.data.length}`}
                   key={measurement.name}
-                  //data={measurement.data}
                   dataKey={measurement.name}
                   name={measurement.name}
                   stroke={lineColors[index]}
