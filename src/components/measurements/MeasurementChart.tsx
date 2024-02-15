@@ -20,12 +20,13 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
-import chroma from "chroma-js"
+import chroma, { Color } from "chroma-js"
 import MeasurementGrid from "./MeasurementGrid"
 import Grid from "@mui/system/Unstable_Grid"
 import { socket } from "../../utils/socket"
 import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
+import distinctColors from 'distinct-colors'
 
 dayjs.extend(utc)
 
@@ -65,20 +66,25 @@ const MeasurementChart = ({ ...props }) => {
     JSON.parse(localStorage.getItem("chart_settings_" + props.page) || "{}"),
   )
 
-  const generateDeviceColors = (deviceNames: string[]) => {
-    const colorScale = chroma.scale(['red', 'blue']).mode('lch').colors(deviceNames.length);
-
-    return deviceNames.reduce((colors, deviceName, index) => {
-      colors[deviceName] = colorScale[index];
-      return colors;
-    }, {} as Record<string, string>);
+  const generateDeviceColors = (deviceNames: string[], palette: Color[]): Record<string, Color> => {
+    const deviceColors: Record<string, Color> = {};
+    deviceNames.forEach((device, i) => {
+      deviceColors[device] = palette[i % palette.length];
+    });
+    return deviceColors;
   };
 
   useEffect(() => {
-    const newDeviceColors = generateDeviceColors(deviceNames);
-    const colors = Object.values(newDeviceColors);
-    setLineColors(colors);
-  }, [deviceNames]);
+    const palette = distinctColors({
+      count: deviceNames.length,
+      lightMin: isDarkMode ? 20 : 50,
+      lightMax: isDarkMode ? 60 : 90,
+      chromaMin: 50,
+      chromaMax: 100
+    });
+    const newDeviceColors = generateDeviceColors(deviceNames, palette);
+    setLineColors(Object.values(newDeviceColors).map((color) => chroma(color).hex()));
+  }, [deviceNames, isDarkMode]);
 
   const [isZoomed, setIsZoomed] = useState(false)
   const [measurements, setMeasurements] = useState<any>([])
