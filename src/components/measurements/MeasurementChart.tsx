@@ -66,14 +66,20 @@ const MeasurementChart = ({ ...props }) => {
     JSON.parse(localStorage.getItem("chart_settings_" + props.page) || "{}"),
   )
 
-  const getRandomColor = useCallback((): string => {
-    return isDarkMode ? '#92B1F8' : '#4661B1'
-  }, [isDarkMode])
+  const generateDeviceColors = (deviceNames: string[]) => {
+    const colorScale = chroma.scale(['red', 'blue']).mode('lch').colors(deviceNames.length);
+
+    return deviceNames.reduce((colors, deviceName, index) => {
+      colors[deviceName] = colorScale[index];
+      return colors;
+    }, {} as Record<string, string>);
+  };
 
   useEffect(() => {
-    const colors = deviceNames.map(() => getRandomColor())
-    setLineColors(colors)
-  }, [deviceNames, getRandomColor])
+    const newDeviceColors = generateDeviceColors(deviceNames);
+    const colors = Object.values(newDeviceColors);
+    setLineColors(colors);
+  }, [deviceNames]);
 
   const [isZoomed, setIsZoomed] = useState(false)
   const [measurements, setMeasurements] = useState<any>([])
@@ -116,7 +122,7 @@ const MeasurementChart = ({ ...props }) => {
     return uniqueData;
   };
 
-  const filteredMeasurements = removeDuplicates(measurements.map((measurement: any) => {
+  const filteredMeasurements = measurements.map((measurement: any) => {
     return {
       ...measurement,
       data: measurement.data.filter((d: any) => {
@@ -135,7 +141,7 @@ const MeasurementChart = ({ ...props }) => {
         }
       }),
     }
-  }));
+  });
 
   useEffect(() => {
     if (filteredMeasurements.length > 0) {
