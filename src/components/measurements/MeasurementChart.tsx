@@ -26,7 +26,7 @@ import Grid from "@mui/system/Unstable_Grid"
 import { socket } from "../../utils/socket"
 import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
-import { get } from "http"
+
 dayjs.extend(utc)
 
 function CustomTooltip({ payload, label, active }: any) {
@@ -77,6 +77,8 @@ const MeasurementChart = ({ ...props }) => {
 
   const [isZoomed, setIsZoomed] = useState(false)
   const [measurements, setMeasurements] = useState<any>([])
+  const [filteredMeasurements, setFilteredMeasurements] = useState<any>([])
+  const [chartData, setChartData] = useState<any>([])
   const [yAxisMin, setYAxisMin] = useState<Number>();
   const [yAxisMax, setYAxisMax] = useState<Number>();
 
@@ -102,58 +104,81 @@ const MeasurementChart = ({ ...props }) => {
   // flag to show the zooming area (ReferenceArea)
   const showZoomBox = isZooming && tempStartZoomArea && tempEndZoomArea
 
-  const removeDuplicates = (data: any[]) => {
-    const seenDates = new Set();
-    const uniqueData = data.filter((item) => {
-      if (seenDates.has(item.date)) {
-        return false;
-      } else {
-        seenDates.add(item.date);
-        return true;
-      }
-    });
-  
-    return uniqueData;
-  };
-
-  const filteredMeasurements = removeDuplicates(measurements.map((measurement: any) => {
-    return {
-      ...measurement,
-      data: measurement.data.filter((d: any) => {
-        if (isZoomed) {
-          let startDate = new Date(startZoomArea)
-          let endDate = new Date(endZoomArea)
-          if (startDate > endDate) {
-            let temp = startDate
-            startDate = endDate
-            endDate = temp
-          }
-          let date = new Date(d.date)
-          return date >= startDate && date <= endDate
-        } else {
-          return true
-        }
-      }),
-    }
-  }));
 
   useEffect(() => {
-    if (filteredMeasurements.length > 0) {
-      const currentData = filteredMeasurements[0]?.data.map((d: any) => d.current);
-      const minValue = Math.min(...currentData);
-      const maxValue = Math.max(...currentData);
+    if (isZooming) {
+      return
+    }
+    let minValue = localStorageKey?.yAxisMin
+    let maxValue = localStorageKey?.yAxisMax
+    let filteredMes = []
 
-      if (yAxisMin === undefined) {
-        const tempMin = localStorageKey?.yAxisMin;
-        setYAxisMin(tempMin && tempMin < minValue ? tempMin : minValue.toFixed(2));
-      }
-
-      if (yAxisMax === undefined) {
-        const tempMax = localStorageKey?.yAxisMax;
-        setYAxisMax(tempMax && tempMax > maxValue ? tempMax : maxValue.toFixed(2));
+    let startDate = new Date(), endDate = new Date()
+    if (isZoomed) {
+      startDate = new Date(startZoomArea)
+      endDate = new Date(endZoomArea)
+      if (startDate > endDate) {
+        let temp = startDate
+        startDate = endDate
+        endDate = temp
       }
     }
-  }, [filteredMeasurements]);
+
+    for (const measurement of measurements) {
+      let filteredData = []
+      const seenDates = new Set();
+      for (const data of measurement.data) {
+        if (seenDates.has(data.date)) {
+          continue
+        } else {
+          seenDates.add(data.date)
+        }
+        if (minValue === undefined || data.current < minValue) {
+          minValue = data.current;
+        }
+        if (maxValue === undefined || data.current > maxValue) {
+          maxValue = data.current;
+        }
+        let date = new Date(data.date)
+        if (isZoomed) {
+          if (date >= startDate && date <= endDate) {
+            filteredData.push(data)
+          }
+        } else {
+          filteredData.push(data)
+        }
+      }
+      /*
+      filteredData = filteredData.sort((a: any, b: any) => {
+        return new Date(a.date).getTime() - new Date(b.date).getTime()
+      })*/
+      filteredMes.push({ ...measurement, data: filteredData })
+    }
+
+    const unifiedData = new Map()
+    for (const measurement of filteredMes) {
+      for (const data of measurement.data) {
+        if (unifiedData.has(data.date)) {
+          let obj = unifiedData.get(data.date)
+          obj[measurement.name] = data.current
+          unifiedData.set(data.date, obj)
+        } else {
+          let obj: any = {
+            date: data.date,
+          }
+          obj[measurement.name] = data.current
+          unifiedData.set(data.date, obj)
+        }
+      }
+    }
+    setChartData(Array.from(unifiedData.values()))
+
+    setFilteredMeasurements(filteredMes)
+
+    setYAxisMin(minValue.toFixed(2))
+    setYAxisMax(maxValue.toFixed(2))
+  }, [measurements, isZoomed, isZooming])
+
 
   const [chartSettings, setChartSettings] = useState({
     xAxisFormat:
@@ -243,7 +268,6 @@ const MeasurementChart = ({ ...props }) => {
         setter(parseFloat(Number(newValue).toFixed(2)));
       }
 
-      console.log('newValue', newValue);
 
       return {
         ...prevSettings,
@@ -344,7 +368,7 @@ const MeasurementChart = ({ ...props }) => {
           )}
           <ResponsiveContainer height={500} width={"100%"}>
             <LineChart
-              data={measurementsData}
+              data={chartData}
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
@@ -362,7 +386,6 @@ const MeasurementChart = ({ ...props }) => {
                 height={50}
               />
               <YAxis
-                dataKey="current"
                 tickFormatter={(value) => formatValue(value)}
                 domain={[chartSettings.yAxisMin, chartSettings.yAxisMax]}
               />
@@ -380,8 +403,8 @@ const MeasurementChart = ({ ...props }) => {
                 <Line
                   //key={`l_${measurement.name}_${measurement.data.length}`}
                   key={measurement.name}
-                  data={measurement.data}
-                  dataKey="current"
+                  //data={measurement.data}
+                  dataKey={measurement.name}
                   name={measurement.name}
                   stroke={lineColors[index]}
                   strokeWidth={2}
