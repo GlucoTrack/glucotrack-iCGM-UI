@@ -102,7 +102,21 @@ const MeasurementChart = ({ ...props }) => {
   // flag to show the zooming area (ReferenceArea)
   const showZoomBox = isZooming && tempStartZoomArea && tempEndZoomArea
 
-  const filteredMeasurements = measurements.map((measurement: any) => {
+  const removeDuplicates = (data: any[]) => {
+    const seenDates = new Set();
+    const uniqueData = data.filter((item) => {
+      if (seenDates.has(item.date)) {
+        return false;
+      } else {
+        seenDates.add(item.date);
+        return true;
+      }
+    });
+  
+    return uniqueData;
+  };
+
+  const filteredMeasurements = removeDuplicates(measurements.map((measurement: any) => {
     return {
       ...measurement,
       data: measurement.data.filter((d: any) => {
@@ -121,7 +135,7 @@ const MeasurementChart = ({ ...props }) => {
         }
       }),
     }
-  })
+  }));
 
   useEffect(() => {
     if (filteredMeasurements.length > 0) {
@@ -345,7 +359,6 @@ const MeasurementChart = ({ ...props }) => {
                 fontSize={12}
                 tick={{ dy: 20 }}
                 interval={Math.floor(measurementsData.length / 20)}
-                allowDuplicatedCategory={false}
                 height={50}
               />
               <YAxis
