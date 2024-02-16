@@ -267,7 +267,7 @@ const EditDevice: React.FC = () => {
               shrink: formValues.deviceName !== "",
             }}
           />
-          <TextField
+          {/* <TextField
             name="macAddress"
             label="MAC Address"
             type="password"
@@ -294,7 +294,7 @@ const EditDevice: React.FC = () => {
             InputLabelProps={{
               shrink: formValues.password !== "",
             }}
-          />
+          /> */}
           <TextField
             name="baseUri"
             label="Base URI"
@@ -303,12 +303,11 @@ const EditDevice: React.FC = () => {
             required
             fullWidth
             margin="normal"
-            disabled
             InputLabelProps={{
               shrink: formValues.baseUri !== "",
             }}
           />
-          <TextField
+          {/* <TextField
             name="jwtToken"
             label="JWT Token"
             type="password"
@@ -349,7 +348,7 @@ const EditDevice: React.FC = () => {
             InputLabelProps={{
               shrink: formValues.rtc !== undefined && formValues.rtc !== null,
             }}
-          />
+          /> */}
           <TextField
             name="measurementInterval"
             label="Measurement Interval"
@@ -437,33 +436,6 @@ const EditDevice: React.FC = () => {
             }}
           />
           <TextField
-            name="coat"
-            label="Coat"
-            type="datetime-local"
-            value={formValues.coat}
-            onChange={handleChange}
-            required
-            fullWidth
-            margin="normal"
-            InputLabelProps={{
-              shrink: formValues.coat !== undefined && formValues.coat !== null,
-            }}
-          />
-          <TextField
-            name="onTest"
-            label="On Test"
-            type="datetime-local"
-            value={formValues.onTest}
-            onChange={handleChange}
-            required
-            fullWidth
-            margin="normal"
-            InputLabelProps={{
-              shrink:
-                formValues.onTest !== undefined && formValues.onTest !== null,
-            }}
-          />
-          <TextField
             name="enzyme"
             label="Enzyme"
             type="number"
@@ -490,6 +462,33 @@ const EditDevice: React.FC = () => {
               shrink:
                 formValues.testStation !== undefined &&
                 formValues.testStation !== null,
+            }}
+          />
+          <TextField
+            name="coat"
+            label="Coat"
+            type="datetime-local"
+            value={formValues.coat}
+            onChange={handleChange}
+            required
+            fullWidth
+            margin="normal"
+            InputLabelProps={{
+              shrink: formValues.coat !== undefined && formValues.coat !== null,
+            }}
+          />
+          <TextField
+            name="onTest"
+            label="On Test"
+            type="datetime-local"
+            value={formValues.onTest}
+            onChange={handleChange}
+            required
+            fullWidth
+            margin="normal"
+            InputLabelProps={{
+              shrink:
+                formValues.onTest !== undefined && formValues.onTest !== null,
             }}
           />
           {content}
