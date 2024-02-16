@@ -278,15 +278,12 @@ const MeasurementChart = ({ ...props }) => {
         const setter = field === 'yAxisMin' ? setYAxisMin : setYAxisMax;
         setter(parseFloat(Number(newValue).toFixed(2)));
       }
-
-
       return {
         ...prevSettings,
         [field]: newValue !== null ? newValue : '',
       };
     });
   };
-
   useEffect(() => {
     if (
       chartSettings.xAxisFormat ||
@@ -430,6 +427,7 @@ const MeasurementChart = ({ ...props }) => {
             <Grid xs={6}>
               <Select
                 label="X-Axis Format"
+                type="string"
                 value={chartSettings.xAxisFormat}
                 onChange={(event) => {
                   handleSettingChange("xAxisFormat", event.target.value)
