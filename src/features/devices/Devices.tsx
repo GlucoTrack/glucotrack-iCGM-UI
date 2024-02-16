@@ -27,10 +27,10 @@ const Devices = () => {
     content = <p>{JSON.stringify(error)}</p>
   } else if (isSuccess) {
     const columns = [
-      { field: "_id", headerName: "ID", flex: 1 },
+      // { field: "_id", headerName: "ID", flex: 1 },
       { field: "deviceName", headerName: "Name", flex: 0.5 },
-      { field: "sessionStartTime", headerName: "Start", flex: 1 },
-      { field: "sessionEndTime", headerName: "End", flex: 1 },
+      // { field: "sessionStartTime", headerName: "Start", flex: 1 },
+      // { field: "sessionEndTime", headerName: "End", flex: 1 },
       {
         field: "measurementInterval",
         headerName: "Meas Int",
@@ -45,10 +45,11 @@ const Devices = () => {
       { field: "pstatVoltage", headerName: "Voltage", flex: 0.6 },
       { field: "pstatTIA", headerName: "TIA", flex: 0.5 },
       { field: "glm", headerName: "GLM", flex: 0.5 },
-      { field: "coat", headerName: "Coat", flex: 1 },
-      { field: "onTest", headerName: "On Test", flex: 1 },
+
       { field: "enzyme", headerName: "Enzyme", flex: 0.5 },
       { field: "testStation", headerName: "Station", flex: 0.5 },
+      // { field: "coat", headerName: "Coat", flex: 1 },
+      // { field: "onTest", headerName: "On Test", flex: 1 },
     ]
     content = (
       <Box flexGrow={1} overflow="auto" width="100%">

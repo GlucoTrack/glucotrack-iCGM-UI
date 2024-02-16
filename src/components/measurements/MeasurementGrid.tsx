@@ -20,11 +20,9 @@ const MeasurementGrid = (props: any) => {
             voltage: data.voltage,
             date: data.date,
             _id: rowId,
+            deviceName: measurement.name,
           }
-        });
-        for (let d of dd) {
-          d.deviceName = measurement.name;
-        }
+        });        
         return dd;
       });
       for (let d of allData) {

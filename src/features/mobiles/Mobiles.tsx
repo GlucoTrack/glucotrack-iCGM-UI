@@ -27,7 +27,7 @@ const Mobiles = () => {
     content = <p>{JSON.stringify(error)}</p>
   } else if (isSuccess) {
     const columns = [
-      { field: "_id", headerName: "ID", flex: 1 },
+      // { field: "_id", headerName: "ID", flex: 1 },
       { field: "mobileName", headerName: "Name", flex: 0.7 },
       // { field: "baseUri", headerName: "URI", flex: 1 },
       { field: "sensorName", headerName: "sName", flex: 0.7 },
