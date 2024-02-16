@@ -3,13 +3,13 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 interface GroupsState {
   groupName: string
   groupDescription: string
-  deviceNames: string
+  deviceNames: string[]
 }
 
 const initialState: GroupsState = {
   groupName: "",
   groupDescription: "",
-  deviceNames: "",
+  deviceNames: [],
 }
 
 export const groupsSlice = createSlice({
@@ -31,3 +31,4 @@ export const groupsSlice = createSlice({
 export const { setGroup, resetGroup } = groupsSlice.actions
 
 export default groupsSlice.reducer
+
