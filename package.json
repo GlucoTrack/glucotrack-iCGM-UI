@@ -23,11 +23,12 @@
     "@vitejs/plugin-react": "^4.2.1",
     "chroma-js": "^2.1.0",
     "dayjs": "^1.11.10",
+    "distinct-colors": "^3.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "^8.0.1",
     "react-router-dom": "^6.12.1",
-    "recharts": "^2.6.2",
+    "recharts": "^2.12.0",
     "socket.io-client": "^4.7.2",
     "vite": "^5.0.7",
     "vitest": "^1.0.4"
