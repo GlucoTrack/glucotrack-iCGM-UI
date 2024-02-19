@@ -423,7 +423,7 @@ const MeasurementChart = ({ ...props }) => {
                 tickFormatter={(value) => formatValue(value)}
                 domain={[chartSettings.yAxisMin, chartSettings.yAxisMax]}
               />
-              <Tooltip content={<CustomTooltip />} />
+              {/* <Tooltip content={<CustomTooltip />} /> */}
               <Legend verticalAlign="top" height={36} />
 
               {showZoomBox && (
