@@ -81,10 +81,14 @@ const MeasurementChart = ({ ...props }) => {
   useEffect(() => {
     const palette = distinctColors({
       count: deviceNames.length,
-      lightMin: isDarkMode ? 20 : 50,
-      lightMax: isDarkMode ? 60 : 90,
-      chromaMin: 50,
+      hueMin: isDarkMode ? 0 : 0,
+      hueMax: isDarkMode ? 360 : 360,
+      chromaMin: 0,
       chromaMax: 100,
+      lightMin: isDarkMode ? 30 : 0,
+      lightMax: isDarkMode ? 100 : 90,
+      quality: 50,
+      samples: 10000,
     })
     const newDeviceColors = generateDeviceColors(deviceNames, palette)
     setLineColors(
