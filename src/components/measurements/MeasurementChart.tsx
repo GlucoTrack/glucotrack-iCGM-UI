@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react"
 import {
   Box,
-  useTheme,
   Button,
-  Paper,
-  TextField,
-  Select,
+  // Grid,
   MenuItem,
+  Paper,
+  Select,
+  TextField,
+  useTheme,
 } from "@mui/material"
 import { useAppSelector } from "@/hooks/useStore"
 import {
@@ -34,9 +35,9 @@ function CustomTooltip({ payload, label, active }: any) {
   if (active && payload && payload.length) {
     return (
       <Paper elevation={3} sx={{ p: 2 }}>
-        <h4>{dayjs(label).format("YYYY-MM-DD HH:mm:ss")}</h4>
+        <h4>{dayjs(label).format("HH:mm:ss")}</h4>
         {payload.map((pl: any, index: number) => (
-          <p>
+          <p key={index}>
             {pl.name}
             <br />
             Current: {pl.payload[pl.name]}
@@ -193,7 +194,15 @@ const MeasurementChart = ({ ...props }) => {
 
     setYAxisMin(minValue ? minValue.toFixed(2) : 0)
     setYAxisMax(maxValue ? maxValue.toFixed(2) : 100)
-  }, [measurements, isZoomed, isZooming])
+  }, [
+    measurements,
+    isZoomed,
+    isZooming,
+    endZoomArea,
+    startZoomArea,
+    localStorageKey?.yAxisMax,
+    localStorageKey?.yAxisMin,
+  ])
 
   const [chartSettings, setChartSettings] = useState({
     xAxisFormat:
@@ -314,7 +323,11 @@ const MeasurementChart = ({ ...props }) => {
         JSON.stringify(newChartSettings),
       )
     }
-  }, [chartSettings])
+  }, [
+    chartSettings.xAxisFormat,
+    chartSettings.yAxisMin,
+    chartSettings.yAxisMax,
+  ])
 
   // Handle new measurements events
   useEffect(() => {
@@ -486,4 +499,4 @@ const MeasurementChart = ({ ...props }) => {
   return <Box>{content}</Box>
 }
 
-export default MeasurementChart
+export default React.memo(MeasurementChart)
