@@ -31,25 +31,25 @@ import distinctColors from "distinct-colors"
 
 dayjs.extend(utc)
 
-function CustomTooltip({ payload, label, active }: any) {
-  if (active && payload && payload.length) {
-    return (
-      <Paper elevation={3} sx={{ p: 2 }}>
-        <h4>{dayjs(label).format("HH:mm:ss")}</h4>
-        {payload.map((pl: any, index: number) => (
-          <p key={index}>
-            {pl.name}
-            <br />
-            Current: {pl.payload[pl.name]}
-            <br />
-          </p>
-        ))}
-      </Paper>
-    )
-  }
+// function CustomTooltip({ payload, label, active }: any) {
+//   if (active && payload && payload.length) {
+//     return (
+//       <Paper elevation={3} sx={{ p: 2 }}>
+//         <h4>{dayjs(label).format("HH:mm:ss")}</h4>
+//         {payload.map((pl: any, index: number) => (
+//           <p key={index}>
+//             {pl.name}
+//             <br />
+//             Current: {pl.payload[pl.name]}
+//             <br />
+//           </p>
+//         ))}
+//       </Paper>
+//     )
+//   }
 
-  return null
-}
+//   return null
+// }
 
 const MeasurementChart = ({ ...props }) => {
   const theme = useTheme()
@@ -212,7 +212,7 @@ const MeasurementChart = ({ ...props }) => {
     xAxisFormat:
       localStorageKey && localStorageKey.xAxisFormat
         ? localStorageKey.xAxisFormat
-        : "YY-MM-DD HH:mm:ss",
+        : "HH:mm:ss",
     yAxisMin:
       localStorageKey && localStorageKey.yAxisMin
         ? localStorageKey.yAxisMin
@@ -464,10 +464,10 @@ const MeasurementChart = ({ ...props }) => {
                 }}
                 sx={{ width: 1, mt: 4 }}
               >
-                <MenuItem value="YY-MM-DD HH:mm:ss">YY-MM-DD HH:mm:ss</MenuItem>
-                <MenuItem value="MM-DD HH:mm:ss">MM-DD HH:mm:ss</MenuItem>
-                <MenuItem value="DD HH:mm:ss">DD HH:mm:ss</MenuItem>
                 <MenuItem value="HH:mm:ss">HH:mm:ss</MenuItem>
+                <MenuItem value="DD HH:mm:ss">DD HH:mm:ss</MenuItem>
+                <MenuItem value="MM-DD HH:mm:ss">MM-DD HH:mm:ss</MenuItem>
+                <MenuItem value="YY-MM-DD HH:mm:ss">YY-MM-DD HH:mm:ss</MenuItem>
               </Select>
             </Grid>
             <Grid xs={3}>
