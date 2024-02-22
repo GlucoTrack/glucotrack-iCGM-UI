@@ -168,11 +168,7 @@ const MeasurementChart = ({ ...props }) => {
         } else {
           filteredData.push(data)
         }
-      }
-      /*
-      filteredData = filteredData.sort((a: any, b: any) => {
-        return new Date(a.date).getTime() - new Date(b.date).getTime()
-      })*/
+      }      
       filteredMes.push({ ...measurement, data: filteredData })
     }
 
@@ -192,7 +188,12 @@ const MeasurementChart = ({ ...props }) => {
         }
       }
     }
-    setChartData(Array.from(unifiedData.values()))
+
+    let orderedData = Array.from(unifiedData.values())
+    orderedData = orderedData.sort((a: any, b: any) => {
+      return new Date(a.date).getTime() - new Date(b.date).getTime()
+    })
+    setChartData(orderedData)
 
     setFilteredMeasurements(filteredMes)
 
@@ -420,7 +421,7 @@ const MeasurementChart = ({ ...props }) => {
                 angle={-25}
                 fontSize={12}
                 tick={{ dy: 20 }}
-                interval={Math.floor(measurementsData.length / 20)}
+                interval={Math.floor(chartData.length / 20)}
                 height={50}
               />
               <YAxis
