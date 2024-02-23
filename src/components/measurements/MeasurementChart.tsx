@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useRef } from "react"
 import {
   Box,
   Button,
@@ -28,8 +28,13 @@ import { socket } from "../../utils/socket"
 import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
 import distinctColors from "distinct-colors"
+import Highcharts from 'highcharts'
+import HighchartsReact from 'highcharts-react-official'
+import Boost from 'highcharts/modules/boost';
 
 dayjs.extend(utc)
+
+Boost(Highcharts);
 
 // function CustomTooltip({ payload, label, active }: any) {
 //   if (active && payload && payload.length) {
@@ -66,6 +71,7 @@ const MeasurementChart = ({ ...props }) => {
   const [localStorageKey, setLocalStorageKey] = useState(
     JSON.parse(localStorage.getItem("chart_settings_" + props.page) || "{}"),
   )
+  const [chartOptions, setChartOptions] = useState({})
 
   const generateDeviceColors = (
     deviceNames: string[],
@@ -94,6 +100,13 @@ const MeasurementChart = ({ ...props }) => {
     setLineColors(
       Object.values(newDeviceColors).map((color) => chroma(color).hex()),
     )
+    setChartOptions(prevOptions => ({
+      ...(prevOptions as { chart: any }),
+      chart: {
+        ...(prevOptions as { chart: any }).chart,
+        backgroundColor: isDarkMode ? 'transparent' : '#ffffff'
+      }
+    }));
   }, [deviceNames, isDarkMode])
 
   const [isZoomed, setIsZoomed] = useState(false)
@@ -193,12 +206,49 @@ const MeasurementChart = ({ ...props }) => {
     orderedData = orderedData.sort((a: any, b: any) => {
       return new Date(a.date).getTime() - new Date(b.date).getTime()
     })
-    setChartData(orderedData)
+    //setChartData(orderedData)
 
     setFilteredMeasurements(filteredMes)
 
     setYAxisMin(minValue ? minValue.toFixed(2) : 0)
     setYAxisMax(maxValue ? maxValue.toFixed(2) : 100)
+
+    const labels: string[] = []
+    const series: any[] = []
+
+    for (const d of orderedData) {
+      const keys = Object.keys(d);
+      labels.push(d.date);
+
+      let seriesObject = series.find(obj => obj.name === keys[1]);
+
+      if (seriesObject) {
+        seriesObject.data = seriesObject.data.concat(d[keys[1]]);
+      } else {
+        series.push({
+          name: keys[1],
+          data: [d[keys[1]]],
+        });
+      }
+    }
+
+    setChartOptions({
+      title: {
+        text: null
+      },
+      XAxis: {
+        categories: labels
+      },
+      series: series,
+      boost: {
+        useGPUTranslations: true,
+        usePreallocated: true
+      },
+      chart: {
+        zoomType: 'x',
+      },
+    })
+
   }, [
     measurements,
     isZoomed,
@@ -405,6 +455,13 @@ const MeasurementChart = ({ ...props }) => {
               Zoom Out
             </Button>
           )}
+
+          <HighchartsReact
+            highcharts={Highcharts}
+            options={chartOptions}
+          />
+
+          {false &&
           <ResponsiveContainer height={500} width={"100%"}>
             <LineChart
               data={chartData}
@@ -452,7 +509,8 @@ const MeasurementChart = ({ ...props }) => {
                 />
               ))}
             </LineChart>
-          </ResponsiveContainer>
+          </ResponsiveContainer>          
+          }
 
           <Grid container spacing={3} lg={6}>
             <Grid xs={6}>
