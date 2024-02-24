@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react"
+import React, { useEffect, useState } from "react"
 import {
   Box,
   Button,
@@ -71,7 +71,24 @@ const MeasurementChart = ({ ...props }) => {
   const [localStorageKey, setLocalStorageKey] = useState(
     JSON.parse(localStorage.getItem("chart_settings_" + props.page) || "{}"),
   )
-  const [chartOptions, setChartOptions] = useState({})
+  const [chartOptions, setChartOptions] = useState({
+    title: {
+      text: null
+    },
+    xAxis: {
+      type: 'datetime',
+      
+    },
+    series: [],
+    boost: {
+      useGPUTranslations: true,
+      usePreallocated: true
+    },
+    chart: {
+      zoomType: 'x',
+      backgroundColor: null,
+    }
+  })
 
   const generateDeviceColors = (
     deviceNames: string[],
@@ -99,14 +116,7 @@ const MeasurementChart = ({ ...props }) => {
     const newDeviceColors = generateDeviceColors(deviceNames, palette)
     setLineColors(
       Object.values(newDeviceColors).map((color) => chroma(color).hex()),
-    )
-    setChartOptions(prevOptions => ({
-      ...(prevOptions as { chart: any }),
-      chart: {
-        ...(prevOptions as { chart: any }).chart,
-        backgroundColor: isDarkMode ? 'transparent' : '#ffffff'
-      }
-    }));
+    )    
   }, [deviceNames, isDarkMode])
 
   const [isZoomed, setIsZoomed] = useState(false)
@@ -181,74 +191,34 @@ const MeasurementChart = ({ ...props }) => {
         } else {
           filteredData.push(data)
         }
-      }      
+      }
       filteredMes.push({ ...measurement, data: filteredData })
     }
 
-    const unifiedData = new Map()
-    for (const measurement of filteredMes) {
-      for (const data of measurement.data) {
-        if (unifiedData.has(data.date)) {
-          let obj = unifiedData.get(data.date)
-          obj[measurement.name] = data.current
-          unifiedData.set(data.date, obj)
-        } else {
-          let obj: any = {
-            date: data.date,
-          }
-          obj[measurement.name] = data.current
-          unifiedData.set(data.date, obj)
-        }
-      }
-    }
-
-    let orderedData = Array.from(unifiedData.values())
-    orderedData = orderedData.sort((a: any, b: any) => {
-      return new Date(a.date).getTime() - new Date(b.date).getTime()
-    })
-    //setChartData(orderedData)
 
     setFilteredMeasurements(filteredMes)
 
     setYAxisMin(minValue ? minValue.toFixed(2) : 0)
     setYAxisMax(maxValue ? maxValue.toFixed(2) : 100)
 
-    const labels: string[] = []
-    const series: any[] = []
-
-    for (const d of orderedData) {
-      const keys = Object.keys(d);
-      labels.push(d.date);
-
-      let seriesObject = series.find(obj => obj.name === keys[1]);
-
-      if (seriesObject) {
-        seriesObject.data = seriesObject.data.concat(d[keys[1]]);
-      } else {
-        series.push({
-          name: keys[1],
-          data: [d[keys[1]]],
-        });
+        
+    let series: any = []
+    for (const measurement of filteredMes) {
+      let data = []
+      for (const d of measurement.data) {
+        data.push([new Date(d.date).getTime(), d.current])
       }
+      series.push({ name: measurement.name, data: data, type: "line" })
     }
 
-    setChartOptions({
-      title: {
-        text: null
-      },
-      XAxis: {
-        categories: labels
-      },
-      series: series,
-      boost: {
-        useGPUTranslations: true,
-        usePreallocated: true
-      },
-      chart: {
-        zoomType: 'x',
-      },
-    })
 
+    setChartOptions((prevOptions: any) => {
+      return {
+        ...prevOptions,
+        series: series
+      }
+    })
+    
   }, [
     measurements,
     isZoomed,
@@ -462,54 +432,54 @@ const MeasurementChart = ({ ...props }) => {
           />
 
           {false &&
-          <ResponsiveContainer height={500} width={"100%"}>
-            <LineChart
-              data={chartData}
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              style={{ cursor: "pointer" }}
-            >
-              <CartesianGrid strokeDasharray={"3 3"} />
-              <XAxis
-                dataKey="date"
-                tickFormatter={dateFormatter}
-                type="category"
-                angle={-25}
-                fontSize={12}
-                tick={{ dy: 20 }}
-                interval={Math.floor(chartData.length / 20)}
-                height={50}
-              />
-              <YAxis
-                tickFormatter={(value) => formatValue(value)}
-                domain={[chartSettings.yAxisMin, chartSettings.yAxisMax]}
-              />
-              {/* <Tooltip content={<CustomTooltip />} /> */}
-              <Legend verticalAlign="top" height={36} />
+            <ResponsiveContainer height={500} width={"100%"}>
+              <LineChart
+                data={chartData}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                style={{ cursor: "pointer" }}
+              >
+                <CartesianGrid strokeDasharray={"3 3"} />
+                <XAxis
+                  dataKey="date"
+                  tickFormatter={dateFormatter}
+                  type="category"
+                  angle={-25}
+                  fontSize={12}
+                  tick={{ dy: 20 }}
+                  interval={Math.floor(chartData.length / 20)}
+                  height={50}
+                />
+                <YAxis
+                  tickFormatter={(value) => formatValue(value)}
+                  domain={[chartSettings.yAxisMin, chartSettings.yAxisMax]}
+                />
+                {/* <Tooltip content={<CustomTooltip />} /> */}
+                <Legend verticalAlign="top" height={36} />
 
-              {showZoomBox && (
-                <ReferenceArea
-                  x1={tempStartZoomArea}
-                  x2={tempEndZoomArea}
-                  strokeOpacity={0.3}
-                />
-              )}
-              {filteredMeasurements.map((measurement: any, index: number) => (
-                <Line
-                  //key={`l_${measurement.name}_${measurement.data.length}`}
-                  key={measurement.name}
-                  dataKey={measurement.name}
-                  name={measurement.name}
-                  stroke={lineColors[index]}
-                  strokeWidth={2}
-                  dot={{ r: 2 }}
-                  isAnimationActive={false}
-                  connectNulls
-                />
-              ))}
-            </LineChart>
-          </ResponsiveContainer>          
+                {showZoomBox && (
+                  <ReferenceArea
+                    x1={tempStartZoomArea}
+                    x2={tempEndZoomArea}
+                    strokeOpacity={0.3}
+                  />
+                )}
+                {filteredMeasurements.map((measurement: any, index: number) => (
+                  <Line
+                    //key={`l_${measurement.name}_${measurement.data.length}`}
+                    key={measurement.name}
+                    dataKey={measurement.name}
+                    name={measurement.name}
+                    stroke={lineColors[index]}
+                    strokeWidth={2}
+                    dot={{ r: 2 }}
+                    isAnimationActive={false}
+                    connectNulls
+                  />
+                ))}
+              </LineChart>
+            </ResponsiveContainer>
           }
 
           <Grid container spacing={3} lg={6}>
