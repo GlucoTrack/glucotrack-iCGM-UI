@@ -70,7 +70,7 @@ const MeasurementChart = ({ ...props }) => {
     )
   }, [deviceNames, isDarkMode])
 
-  const [isZoomed, setIsZoomed] = useState(false)
+  
   const [measurements, setMeasurements] = useState<any>([])
   const [filteredMeasurements, setFilteredMeasurements] = useState<any>([])
   const [yAxisMin, setYAxisMin] = useState<Number>()
@@ -112,7 +112,6 @@ const MeasurementChart = ({ ...props }) => {
   useEffect(() => {
     if (data?.measurements) {
       setMeasurements(data.measurements)
-      setIsZoomed(false)
       setStartZoomArea(null)
       setEndZoomArea(null)
     }
@@ -205,18 +204,7 @@ const MeasurementChart = ({ ...props }) => {
     }
     return date
   }
-
-  const handleZoom = (e: any) => {
-    setIsZoomed(true);
-    console.log('zoom X:', e.chart.zoom.x);
-  };
-
-  const handleResetZoom = () => {
-    setIsZoomed(false);
-    setStartZoomArea("");
-    setEndZoomArea("");
-    console.log('Zoom removed');
-  };
+  
 
   function formatValue(value: number) {
     if (value >= 1000000) {
@@ -344,8 +332,6 @@ const MeasurementChart = ({ ...props }) => {
           <HighchartsReact
             highcharts={Highcharts}
             options={chartOptions}
-            onZoom={handleZoom}
-            onResetZoom={handleResetZoom}
           />
 
           <Grid container spacing={3} lg={6}>
