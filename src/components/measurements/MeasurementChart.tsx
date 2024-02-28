@@ -70,7 +70,7 @@ const MeasurementChart = ({ ...props }) => {
     )
   }, [deviceNames, isDarkMode])
 
-  
+
   const [measurements, setMeasurements] = useState<any>([])
   const [filteredMeasurements, setFilteredMeasurements] = useState<any>([])
   const [yAxisMin, setYAxisMin] = useState<Number>()
@@ -79,21 +79,46 @@ const MeasurementChart = ({ ...props }) => {
   const [startZoomArea, setStartZoomArea] = useState<Date | null>()
   const [endZoomArea, setEndZoomArea] = useState<Date | null>()
 
+  const [chartSettings, setChartSettings] = useState({
+    xAxisFormat:
+      localStorageKey && localStorageKey.xAxisFormat
+        ? localStorageKey.xAxisFormat
+        : "HH:mm:ss",
+    yAxisMin:
+      localStorageKey && localStorageKey.yAxisMin
+        ? localStorageKey.yAxisMin
+        : 0,
+    yAxisMax:
+      localStorageKey && localStorageKey.yAxisMax
+        ? localStorageKey.yAxisMax
+        : 0,
+  })
+
   const [chartOptions, setChartOptions] = useState({
     title: {
       text: null
     },
     xAxis: {
       type: 'datetime',
-
+      labels: {
+        rotation: -30,
+        formatter: function (v: any): any {
+          return dateFormatter(v.value, chartSettings.xAxisFormat)
+        }
+      }
     },
     series: [],
     boost: {
       useGPUTranslations: true,
       usePreallocated: true
     },
+    tooltip: {
+      enabled: false,
+    },
     chart: {
       zoomType: 'x',
+      panKey: 'alt',
+      panning: true,
       backgroundColor: null,
       events: {
         selection: function (event: any) {
@@ -102,8 +127,8 @@ const MeasurementChart = ({ ...props }) => {
             setEndZoomArea(null)
           } else {
             setStartZoomArea(new Date(event.xAxis[0].min))
-            setEndZoomArea(new Date(event.xAxis[0].max))            
-          }          
+            setEndZoomArea(new Date(event.xAxis[0].max))
+          }
         }
       },
     },
@@ -183,28 +208,13 @@ const MeasurementChart = ({ ...props }) => {
     endZoomArea,
   ])
 
-  const [chartSettings, setChartSettings] = useState({
-    xAxisFormat:
-      localStorageKey && localStorageKey.xAxisFormat
-        ? localStorageKey.xAxisFormat
-        : "HH:mm:ss",
-    yAxisMin:
-      localStorageKey && localStorageKey.yAxisMin
-        ? localStorageKey.yAxisMin
-        : 0,
-    yAxisMax:
-      localStorageKey && localStorageKey.yAxisMax
-        ? localStorageKey.yAxisMax
-        : 0,
-  })
-
-  const dateFormatter = (date: any) => {
+  const dateFormatter = (date: any, format: string) => {
     if (date) {
-      return dayjs(date).format(chartSettings.xAxisFormat)
+      return dayjs(date).format(format)
     }
     return date
   }
-  
+
 
   function formatValue(value: number) {
     if (value >= 1000000) {
@@ -217,6 +227,18 @@ const MeasurementChart = ({ ...props }) => {
   }
 
   const handleSettingChange = (field: string, value: string | number) => {
+    if (field === 'xAxisFormat') {
+      setChartOptions((prevOptions: any) => {
+        let xAxis = prevOptions.xAxis
+        xAxis.labels.formatter = function (v: any): any {
+          return dateFormatter(v.value, value.toString())
+        }
+        return {
+          ...prevOptions,
+          xAxis
+        }
+      })
+    }
     setChartSettings((prevSettings) => {
       let newValue = value
 
@@ -245,6 +267,7 @@ const MeasurementChart = ({ ...props }) => {
       }
     })
   }
+
   useEffect(() => {
     if (
       chartSettings.xAxisFormat ||
@@ -267,6 +290,8 @@ const MeasurementChart = ({ ...props }) => {
     chartSettings.xAxisFormat,
     chartSettings.yAxisMin,
     chartSettings.yAxisMax,
+    props.page,
+    localStorageKey,
   ])
 
   // Handle new measurements events
