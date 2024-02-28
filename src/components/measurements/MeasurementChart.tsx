@@ -41,20 +41,10 @@ const MeasurementChart = ({ ...props }) => {
     JSON.parse(localStorage.getItem("chart_settings_" + props.page) || "{}"),
   )
 
-  const generateDeviceColors = (
-    deviceNames: string[],
-    palette: Color[],
-  ): Record<string, Color> => {
-    const deviceColors: Record<string, Color> = {}
-    deviceNames.forEach((device, i) => {
-      deviceColors[device] = palette[i % palette.length]
-    })
-    return deviceColors
-  }
 
-  useEffect(() => {
+  function generateLineColors(number: number, isDarkMode: boolean) {
     const palette = distinctColors({
-      count: deviceNames.length,
+      count: number,
       hueMin: isDarkMode ? 0 : 0,
       hueMax: isDarkMode ? 360 : 360,
       chromaMin: 0,
@@ -64,12 +54,8 @@ const MeasurementChart = ({ ...props }) => {
       quality: 50,
       samples: 10000,
     })
-    const newDeviceColors = generateDeviceColors(deviceNames, palette)
-    setLineColors(
-      Object.values(newDeviceColors).map((color) => chroma(color).hex()),
-    )
-  }, [deviceNames, isDarkMode])
-
+    return palette.map((color) => chroma(color).hex())
+  }
 
   const [measurements, setMeasurements] = useState<any>([])
   const [filteredMeasurements, setFilteredMeasurements] = useState<any>([])
@@ -137,7 +123,7 @@ const MeasurementChart = ({ ...props }) => {
       zoomType: 'x',
       panKey: 'alt',
       panning: true,
-      backgroundColor: null,      
+      backgroundColor: null,
     },
   })
 
@@ -155,7 +141,10 @@ const MeasurementChart = ({ ...props }) => {
     let minValue = localStorageKey?.yAxisMin
     let maxValue = localStorageKey?.yAxisMax
 
+    let colors = generateLineColors(measurements.length, isDarkMode)
+
     let series: any = []
+    let index = 0;
     for (const measurement of measurements) {
       let data = []
       for (const d of measurement.data) {
@@ -168,7 +157,8 @@ const MeasurementChart = ({ ...props }) => {
         data.push([new Date(d.date).getTime(), d.current])
 
       }
-      series.push({ name: measurement.name, data: data, type: "line" })
+      series.push({ name: measurement.name, data: data, type: 'line', color: colors[index] })
+      index++
     }
 
     setYAxisMin(minValue ? minValue.toFixed(2) : 0)
@@ -185,6 +175,7 @@ const MeasurementChart = ({ ...props }) => {
     measurements,
     localStorageKey?.yAxisMax,
     localStorageKey?.yAxisMin,
+    isDarkMode,
   ])
 
   // Filtered measurements for table
