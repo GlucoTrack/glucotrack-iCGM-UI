@@ -100,12 +100,30 @@ const MeasurementChart = ({ ...props }) => {
     },
     xAxis: {
       type: 'datetime',
+      minRange: 1000 * 5,
       labels: {
         rotation: -30,
         formatter: function (v: any): any {
           return dateFormatter(v.value, chartSettings.xAxisFormat)
         }
-      }
+      },
+      events: {
+        afterSetExtremes: function (event: any) {
+          if (event.trigger === 'zoom') {
+            setStartZoomArea(new Date(event.min))
+            setEndZoomArea(new Date(event.max))
+          } else if (event.trigger === 'pan') {
+            // TODO probably need a debounce here
+            setStartZoomArea(new Date(event.min))
+            setEndZoomArea(new Date(event.max))
+          }
+        }
+      },
+    },
+    yAxis: {
+      title: {
+        text: null
+      },
     },
     series: [],
     boost: {
@@ -119,18 +137,7 @@ const MeasurementChart = ({ ...props }) => {
       zoomType: 'x',
       panKey: 'alt',
       panning: true,
-      backgroundColor: null,
-      events: {
-        selection: function (event: any) {
-          if (event.resetSelection) {
-            setStartZoomArea(null)
-            setEndZoomArea(null)
-          } else {
-            setStartZoomArea(new Date(event.xAxis[0].min))
-            setEndZoomArea(new Date(event.xAxis[0].max))
-          }
-        }
-      },
+      backgroundColor: null,      
     },
   })
 
@@ -274,24 +281,25 @@ const MeasurementChart = ({ ...props }) => {
       chartSettings.yAxisMin ||
       chartSettings.yAxisMax
     ) {
-      let newChartSettings = {
-        ...localStorageKey,
-        xAxisFormat: chartSettings.xAxisFormat,
-        yAxisMin: chartSettings.yAxisMin,
-        yAxisMax: chartSettings.yAxisMax,
-      }
-      setLocalStorageKey(newChartSettings)
-      localStorage.setItem(
-        "chart_settings_" + props.page,
-        JSON.stringify(newChartSettings),
-      )
+      setLocalStorageKey((prevKey: any) => {
+        let newChartSettings = {
+          ...prevKey,
+          xAxisFormat: chartSettings.xAxisFormat,
+          yAxisMin: chartSettings.yAxisMin,
+          yAxisMax: chartSettings.yAxisMax,
+        }
+        localStorage.setItem(
+          "chart_settings_" + props.page,
+          JSON.stringify(newChartSettings),
+        )
+        return newChartSettings
+      })
     }
   }, [
     chartSettings.xAxisFormat,
     chartSettings.yAxisMin,
     chartSettings.yAxisMax,
     props.page,
-    localStorageKey,
   ])
 
   // Handle new measurements events
