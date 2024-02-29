@@ -10,17 +10,6 @@ import {
   useTheme,
 } from "@mui/material"
 import { useAppSelector } from "@/hooks/useStore"
-import {
-  CartesianGrid,
-  Legend,
-  Line,
-  LineChart,
-  ReferenceArea,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts"
 import chroma, { Color } from "chroma-js"
 import MeasurementGrid from "./MeasurementGrid"
 import Grid from "@mui/system/Unstable_Grid"
@@ -28,28 +17,13 @@ import { socket } from "../../utils/socket"
 import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
 import distinctColors from "distinct-colors"
+import Highcharts from 'highcharts'
+import HighchartsReact from 'highcharts-react-official'
+import Boost from 'highcharts/modules/boost';
 
 dayjs.extend(utc)
 
-// function CustomTooltip({ payload, label, active }: any) {
-//   if (active && payload && payload.length) {
-//     return (
-//       <Paper elevation={3} sx={{ p: 2 }}>
-//         <h4>{dayjs(label).format("HH:mm:ss")}</h4>
-//         {payload.map((pl: any, index: number) => (
-//           <p key={index}>
-//             {pl.name}
-//             <br />
-//             Current: {pl.payload[pl.name]}
-//             <br />
-//           </p>
-//         ))}
-//       </Paper>
-//     )
-//   }
-
-//   return null
-// }
+Boost(Highcharts);
 
 const MeasurementChart = ({ ...props }) => {
   const theme = useTheme()
@@ -67,20 +41,10 @@ const MeasurementChart = ({ ...props }) => {
     JSON.parse(localStorage.getItem("chart_settings_" + props.page) || "{}"),
   )
 
-  const generateDeviceColors = (
-    deviceNames: string[],
-    palette: Color[],
-  ): Record<string, Color> => {
-    const deviceColors: Record<string, Color> = {}
-    deviceNames.forEach((device, i) => {
-      deviceColors[device] = palette[i % palette.length]
-    })
-    return deviceColors
-  }
 
-  useEffect(() => {
+  function generateLineColors(number: number, isDarkMode: boolean) {
     const palette = distinctColors({
-      count: deviceNames.length,
+      count: number,
       hueMin: isDarkMode ? 0 : 0,
       hueMax: isDarkMode ? 360 : 360,
       chromaMin: 0,
@@ -90,124 +54,16 @@ const MeasurementChart = ({ ...props }) => {
       quality: 50,
       samples: 10000,
     })
-    const newDeviceColors = generateDeviceColors(deviceNames, palette)
-    setLineColors(
-      Object.values(newDeviceColors).map((color) => chroma(color).hex()),
-    )
-  }, [deviceNames, isDarkMode])
+    return palette.map((color) => chroma(color).hex())
+  }
 
-  const [isZoomed, setIsZoomed] = useState(false)
   const [measurements, setMeasurements] = useState<any>([])
   const [filteredMeasurements, setFilteredMeasurements] = useState<any>([])
-  const [chartData, setChartData] = useState<any>([])
   const [yAxisMin, setYAxisMin] = useState<Number>()
   const [yAxisMax, setYAxisMax] = useState<Number>()
 
-  useEffect(() => {
-    if (data?.measurements) {
-      setMeasurements(data.measurements)
-      setIsZoomed(false)
-      setStartZoomArea("")
-      setEndZoomArea("")
-      setTempStartZoomArea("")
-      setTempEndZoomArea("")
-    }
-  }, [data?.measurements])
-
-  const [tempStartZoomArea, setTempStartZoomArea] = useState<string>("")
-  const [tempEndZoomArea, setTempEndZoomArea] = useState<string>("")
-  const [startZoomArea, setStartZoomArea] = useState<string>("")
-  const [endZoomArea, setEndZoomArea] = useState<string>("")
-
-  // flag if currently zooming (press and drag)
-  const [isZooming, setIsZooming] = useState(false)
-
-  // flag to show the zooming area (ReferenceArea)
-  const showZoomBox = isZooming && tempStartZoomArea && tempEndZoomArea
-
-  useEffect(() => {
-    if (isZooming) {
-      return
-    }
-    let minValue = localStorageKey?.yAxisMin
-    let maxValue = localStorageKey?.yAxisMax
-    let filteredMes = []
-
-    let startDate = new Date(),
-      endDate = new Date()
-    if (isZoomed) {
-      startDate = new Date(startZoomArea)
-      endDate = new Date(endZoomArea)
-      if (startDate > endDate) {
-        let temp = startDate
-        startDate = endDate
-        endDate = temp
-      }
-    }
-
-    for (const measurement of measurements) {
-      let filteredData = []
-      const seenDates = new Set()
-      for (const data of measurement.data) {
-        if (seenDates.has(data.date)) {
-          continue
-        } else {
-          seenDates.add(data.date)
-        }
-        if (minValue === undefined || data.current < minValue) {
-          minValue = data.current
-        }
-        if (maxValue === undefined || data.current > maxValue) {
-          maxValue = data.current
-        }
-        let date = new Date(data.date)
-        if (isZoomed) {
-          if (date >= startDate && date <= endDate) {
-            filteredData.push(data)
-          }
-        } else {
-          filteredData.push(data)
-        }
-      }      
-      filteredMes.push({ ...measurement, data: filteredData })
-    }
-
-    const unifiedData = new Map()
-    for (const measurement of filteredMes) {
-      for (const data of measurement.data) {
-        if (unifiedData.has(data.date)) {
-          let obj = unifiedData.get(data.date)
-          obj[measurement.name] = data.current
-          unifiedData.set(data.date, obj)
-        } else {
-          let obj: any = {
-            date: data.date,
-          }
-          obj[measurement.name] = data.current
-          unifiedData.set(data.date, obj)
-        }
-      }
-    }
-
-    let orderedData = Array.from(unifiedData.values())
-    orderedData = orderedData.sort((a: any, b: any) => {
-      return new Date(a.date).getTime() - new Date(b.date).getTime()
-    })
-    setChartData(orderedData)
-
-    setFilteredMeasurements(filteredMes)
-
-    setYAxisMin(minValue ? minValue.toFixed(2) : 0)
-    setYAxisMax(maxValue ? maxValue.toFixed(2) : 100)
-  }, [
-    measurements,
-    isZoomed,
-    isZooming,
-    endZoomArea,
-    startZoomArea,
-    localStorageKey?.yAxisMax,
-    localStorageKey?.yAxisMin,
-  ])
+  const [startZoomArea, setStartZoomArea] = useState<Date | null>()
+  const [endZoomArea, setEndZoomArea] = useState<Date | null>()
 
   const [chartSettings, setChartSettings] = useState({
     xAxisFormat:
@@ -224,52 +80,182 @@ const MeasurementChart = ({ ...props }) => {
         : 0,
   })
 
-  const dateFormatter = (date: any) => {
+  const [chartOptions, setChartOptions] = useState({
+    plotOptions: {
+      series: {
+        marker: {
+          enabled: false,
+          states: {
+            hover: {
+              enabled: false
+            }
+          }
+        }
+      }
+    },
+    title: {
+      text: null
+    },
+    xAxis: {
+      type: 'datetime',
+      minRange: 1000 * 5,
+      lineColor: '',
+      labels: {
+        style: {
+          color: ''
+        },
+        rotation: -30,
+        formatter: function (v: any): any {
+          return dateFormatter(v.value, chartSettings.xAxisFormat)
+        }
+      },
+      events: {
+        afterSetExtremes: function (event: any) {
+          if (event.trigger === 'zoom') {
+            setStartZoomArea(new Date(event.min))
+            setEndZoomArea(new Date(event.max))
+          } else if (event.trigger === 'pan') {
+            // TODO probably need a debounce here
+            setStartZoomArea(new Date(event.min))
+            setEndZoomArea(new Date(event.max))
+          }
+        }
+      },
+    },
+    yAxis: {
+      //min: Number(chartSettings.yAxisMin),
+      //max: Number(chartSettings.yAxisMax),
+      title: {
+        text: null
+      },
+      labels: {
+        style: {
+        },
+        formatter: function (v: any): any {
+          return formatValue(v.value)
+        }
+      },
+    },
+    series: [],
+    boost: {
+      useGPUTranslations: true,
+      usePreallocated: true
+    },
+    tooltip: {
+      enabled: false,
+    },
+    chart: {
+      zoomType: 'xy',
+      panKey: 'alt',
+      panning: true,
+      backgroundColor: null,
+    },
+    legend: {
+      itemStyle: {
+      }
+    }
+  })
+
+  useEffect(() => {
+    if (data?.measurements) {
+      setMeasurements(data.measurements)
+      setStartZoomArea(null)
+      setEndZoomArea(null)
+    }
+  }, [data?.measurements])
+
+  useEffect(() => {
+    const lightChartColor = '#000000'
+    const darkChartColor = '#ffffff'
+    const selectedChartColor = isDarkMode ? darkChartColor : lightChartColor
+
+    setChartOptions((prevOptions: any) => {
+      prevOptions.xAxis.lineColor = selectedChartColor
+      prevOptions.xAxis.tickColor = selectedChartColor
+      prevOptions.xAxis.labels.style.color = selectedChartColor
+      prevOptions.yAxis.lineColor = selectedChartColor
+      prevOptions.yAxis.labels.style.color = selectedChartColor
+      prevOptions.legend.itemStyle.color = selectedChartColor
+      return prevOptions
+    })
+  }, [isDarkMode])
+
+  useEffect(() => {
+    let minValue = localStorageKey?.yAxisMin
+    let maxValue = localStorageKey?.yAxisMax
+
+    let colors = generateLineColors(measurements.length, isDarkMode)
+
+    let series: any = []
+    let index = 0;
+    for (const measurement of measurements) {
+      let data = []
+      for (const d of measurement.data) {
+        if (minValue === undefined || d.current < minValue) {
+          minValue = d.current
+        }
+        if (maxValue === undefined || d.current > maxValue) {
+          maxValue = d.current
+        }
+        data.push([new Date(d.date).getTime(), d.current])
+
+      }
+      series.push({ name: measurement.name, data: data, type: 'line', color: colors[index] })
+      index++
+    }
+
+    setYAxisMin(minValue ? minValue.toFixed(2) : 0)
+    setYAxisMax(maxValue ? maxValue.toFixed(2) : 100)
+
+    setChartOptions((prevOptions: any) => {
+      return {
+        ...prevOptions,
+        series: series
+      }
+    })
+
+  }, [
+    measurements,
+    localStorageKey?.yAxisMax,
+    localStorageKey?.yAxisMin,
+    isDarkMode,
+  ])
+
+  // Filtered measurements for table
+  useEffect(() => {
+    if (startZoomArea && endZoomArea) {
+      let filteredMes = []
+      for (const measurement of measurements) {
+        let filteredData = []
+        for (const data of measurement.data) {
+          let date = new Date(data.date)
+
+          if (date >= startZoomArea && date <= endZoomArea) {
+            filteredData.push(data)
+          }
+
+        }
+        filteredMes.push({ ...measurement, data: filteredData })
+      }
+
+      setFilteredMeasurements(filteredMes)
+    } else {
+      setFilteredMeasurements(measurements)
+    }
+
+  }, [
+    measurements,
+    startZoomArea,
+    endZoomArea,
+  ])
+
+  const dateFormatter = (date: any, format: string) => {
     if (date) {
-      return dayjs(date).format(chartSettings.xAxisFormat)
+      return dayjs(date).format(format)
     }
     return date
   }
 
-  // reset the states on zoom out
-  function handleZoomOut() {
-    setIsZoomed(false)
-    setStartZoomArea("")
-    setEndZoomArea("")
-    setTempStartZoomArea("")
-    setTempEndZoomArea("")
-  }
-
-  function handleMouseDown(e: any) {
-    setIsZooming(true)
-    setTempStartZoomArea(e.activeLabel)
-    setTempEndZoomArea("")
-  }
-
-  function handleMouseMove(e: any) {
-    if (isZooming) {
-      setTempEndZoomArea(e.activeLabel)
-    }
-  }
-
-  function handleMouseUp(e: any) {
-    if (isZooming) {
-      setIsZooming(false)
-
-      if (tempStartZoomArea === tempEndZoomArea || tempStartZoomArea === "") {
-        setTempStartZoomArea("")
-        setTempEndZoomArea("")
-        return
-      }
-
-      setEndZoomArea(tempEndZoomArea)
-      setStartZoomArea(tempStartZoomArea)
-      setTempStartZoomArea("")
-      setTempEndZoomArea("")
-
-      setIsZoomed(true)
-    }
-  }
 
   function formatValue(value: number) {
     if (value >= 1000000) {
@@ -282,6 +268,18 @@ const MeasurementChart = ({ ...props }) => {
   }
 
   const handleSettingChange = (field: string, value: string | number) => {
+    if (field === 'xAxisFormat') {
+      setChartOptions((prevOptions: any) => {
+        let xAxis = prevOptions.xAxis
+        xAxis.labels.formatter = function (v: any): any {
+          return dateFormatter(v.value, value.toString())
+        }
+        return {
+          ...prevOptions,
+          xAxis
+        }
+      })
+    }
     setChartSettings((prevSettings) => {
       let newValue = value
 
@@ -303,6 +301,20 @@ const MeasurementChart = ({ ...props }) => {
 
         const setter = field === "yAxisMin" ? setYAxisMin : setYAxisMax
         setter(parseFloat(Number(newValue).toFixed(2)))
+
+        /*
+        setChartOptions((prevOptions: any) => {
+          let yAxis = prevOptions.yAxis
+          if (field === "yAxisMin") {
+            yAxis.min = newValue
+          } else {
+            yAxis.max = newValue
+          }
+          return {
+            ...prevOptions,
+            yAxis
+          }
+        })*/
       }
       return {
         ...prevSettings,
@@ -310,28 +322,32 @@ const MeasurementChart = ({ ...props }) => {
       }
     })
   }
+
   useEffect(() => {
     if (
       chartSettings.xAxisFormat ||
       chartSettings.yAxisMin ||
       chartSettings.yAxisMax
     ) {
-      let newChartSettings = {
-        ...localStorageKey,
-        xAxisFormat: chartSettings.xAxisFormat,
-        yAxisMin: chartSettings.yAxisMin,
-        yAxisMax: chartSettings.yAxisMax,
-      }
-      setLocalStorageKey(newChartSettings)
-      localStorage.setItem(
-        "chart_settings_" + props.page,
-        JSON.stringify(newChartSettings),
-      )
+      setLocalStorageKey((prevKey: any) => {
+        let newChartSettings = {
+          ...prevKey,
+          xAxisFormat: chartSettings.xAxisFormat,
+          yAxisMin: chartSettings.yAxisMin,
+          yAxisMax: chartSettings.yAxisMax,
+        }
+        localStorage.setItem(
+          "chart_settings_" + props.page,
+          JSON.stringify(newChartSettings),
+        )
+        return newChartSettings
+      })
     }
   }, [
     chartSettings.xAxisFormat,
     chartSettings.yAxisMin,
     chartSettings.yAxisMax,
+    props.page,
   ])
 
   // Handle new measurements events
@@ -389,70 +405,15 @@ const MeasurementChart = ({ ...props }) => {
       </p>
     )
   } else if (isSuccess) {
-    const measurementsData =
-      filteredMeasurements[0]?.data ?? filteredMeasurements
 
     content = (
       <>
         <Box style={{ userSelect: "none", marginTop: 30 }}>
-          {isZoomed && (
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleZoomOut}
-              sx={{ mb: 3, alignItems: "center" }}
-            >
-              Zoom Out
-            </Button>
-          )}
-          <ResponsiveContainer height={500} width={"100%"}>
-            <LineChart
-              data={chartData}
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              style={{ cursor: "pointer" }}
-            >
-              <CartesianGrid strokeDasharray={"3 3"} />
-              <XAxis
-                dataKey="date"
-                tickFormatter={dateFormatter}
-                type="category"
-                angle={-25}
-                fontSize={12}
-                tick={{ dy: 20 }}
-                interval={Math.floor(chartData.length / 20)}
-                height={50}
-              />
-              <YAxis
-                tickFormatter={(value) => formatValue(value)}
-                domain={[chartSettings.yAxisMin, chartSettings.yAxisMax]}
-              />
-              {/* <Tooltip content={<CustomTooltip />} /> */}
-              <Legend verticalAlign="top" height={36} />
 
-              {showZoomBox && (
-                <ReferenceArea
-                  x1={tempStartZoomArea}
-                  x2={tempEndZoomArea}
-                  strokeOpacity={0.3}
-                />
-              )}
-              {filteredMeasurements.map((measurement: any, index: number) => (
-                <Line
-                  //key={`l_${measurement.name}_${measurement.data.length}`}
-                  key={measurement.name}
-                  dataKey={measurement.name}
-                  name={measurement.name}
-                  stroke={lineColors[index]}
-                  strokeWidth={2}
-                  dot={{ r: 2 }}
-                  isAnimationActive={false}
-                  connectNulls
-                />
-              ))}
-            </LineChart>
-          </ResponsiveContainer>
+          <HighchartsReact
+            highcharts={Highcharts}
+            options={chartOptions}
+          />
 
           <Grid container spacing={3} lg={6}>
             <Grid xs={6}>
