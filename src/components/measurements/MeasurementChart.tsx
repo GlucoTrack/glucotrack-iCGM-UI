@@ -99,7 +99,11 @@ const MeasurementChart = ({ ...props }) => {
     xAxis: {
       type: 'datetime',
       minRange: 1000 * 5,
+      lineColor: '',
       labels: {
+        style: {
+          color: ''
+        },
         rotation: -30,
         formatter: function (v: any): any {
           return dateFormatter(v.value, chartSettings.xAxisFormat)
@@ -119,12 +123,14 @@ const MeasurementChart = ({ ...props }) => {
       },
     },
     yAxis: {
-      min: Number(chartSettings.yAxisMin),
-      max: Number(chartSettings.yAxisMax),
+      //min: Number(chartSettings.yAxisMin),
+      //max: Number(chartSettings.yAxisMax),
       title: {
         text: null
       },
       labels: {
+        style: {
+        },
         formatter: function (v: any): any {
           return formatValue(v.value)
         }
@@ -139,11 +145,15 @@ const MeasurementChart = ({ ...props }) => {
       enabled: false,
     },
     chart: {
-      zoomType: 'x',
+      zoomType: 'xy',
       panKey: 'alt',
       panning: true,
       backgroundColor: null,
     },
+    legend: {
+      itemStyle: {
+      }
+    }
   })
 
   useEffect(() => {
@@ -154,7 +164,21 @@ const MeasurementChart = ({ ...props }) => {
     }
   }, [data?.measurements])
 
+  useEffect(() => {
+    const lightChartColor = '#000000'
+    const darkChartColor = '#ffffff'
+    const selectedChartColor = isDarkMode ? darkChartColor : lightChartColor
 
+    setChartOptions((prevOptions: any) => {
+      prevOptions.xAxis.lineColor = selectedChartColor
+      prevOptions.xAxis.tickColor = selectedChartColor
+      prevOptions.xAxis.labels.style.color = selectedChartColor
+      prevOptions.yAxis.lineColor = selectedChartColor
+      prevOptions.yAxis.labels.style.color = selectedChartColor
+      prevOptions.legend.itemStyle.color = selectedChartColor
+      return prevOptions
+    })
+  }, [isDarkMode])
 
   useEffect(() => {
     let minValue = localStorageKey?.yAxisMin
@@ -278,6 +302,7 @@ const MeasurementChart = ({ ...props }) => {
         const setter = field === "yAxisMin" ? setYAxisMin : setYAxisMax
         setter(parseFloat(Number(newValue).toFixed(2)))
 
+        /*
         setChartOptions((prevOptions: any) => {
           let yAxis = prevOptions.yAxis
           if (field === "yAxisMin") {
@@ -289,7 +314,7 @@ const MeasurementChart = ({ ...props }) => {
             ...prevOptions,
             yAxis
           }
-        })
+        })*/
       }
       return {
         ...prevSettings,
