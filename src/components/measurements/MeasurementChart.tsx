@@ -81,6 +81,18 @@ const MeasurementChart = ({ ...props }) => {
   })
 
   const [chartOptions, setChartOptions] = useState({
+    plotOptions: {
+      series: {
+        marker: {
+          enabled: false,
+          states: {
+            hover: {
+              enabled: false
+            }
+          }
+        }
+      }
+    },
     title: {
       text: null
     },
@@ -107,8 +119,15 @@ const MeasurementChart = ({ ...props }) => {
       },
     },
     yAxis: {
+      min: Number(chartSettings.yAxisMin),
+      max: Number(chartSettings.yAxisMax),
       title: {
         text: null
+      },
+      labels: {
+        formatter: function (v: any): any {
+          return formatValue(v.value)
+        }
       },
     },
     series: [],
@@ -258,6 +277,19 @@ const MeasurementChart = ({ ...props }) => {
 
         const setter = field === "yAxisMin" ? setYAxisMin : setYAxisMax
         setter(parseFloat(Number(newValue).toFixed(2)))
+
+        setChartOptions((prevOptions: any) => {
+          let yAxis = prevOptions.yAxis
+          if (field === "yAxisMin") {
+            yAxis.min = newValue
+          } else {
+            yAxis.max = newValue
+          }
+          return {
+            ...prevOptions,
+            yAxis
+          }
+        })
       }
       return {
         ...prevSettings,
