@@ -58,9 +58,7 @@ const MeasurementChart = ({ ...props }) => {
   }
 
   const [measurements, setMeasurements] = useState<any>([])
-  const [filteredMeasurements, setFilteredMeasurements] = useState<any>([])
-  const [yAxisMin, setYAxisMin] = useState<Number>()
-  const [yAxisMax, setYAxisMax] = useState<Number>()
+  const [filteredMeasurements, setFilteredMeasurements] = useState<any>([])  
 
   const [startZoomArea, setStartZoomArea] = useState<Date | null>()
   const [endZoomArea, setEndZoomArea] = useState<Date | null>()
@@ -69,15 +67,7 @@ const MeasurementChart = ({ ...props }) => {
     xAxisFormat:
       localStorageKey && localStorageKey.xAxisFormat
         ? localStorageKey.xAxisFormat
-        : "HH:mm:ss",
-    yAxisMin:
-      localStorageKey && localStorageKey.yAxisMin
-        ? localStorageKey.yAxisMin
-        : 0,
-    yAxisMax:
-      localStorageKey && localStorageKey.yAxisMax
-        ? localStorageKey.yAxisMax
-        : 0,
+        : "HH:mm:ss",    
   })
 
   const [chartOptions, setChartOptions] = useState({
@@ -122,9 +112,7 @@ const MeasurementChart = ({ ...props }) => {
         }
       },
     },
-    yAxis: {
-      //min: Number(chartSettings.yAxisMin),
-      //max: Number(chartSettings.yAxisMax),
+    yAxis: {      
       title: {
         text: null
       },
@@ -180,33 +168,21 @@ const MeasurementChart = ({ ...props }) => {
     })
   }, [isDarkMode])
 
-  useEffect(() => {
-    let minValue = localStorageKey?.yAxisMin
-    let maxValue = localStorageKey?.yAxisMax
-
+  useEffect(() => {    
     let colors = generateLineColors(measurements.length, isDarkMode)
 
     let series: any = []
     let index = 0;
     for (const measurement of measurements) {
       let data = []
-      for (const d of measurement.data) {
-        if (minValue === undefined || d.current < minValue) {
-          minValue = d.current
-        }
-        if (maxValue === undefined || d.current > maxValue) {
-          maxValue = d.current
-        }
+      for (const d of measurement.data) {        
         data.push([new Date(d.date).getTime(), d.current])
 
       }
       series.push({ name: measurement.name, data: data, type: 'line', color: colors[index] })
       index++
     }
-
-    setYAxisMin(minValue ? minValue.toFixed(2) : 0)
-    setYAxisMax(maxValue ? maxValue.toFixed(2) : 100)
-
+    
     setChartOptions((prevOptions: any) => {
       return {
         ...prevOptions,
@@ -215,9 +191,7 @@ const MeasurementChart = ({ ...props }) => {
     })
 
   }, [
-    measurements,
-    localStorageKey?.yAxisMax,
-    localStorageKey?.yAxisMin,
+    measurements,    
     isDarkMode,
   ])
 
@@ -282,40 +256,7 @@ const MeasurementChart = ({ ...props }) => {
     }
     setChartSettings((prevSettings) => {
       let newValue = value
-
-      if (field === "yAxisMin" || field === "yAxisMax") {
-        const dataValues = filteredMeasurements[0]?.data.map(
-          (d: any) => d.current,
-        )
-        const extremeValue =
-          field === "yAxisMin"
-            ? Math.min(...dataValues)
-            : Math.max(...dataValues)
-
-        if (
-          (field === "yAxisMin" && Number(newValue) > extremeValue) ||
-          (field === "yAxisMax" && Number(newValue) < extremeValue)
-        ) {
-          newValue = extremeValue
-        }
-
-        const setter = field === "yAxisMin" ? setYAxisMin : setYAxisMax
-        setter(parseFloat(Number(newValue).toFixed(2)))
-
-        /*
-        setChartOptions((prevOptions: any) => {
-          let yAxis = prevOptions.yAxis
-          if (field === "yAxisMin") {
-            yAxis.min = newValue
-          } else {
-            yAxis.max = newValue
-          }
-          return {
-            ...prevOptions,
-            yAxis
-          }
-        })*/
-      }
+      
       return {
         ...prevSettings,
         [field]: newValue !== null ? newValue : "",
@@ -325,16 +266,12 @@ const MeasurementChart = ({ ...props }) => {
 
   useEffect(() => {
     if (
-      chartSettings.xAxisFormat ||
-      chartSettings.yAxisMin ||
-      chartSettings.yAxisMax
+      chartSettings.xAxisFormat      
     ) {
       setLocalStorageKey((prevKey: any) => {
         let newChartSettings = {
           ...prevKey,
-          xAxisFormat: chartSettings.xAxisFormat,
-          yAxisMin: chartSettings.yAxisMin,
-          yAxisMax: chartSettings.yAxisMax,
+          xAxisFormat: chartSettings.xAxisFormat,          
         }
         localStorage.setItem(
           "chart_settings_" + props.page,
@@ -345,8 +282,6 @@ const MeasurementChart = ({ ...props }) => {
     }
   }, [
     chartSettings.xAxisFormat,
-    chartSettings.yAxisMin,
-    chartSettings.yAxisMax,
     props.page,
   ])
 
@@ -431,29 +366,7 @@ const MeasurementChart = ({ ...props }) => {
                 <MenuItem value="MM-DD HH:mm:ss">MM-DD HH:mm:ss</MenuItem>
                 <MenuItem value="YY-MM-DD HH:mm:ss">YY-MM-DD HH:mm:ss</MenuItem>
               </Select>
-            </Grid>
-            <Grid xs={3}>
-              <TextField
-                label="Y-Axis Min"
-                type="number"
-                value={yAxisMin !== undefined ? yAxisMin : 0}
-                onChange={(event) => setYAxisMin(Number(event.target.value))}
-                onBlur={() => handleSettingChange("yAxisMin", Number(yAxisMin))}
-                sx={{ width: 1, mt: 4 }}
-                fullWidth
-              />
-            </Grid>
-            <Grid xs={3}>
-              <TextField
-                label="Y-Axis Max"
-                type="number"
-                value={yAxisMax !== undefined ? yAxisMax : 0}
-                onChange={(event) => setYAxisMax(Number(event.target.value))}
-                onBlur={() => handleSettingChange("yAxisMax", Number(yAxisMax))}
-                sx={{ width: 1, mt: 4 }}
-                fullWidth
-              />
-            </Grid>
+            </Grid>            
           </Grid>
         </Box>
         <Box>
