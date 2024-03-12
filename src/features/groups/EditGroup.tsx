@@ -14,11 +14,13 @@ import {
   useDeleteGroupMutation,
   useEditGroupMutation,
   useGetDevicesQuery,
-  useEditDeviceMutation,
+  useEditDevicesMutation
 } from "@/features/api/apiSlice"
 import { RootState } from "@/store/store"
 import { resetGroup } from "./groupsSlice"
 import { Typography } from "@mui/material"
+import { Snackbar } from '@mui/material';
+import { Alert } from '@mui/material';
 
 interface FormValues {
   groupName: string
@@ -59,10 +61,11 @@ const EditGroup: React.FC = () => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const theme = useTheme()
+  const [open, setOpen] = React.useState(false);
+  const [message, setMessage] = React.useState('');
+  const [severity, setSeverity] = React.useState<'error' | 'success' | 'info' | 'warning' | undefined>('success');
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
-  const [formDeviceValues, setFormDeviceValues] =
-    useState<DeviceValues>(initialDeviceValues)
-  const [devicesToUpdate, setDevicesToUpdate] = useState<DeviceValues[]>([])
+  const [formDeviceValues, setFormDeviceValues] = useState<DeviceValues>(initialDeviceValues)
   const [isDeviceSubmitting, setIsDeviceSubmitting] = useState(false)
   const { data, isFetching, isLoading } = useGetDevicesQuery({})
   const { groupId } = useParams<Record<string, string>>()
@@ -88,14 +91,8 @@ const EditGroup: React.FC = () => {
     },
   ] = useDeleteGroupMutation()
   const [
-    editDevice,
-    {
-      isLoading: isDeviceEditing,
-      isError: isDeviceEditError,
-      error: editDeviceError,
-      isSuccess: isEditDeviceSuccess,
-    },
-  ] = useEditDeviceMutation()
+    editDevices,
+  ] = useEditDevicesMutation()
 
   useEffect(() => {
     const savedFormValues = localStorage.getItem("groupValues_" + groupId)
@@ -123,6 +120,16 @@ const EditGroup: React.FC = () => {
       setDefaultValues()
     }
   }, [groupName, groupDescription, deviceNames])
+
+  const openSnackbar = (message: string, severity: 'error' | 'success' | 'info' | 'warning' | undefined) => {
+    setMessage(message);
+    setSeverity(severity);
+    setOpen(true);
+  };
+
+  const closeSnackbar = () => {
+    setOpen(false);
+  };
 
   const canSave =
     [
@@ -195,7 +202,7 @@ const EditGroup: React.FC = () => {
   }
 
   let content: JSX.Element | null = null
-  if (isEditingGroup || isDeletingGroup || isDeviceEditing) {
+  if (isEditingGroup || isDeletingGroup) {
     content = <h3>Loading...</h3>
   } else if (isEditError || isDeleteError) {
     const errorMessageString = isEditError
@@ -211,53 +218,37 @@ const EditGroup: React.FC = () => {
     handleMutationSuccess()
   }
 
-  const editDeviceAsync = async () => {
-    try {
-      const { _id, ...restOfUpdateDevice } = devicesToUpdate[0] as DeviceValues
-      await editDevice({ deviceId: _id, ...restOfUpdateDevice })
-      if (!isDeviceEditing) {
-        if (editDeviceError) {
-          console.error("Failed to edit device:", editDeviceError)
-          setIsDeviceSubmitting(false)
-        } else {
-          setDevicesToUpdate((prevDevices) => prevDevices.slice(1))
-          console.log("Device edited successfully:", data)
-        }
-      }
-    } catch (error) {
-      console.error("Failed to edit device:", error)
-      setIsDeviceSubmitting(false)
-    }
-  }
-
-  useEffect(() => {
-    if (devicesToUpdate.length > 0) {
-      editDeviceAsync()
-    }
-    if (isDeviceSubmitting && devicesToUpdate.length === 0) {
-      setIsDeviceSubmitting(false)
-      handleMutationSuccess()
-    }
-  }, [devicesToUpdate])
-
   const handleDevices = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsDeviceSubmitting(true)
     if (canSaveDevice) {
       try {
-        const devices = []
-        for (const deviceName of formValues.deviceNames) {
-          const device = data.devices.find(
-            (device: any) => device.deviceName === deviceName,
-          )
-          const { __v, updatedAt, createdAt, ...restOfDevice } = device
-          const { _id, ...restOfFormDeviceValues } = formDeviceValues
-          const updatedDevice = { ...restOfDevice, ...restOfFormDeviceValues }
-          devices.push(updatedDevice)
+        const devices = formValues.deviceNames.map(deviceName => {
+          const device = data.devices.find((device: any) => device.deviceName === deviceName);
+          return device ? device._id : null;
+        }).filter(id => id !== null);
+
+        const response = await editDevices({ deviceIds: devices, ...formDeviceValues });
+        //if (response?.error?.data) {
+        if ('error' in response && 'data' in response.error) {
+          openSnackbar((response.error.data as any).message, 'error');
+        } else {
+          if (response?.data?.devices?.updatedDeviceIds) {
+            const updatedDeviceIds = response.data.devices.updatedDeviceIds;
+            const allDevicesUpdated = devices.every(deviceId => updatedDeviceIds.includes(deviceId));
+            if (allDevicesUpdated) {
+              openSnackbar("All devices updated successfully", 'success');
+            } else {
+              openSnackbar("Some devices were not updated", 'warning');
+            }
+          } else {
+            openSnackbar("Failed to edit devices", 'error');
+          }
         }
-        setDevicesToUpdate(devices)
       } catch (error: any) {
         console.error("Failed to edit device:", error)
+        openSnackbar("Failed to edit device: " + error.message, 'error');
+      } finally {
         setIsDeviceSubmitting(false)
       }
     }
@@ -493,6 +484,12 @@ const EditGroup: React.FC = () => {
           </Box>
         </form>
       </Box>
+
+      <Snackbar open={open} autoHideDuration={6000} onClose={closeSnackbar}>
+        <Alert onClose={closeSnackbar} severity={severity} sx={{ width: '100%' }}>
+          {message}
+        </Alert>
+      </Snackbar>
     </Box>
   )
 }
