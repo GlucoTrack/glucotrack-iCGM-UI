@@ -218,6 +218,22 @@ const EditGroup: React.FC = () => {
     handleMutationSuccess()
   }
 
+  const handleEditDevicesResponse = (response: any, devices: any) => {
+    if (response?.error?.data) {
+      openSnackbar(response.error.data.message, 'error');
+    } else {
+      if (response?.data?.devices?.updatedDeviceIds) {
+        const updatedDeviceIds = response.data.devices.updatedDeviceIds;
+        const failedDeviceIds = response.data.devices.failedDeviceIds;
+        const allDevicesUpdated = devices.every((deviceId: any) => updatedDeviceIds.includes(deviceId));
+        const message = allDevicesUpdated ? "All devices updated successfully" : `The following devices were not updated: ${failedDeviceIds.join(', ')}`;
+        openSnackbar(message, allDevicesUpdated ? 'success' : 'warning');
+      } else {
+        openSnackbar("Failed to edit devices", 'error');
+      }
+    }
+  };
+
   const handleDevices = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsDeviceSubmitting(true)
@@ -229,24 +245,8 @@ const EditGroup: React.FC = () => {
         }).filter(id => id !== null);
 
         const response = await editDevices({ deviceIds: devices, ...formDeviceValues });
-        //if (response?.error?.data) {
-        if ('error' in response && 'data' in response.error) {
-          openSnackbar((response.error.data as any).message, 'error');
-        } else {
-          if (response?.data?.devices?.updatedDeviceIds) {
-            const updatedDeviceIds = response.data.devices.updatedDeviceIds;
-            const allDevicesUpdated = devices.every(deviceId => updatedDeviceIds.includes(deviceId));
-            if (allDevicesUpdated) {
-              openSnackbar("All devices updated successfully", 'success');
-            } else {
-              openSnackbar("Some devices were not updated", 'warning');
-            }
-          } else {
-            openSnackbar("Failed to edit devices", 'error');
-          }
-        }
+        handleEditDevicesResponse(response, devices);
       } catch (error: any) {
-        console.error("Failed to edit device:", error)
         openSnackbar("Failed to edit device: " + error.message, 'error');
       } finally {
         setIsDeviceSubmitting(false)
