@@ -36,25 +36,25 @@ const initialValues: FormValues = {
 
 interface DeviceValues {
   _id?: string
-  measurementInterval: number
-  transmitDelay: number
-  checkParametersInterval: number
-  pstatVoltage: number
-  pstatTIA: number
-  glm: number
-  enzyme: number
-  testStation: number
+  measurementInterval: string
+  transmitDelay: string
+  checkParametersInterval: string
+  pstatVoltage: string
+  pstatTIA: string
+  glm: string
+  enzyme: string
+  testStation: string
 }
 
 const initialDeviceValues: DeviceValues = {
-  measurementInterval: 10,
-  transmitDelay: 0,
-  checkParametersInterval: 60,
-  pstatVoltage: 0.6,
-  pstatTIA: 0,
-  glm: 0,
-  enzyme: 0,
-  testStation: 0,
+  measurementInterval: '',
+  transmitDelay: '',
+  checkParametersInterval: '',
+  pstatVoltage: '',
+  pstatTIA: '',
+  glm: '',
+  enzyme: '',
+  testStation: '',
 }
 
 const EditGroup: React.FC = () => {
@@ -157,7 +157,7 @@ const EditGroup: React.FC = () => {
     formDeviceValues.glm,
     formDeviceValues.enzyme,
     formDeviceValues.testStation,
-  ].some((value) => value !== undefined && value !== null && value !== 0)
+  ].some((value) => value !== undefined && value !== null && value !== '');
 
   const handleCancel = () => {
     setTimeout(() => {
@@ -220,7 +220,8 @@ const EditGroup: React.FC = () => {
 
   const handleEditDevicesResponse = (response: any, devices: any) => {
     if (response?.error?.data) {
-      openSnackbar(response.error.data.message, 'error');
+      const errorMessage = response.error.data.errors ? response.error.data.errors.join(', ') : response.error.data.message;
+      openSnackbar(errorMessage, 'error');
     } else {
       if (response?.data?.devices?.updatedDeviceIds) {
         const updatedDeviceIds = response.data.devices.updatedDeviceIds;
@@ -232,7 +233,7 @@ const EditGroup: React.FC = () => {
         openSnackbar("Failed to edit devices", 'error');
       }
     }
-  };
+  }
 
   const handleDevices = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -244,7 +245,8 @@ const EditGroup: React.FC = () => {
           return device ? device._id : null;
         }).filter(id => id !== null);
 
-        const response = await editDevices({ deviceIds: devices, ...formDeviceValues });
+        const nonEmptyFormDeviceValues = Object.fromEntries(Object.entries(formDeviceValues).filter(([key, value]) => value !== ''));
+        const response = await editDevices({ deviceIds: devices, ...nonEmptyFormDeviceValues });        
         handleEditDevicesResponse(response, devices);
       } catch (error: any) {
         openSnackbar("Failed to edit device: " + error.message, 'error');
@@ -253,6 +255,16 @@ const EditGroup: React.FC = () => {
       }
     }
   }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    if (!isNaN(Number(value)) || value === '') {
+      setFormDeviceValues(prevState => ({
+        ...prevState,
+        [name]: value,
+      }));
+    }
+  };
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
@@ -337,13 +349,7 @@ const EditGroup: React.FC = () => {
             name="measurementInterval"
             label="Measurement Interval"
             value={formDeviceValues.measurementInterval}
-            onChange={(e) => {
-              setFormDeviceValues({
-                ...formDeviceValues,
-                measurementInterval: parseInt(e.target.value),
-              })
-            }}
-            type="number"
+            onChange={handleInputChange}
             margin="normal"
             sx={{ mr: 2 }}
           />
@@ -352,15 +358,7 @@ const EditGroup: React.FC = () => {
             name="transmitDelay"
             label="Transmit Delay"
             value={formDeviceValues.transmitDelay}
-            onChange={(e) => {
-              if (e.target.value.trim() !== "") {
-                setFormDeviceValues({
-                  ...formDeviceValues,
-                  transmitDelay: parseInt(e.target.value),
-                })
-              }
-            }}
-            type="number"
+            onChange={handleInputChange}
             margin="normal"
             sx={{ mr: 2 }}
           />
@@ -369,15 +367,7 @@ const EditGroup: React.FC = () => {
             name="checkParametersInterval"
             label="Check Parameters Interval"
             value={formDeviceValues.checkParametersInterval}
-            onChange={(e) => {
-              if (e.target.value.trim() !== "") {
-                setFormDeviceValues({
-                  ...formDeviceValues,
-                  checkParametersInterval: parseInt(e.target.value),
-                })
-              }
-            }}
-            type="number"
+            onChange={handleInputChange}
             margin="normal"
             sx={{ mr: 2 }}
           />
@@ -386,15 +376,7 @@ const EditGroup: React.FC = () => {
             name="pstatVoltage"
             label="Pstat Voltage"
             value={formDeviceValues.pstatVoltage}
-            onChange={(e) => {
-              if (e.target.value.trim() !== "") {
-                setFormDeviceValues({
-                  ...formDeviceValues,
-                  pstatVoltage: parseInt(e.target.value),
-                })
-              }
-            }}
-            type="number"
+            onChange={handleInputChange}
             margin="normal"
             sx={{ mr: 2 }}
           />
@@ -403,15 +385,7 @@ const EditGroup: React.FC = () => {
             name="pstatTIA"
             label="Pstat TIA"
             value={formDeviceValues.pstatTIA}
-            onChange={(e) => {
-              if (e.target.value.trim() !== "") {
-                setFormDeviceValues({
-                  ...formDeviceValues,
-                  pstatTIA: parseInt(e.target.value),
-                })
-              }
-            }}
-            type="number"
+            onChange={handleInputChange}
             margin="normal"
             sx={{ mr: 2 }}
           />
@@ -420,15 +394,7 @@ const EditGroup: React.FC = () => {
             name="glm"
             label="GLM"
             value={formDeviceValues.glm}
-            onChange={(e) => {
-              if (e.target.value.trim() !== "") {
-                setFormDeviceValues({
-                  ...formDeviceValues,
-                  glm: parseInt(e.target.value),
-                })
-              }
-            }}
-            type="number"
+            onChange={handleInputChange}
             margin="normal"
             sx={{ mr: 2 }}
           />
@@ -437,15 +403,7 @@ const EditGroup: React.FC = () => {
             name="enzyme"
             label="Enzyme"
             value={formDeviceValues.enzyme}
-            onChange={(e) => {
-              if (e.target.value.trim() !== "") {
-                setFormDeviceValues({
-                  ...formDeviceValues,
-                  enzyme: parseInt(e.target.value),
-                })
-              }
-            }}
-            type="number"
+            onChange={handleInputChange}
             margin="normal"
             sx={{ mr: 2 }}
           />
@@ -454,15 +412,7 @@ const EditGroup: React.FC = () => {
             name="testStation"
             label="Test Station"
             value={formDeviceValues.testStation}
-            onChange={(e) => {
-              if (e.target.value.trim() !== "") {
-                setFormDeviceValues({
-                  ...formDeviceValues,
-                  testStation: parseInt(e.target.value),
-                })
-              }
-            }}
-            type="number"
+            onChange={handleInputChange}
             margin="normal"
             sx={{ mr: 2 }}
           />
