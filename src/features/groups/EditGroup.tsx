@@ -189,21 +189,25 @@ const EditGroup: React.FC = () => {
   }
 
   let content: JSX.Element | null = null
-  if (isEditingGroup || isDeletingGroup) {
-    content = <h3>Loading...</h3>
-  } else if (isEditError || isDeleteError) {
-    const errorMessageString = isEditError
-      ? JSON.stringify(editError)
-      : JSON.stringify(deleteError)
-    const errorMessageParsed = JSON.parse(errorMessageString)
-    content = (
-      <p style={{ color: theme.palette.error.main }}>
-        {errorMessageParsed.data.message}
-      </p>
-    )
-  } else if (isEditSuccess || isDeleteSuccess) {
-    handleMutationSuccess()
-  }
+
+  useEffect(() => {
+    if (isEditingGroup || isDeletingGroup) {
+      openSnackbar('loading...', 'warning');
+    } else if (isEditError || isDeleteError) {
+      const errorMessageString = isEditError
+        ? JSON.stringify(editError)
+        : JSON.stringify(deleteError)
+      const errorMessageParsed = JSON.parse(errorMessageString);
+      const errorMessage = JSON.stringify(errorMessageParsed.data.message);
+      openSnackbar(errorMessage, 'error');
+    } else if (isEditSuccess) {
+      openSnackbar('Group updated successfully', 'success');
+      handleMutationSuccess();
+    } else if (isDeleteSuccess) {
+      openSnackbar('Group deleted successfully', 'success');
+      handleMutationSuccess();
+    }
+  }, [isEditingGroup, isDeletingGroup, isEditError, isDeleteError]);
 
   const handleEditDevicesResponse = (response: any, devices: any) => {
     if (response?.error?.data) {
@@ -215,6 +219,7 @@ const EditGroup: React.FC = () => {
         const failedDeviceIds = response.data.devices.failedDeviceIds;
         const allDevicesUpdated = devices.every((deviceId: any) => updatedDeviceIds.includes(deviceId));
         const message = allDevicesUpdated ? "All devices updated successfully" : `The following devices were not updated: ${failedDeviceIds.join(', ')}`;
+        setFormDeviceValues(initialDeviceValues);
         openSnackbar(message, allDevicesUpdated ? 'success' : 'warning');
       } else {
         openSnackbar("Failed to edit devices", 'error');
@@ -406,7 +411,9 @@ const EditGroup: React.FC = () => {
 
           <Box mt={2} display="flex" justifyContent="space-between">
             <Box display="flex" justifyContent="flex-start" gap={2}>
-              <Button variant="outlined" color="secondary" onClick={() => {}}>
+              <Button variant="outlined" color="secondary" onClick={() => {
+                setFormDeviceValues(initialDeviceValues);
+              }}>
                 Cancel
               </Button>
               <Button
