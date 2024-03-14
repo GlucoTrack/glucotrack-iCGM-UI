@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useContext, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Box, Button, TextField, useTheme, Autocomplete } from "@mui/material"
 import {
@@ -6,6 +6,7 @@ import {
 } from "@/features/api/apiSlice"
 import Header from "@/components/Header"
 import { useAddGroupMutation } from "@/features/api/apiSlice"
+import { SnackbarContext } from '../../providers/SnackbarProvider';
 
 interface FormValues {
   groupName: string
@@ -22,6 +23,8 @@ const initialValues: FormValues = {
 const AddGroup: React.FC = () => {
   const navigate = useNavigate()
   const theme = useTheme()
+  const { openSnackbar } = useContext(SnackbarContext);
+  const [showError, setShowError] = useState(false);
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
   const { data, isFetching } = useGetDevicesQuery({})
   const [addGroup, { isLoading, isError, error, isSuccess }] =
@@ -66,21 +69,22 @@ const AddGroup: React.FC = () => {
     navigate("/groups")
   }
 
-  let content: JSX.Element | null = null
-  if (isLoading) {
-    content = <h3>Loading...</h3>
-  } else if (isError) {
-    const errorMessageString = JSON.stringify(error)
-    const errorMessageParsed = JSON.parse(errorMessageString)
-    content = (
-      <p style={{ color: theme.palette.error.main }}>
-        {JSON.stringify(errorMessageParsed.data.message)}
-      </p>
-    )
-  } else if (isSuccess) {
-    handleMutationSuccess()
-  }
+  useEffect(() => {
+    if (isLoading) {
+      openSnackbar('loading...', 'warning');
+    } else if (isError) {
+      const errorMessageString = JSON.stringify(error);
+      const errorMessageParsed = JSON.parse(errorMessageString);
+      const errorMessage = JSON.stringify(errorMessageParsed.data.message);
+      openSnackbar(errorMessage, 'error');
+    } else if (isSuccess) {
+      openSnackbar('Group updated successfully', 'success');
+      handleMutationSuccess();
+    }
+  }, [isError, error, isLoading, isSuccess]);
 
+  let content: JSX.Element | null = null;
+  
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
 import {
@@ -19,8 +19,7 @@ import {
 import { RootState } from "@/store/store"
 import { resetGroup } from "./groupsSlice"
 import { Typography } from "@mui/material"
-import { Snackbar } from '@mui/material';
-import { Alert } from '@mui/material';
+import { SnackbarContext } from '../../providers/SnackbarProvider';
 
 interface FormValues {
   groupName: string
@@ -61,9 +60,7 @@ const EditGroup: React.FC = () => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const theme = useTheme()
-  const [open, setOpen] = React.useState(false);
-  const [message, setMessage] = React.useState('');
-  const [severity, setSeverity] = React.useState<'error' | 'success' | 'info' | 'warning' | undefined>('success');
+  const { openSnackbar } = useContext(SnackbarContext);
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
   const [formDeviceValues, setFormDeviceValues] = useState<DeviceValues>(initialDeviceValues)
   const [isDeviceSubmitting, setIsDeviceSubmitting] = useState(false)
@@ -120,16 +117,6 @@ const EditGroup: React.FC = () => {
       setDefaultValues()
     }
   }, [groupName, groupDescription, deviceNames])
-
-  const openSnackbar = (message: string, severity: 'error' | 'success' | 'info' | 'warning' | undefined) => {
-    setMessage(message);
-    setSeverity(severity);
-    setOpen(true);
-  };
-
-  const closeSnackbar = () => {
-    setOpen(false);
-  };
 
   const canSave =
     [
@@ -434,12 +421,6 @@ const EditGroup: React.FC = () => {
           </Box>
         </form>
       </Box>
-
-      <Snackbar open={open} autoHideDuration={6000} onClose={closeSnackbar}>
-        <Alert onClose={closeSnackbar} severity={severity} sx={{ width: '100%' }}>
-          {message}
-        </Alert>
-      </Snackbar>
     </Box>
   )
 }
