@@ -22,6 +22,7 @@ import New from "@/features/new/New"
 import { useAppSelector } from "@/hooks/useStore"
 
 import "./index.css"
+import { SnackbarProvider } from "./providers/SnackbarProvider"
 
 function App() {
   const mode = useAppSelector((state) => state.navbar.mode)
@@ -30,33 +31,35 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <BrowserRouter>
-        <Box height="100%" width="100%">
-          <Routes>
-            <Route element={<Layout />}>
-              <Route path="/" element={<Navigate to="/home" replace />} />
-              <Route path="/home" element={<Home />} />
-              <Route path="/devices" element={<Devices />} />
-              <Route path="/devices/add" element={<AddDevice />} />
-              <Route path="/devices/edit/:deviceId" element={<EditDevice />} />
-              <Route path="/mobiles" element={<Mobiles />} />
-              <Route path="/mobiles/add" element={<AddMobile />} />
-              <Route path="/mobiles/edit/:mobileId" element={<EditMobile />} />
-              <Route path="/groups" element={<Groups />} />
-              <Route path="/groups/add" element={<AddGroup />} />
-              <Route path="/groups/edit/:groupId" element={<EditGroup />} />
-              <Route path="/measurements" element={<Measurements />} />
-              <Route
-                path="/animal-measurements"
-                element={<AnimalMeasurements />}
-              />
-              <Route path="/users" element={<Users />} />
-              <Route path="/new" element={<New />} />
-            </Route>
-          </Routes>
-        </Box>
-      </BrowserRouter>
+      <SnackbarProvider>
+        <CssBaseline />
+        <BrowserRouter>
+          <Box height="100%" width="100%">
+            <Routes>
+              <Route element={<Layout />}>
+                <Route path="/" element={<Navigate to="/home" replace />} />
+                <Route path="/home" element={<Home />} />
+                <Route path="/devices" element={<Devices />} />
+                <Route path="/devices/add" element={<AddDevice />} />
+                <Route path="/devices/edit/:deviceId" element={<EditDevice />} />
+                <Route path="/mobiles" element={<Mobiles />} />
+                <Route path="/mobiles/add" element={<AddMobile />} />
+                <Route path="/mobiles/edit/:mobileId" element={<EditMobile />} />
+                <Route path="/groups" element={<Groups />} />
+                <Route path="/groups/add" element={<AddGroup />} />
+                <Route path="/groups/edit/:groupId" element={<EditGroup />} />
+                <Route path="/measurements" element={<Measurements />} />
+                <Route
+                  path="/animal-measurements"
+                  element={<AnimalMeasurements />}
+                />
+                <Route path="/users" element={<Users />} />
+                <Route path="/new" element={<New />} />
+              </Route>
+            </Routes>
+          </Box>
+        </BrowserRouter>
+      </SnackbarProvider>
     </ThemeProvider>
   )
 }

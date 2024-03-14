@@ -1,25 +1,32 @@
-import React, { useState } from "react"
+import React, { useState, useContext, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Box, Button, TextField, useTheme } from "@mui/material"
+import { Box, Button, TextField, useTheme, Autocomplete } from "@mui/material"
+import {
+  useGetDevicesQuery,
+} from "@/features/api/apiSlice"
 import Header from "@/components/Header"
 import { useAddGroupMutation } from "@/features/api/apiSlice"
+import { SnackbarContext } from '../../providers/SnackbarProvider';
 
 interface FormValues {
   groupName: string
   groupDescription: string
-  deviceNames: string
+  deviceNames: string[]
 }
 
 const initialValues: FormValues = {
   groupName: "",
   groupDescription: "",
-  deviceNames: "",
+  deviceNames: [],
 }
 
 const AddGroup: React.FC = () => {
   const navigate = useNavigate()
   const theme = useTheme()
+  const { openSnackbar } = useContext(SnackbarContext);
+  const [showError, setShowError] = useState(false);
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
+  const { data, isFetching } = useGetDevicesQuery({})
   const [addGroup, { isLoading, isError, error, isSuccess }] =
     useAddGroupMutation()
   const canSave =
@@ -41,7 +48,10 @@ const AddGroup: React.FC = () => {
     e.preventDefault()
     if (canSave) {
       try {
-        await addGroup(formValues)
+        await addGroup({
+          ...formValues,
+          deviceNames: formValues.deviceNames.join(","),
+        })
       } catch (error: any) {
         console.error(error)
       }
@@ -59,21 +69,22 @@ const AddGroup: React.FC = () => {
     navigate("/groups")
   }
 
-  let content: JSX.Element | null = null
-  if (isLoading) {
-    content = <h3>Loading...</h3>
-  } else if (isError) {
-    const errorMessageString = JSON.stringify(error)
-    const errorMessageParsed = JSON.parse(errorMessageString)
-    content = (
-      <p style={{ color: theme.palette.error.main }}>
-        {JSON.stringify(errorMessageParsed.data.message)}
-      </p>
-    )
-  } else if (isSuccess) {
-    handleMutationSuccess()
-  }
+  useEffect(() => {
+    if (isLoading) {
+      openSnackbar('loading...', 'warning');
+    } else if (isError) {
+      const errorMessageString = JSON.stringify(error);
+      const errorMessageParsed = JSON.parse(errorMessageString);
+      const errorMessage = JSON.stringify(errorMessageParsed.data.message);
+      openSnackbar(errorMessage, 'error');
+    } else if (isSuccess) {
+      openSnackbar('Group updated successfully', 'success');
+      handleMutationSuccess();
+    }
+  }, [isError, error, isLoading, isSuccess]);
 
+  let content: JSX.Element | null = null;
+  
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header
@@ -102,15 +113,24 @@ const AddGroup: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          <TextField
-            id="deviceNames"
-            name="deviceNames"
-            label="Device Names"
-            value={formValues.deviceNames}
-            onChange={handleChange}
-            required
-            fullWidth
-            margin="normal"
+          <Autocomplete
+            multiple
+            loading={isFetching || isLoading}
+            options={
+              data && data.devices
+                ? data.devices.map((device: any) => device.deviceName)
+                : []
+            }
+            value={formValues.deviceNames ?? []}
+            onChange={(_event, newValue) => {
+              setFormValues((prevValues) => ({
+                ...prevValues,
+                deviceNames: newValue,
+              }))
+            }}
+            renderInput={(params) => (
+              <TextField {...params} label={"Device Names"} fullWidth />
+            )}
           />
           {content}
 
