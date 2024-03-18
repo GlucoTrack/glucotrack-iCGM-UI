@@ -38,6 +38,17 @@ export const apiSlice = createApi({
         "Devices",
       ],
     }),
+    editDevices: builder.mutation({
+      query: ({ deviceIds, ...deviceData }) => ({
+        url: `device/updateDeviceIds/${deviceIds}`,
+        method: "PATCH",
+        body: deviceData,
+      }),
+      invalidatesTags: (result, error, arg) => [
+        { type: "Devices", id: arg },
+        "Devices",
+      ],
+    }),
     deleteDevice: builder.mutation({
       query: (deviceId) => ({
         url: `device/delete/${deviceId}`,
@@ -161,6 +172,7 @@ export const {
   useGetDevicesQuery,
   useGetDeviceQuery,
   useEditDeviceMutation,
+  useEditDevicesMutation,
   useDeleteDeviceMutation,
   useAddMobileMutation,
   useGetMobilesQuery,
