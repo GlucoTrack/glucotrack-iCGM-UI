@@ -28,7 +28,6 @@ Boost(Highcharts);
 const MeasurementChart = ({ ...props }) => {
   const theme = useTheme()
   const isDarkMode = theme.palette.mode === "dark"
-  const [lineColors, setLineColors] = useState<string[]>([])
   const startTime = useAppSelector((state) => state.measurements.startTime)
   const endTime = useAppSelector((state) => state.measurements.endTime)
   const realtime = useAppSelector((state) => state.measurements.realtime)
@@ -133,6 +132,7 @@ const MeasurementChart = ({ ...props }) => {
       enabled: false,
     },
     chart: {
+      height: 700,
       zoomType: 'xy',
       panKey: 'alt',
       panning: true,
