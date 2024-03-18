@@ -1,8 +1,21 @@
 import React, { useEffect } from "react"
-import { DataGrid, GridToolbar } from "@mui/x-data-grid"
+import { DataGrid, GridToolbarExport, GridToolbarContainer, GridToolbarColumnsButton, GridToolbarFilterButton, GridToolbarDensitySelector } from "@mui/x-data-grid"
 import { Box } from "@mui/material"
 import Measurements from "@/interfaces/Measurement"
 import dayjs from "dayjs"
+
+function CustomToolbar() {
+  const fileName = new Date().toISOString().replace(/:/g, '-');
+
+  return (
+    <GridToolbarContainer>
+      <GridToolbarColumnsButton />
+      <GridToolbarFilterButton />
+      <GridToolbarDensitySelector />
+      <GridToolbarExport csvOptions={{ fileName }} />
+    </GridToolbarContainer>
+  );
+}
 
 const MeasurementGrid = (props: any) => {
   const [data, setData] = React.useState<Measurements[]>([]);
@@ -22,7 +35,7 @@ const MeasurementGrid = (props: any) => {
             _id: rowId,
             deviceName: measurement.name,
           }
-        });        
+        });
         return dd;
       });
       for (let d of allData) {
@@ -43,11 +56,17 @@ const MeasurementGrid = (props: any) => {
 
   return <Box sx={{ mt: 4 }} flexGrow={1} overflow="auto" width="100%">
     <DataGrid<Measurements>
-      slots={{ toolbar: GridToolbar }}
+      slots={{ toolbar: CustomToolbar }}
       rows={data}
       getRowId={(row) => row._id}
       columns={columns}
+      initialState={{
+        pagination: {
+          paginationModel: { pageSize: 5, page: 0 },
+        },
+      }}
     />
+      
   </Box>
 }
 

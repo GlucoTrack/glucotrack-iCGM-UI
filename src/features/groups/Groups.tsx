@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom"
 import { Box } from "@mui/material"
-import { DataGrid, GridCellParams, GridToolbar } from "@mui/x-data-grid"
-import { GridToolbarContainer, GridToolbarColumnsButton, GridToolbarFilterButton, GridToolbarDensitySelector, GridToolbarExport } from '@mui/x-data-grid';
+import { DataGrid, GridCellParams, GridToolbar} from "@mui/x-data-grid"
+
 
 import Header from "@/components/Header"
 import Action from "@/components/HeaderAction"
@@ -10,18 +10,6 @@ import { useDispatch } from "react-redux"
 import { setGroup } from "@/features/groups/groupsSlice"
 import Group from "@/interfaces/Group"
 
-function CustomToolbar() {
-  const fileName = new Date().toISOString().replace(/:/g, '-') + '-GT-groups';
-
-  return (
-    <GridToolbarContainer>
-      <GridToolbarColumnsButton />
-      <GridToolbarFilterButton />
-      <GridToolbarDensitySelector />
-      <GridToolbarExport csvOptions={{ fileName }} />
-    </GridToolbarContainer>
-  );
-}
 
 const Groups: React.FC = () => {
   const dispatch = useDispatch()
@@ -72,7 +60,7 @@ const Groups: React.FC = () => {
     content = (
       <Box height={"75vh"}>
         <DataGrid<Group>
-          slots={{ toolbar: CustomToolbar }}
+          slots={{ toolbar: GridToolbar }}          
           rows={data.groups}
           getRowId={(row) => row._id}
           columns={columns}
