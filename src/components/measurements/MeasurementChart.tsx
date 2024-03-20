@@ -131,6 +131,9 @@ const MeasurementChart = ({ ...props }) => {
     tooltip: {
       enabled: false,
     },
+    accessibility: {
+      enabled: false,
+    },
     chart: {
       height: 700,
       zoomType: 'xy',
