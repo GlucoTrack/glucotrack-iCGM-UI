@@ -46,9 +46,9 @@ const MeasurementChart = ({ ...props }) => {
       count: number,
       hueMin: isDarkMode ? 0 : 0,
       hueMax: isDarkMode ? 360 : 360,
-      chromaMin: 0,
+      chromaMin: 50,
       chromaMax: 100,
-      lightMin: isDarkMode ? 30 : 0,
+      lightMin: isDarkMode ? 50 : 20,
       lightMax: isDarkMode ? 100 : 90,
       quality: 50,
       samples: 10000,
@@ -173,7 +173,6 @@ const MeasurementChart = ({ ...props }) => {
 
   useEffect(() => {    
     let colors = generateLineColors(measurements.length, isDarkMode)
-
     let series: any = []
     let index = 0;
     for (const measurement of measurements) {
