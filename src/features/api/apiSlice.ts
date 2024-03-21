@@ -5,7 +5,7 @@ export const apiSlice = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: import.meta.env.VITE_API_BASE_URL,
   }),
-  tagTypes: ["Devices", "Mobiles", "Groups", "Measurements", "AveragesAndStds"],
+  tagTypes: ["Devices", "Mobiles", "Groups", "Measurements", "AveragesAndStds", "MobileGroups"],
   endpoints: (builder) => ({
     //TODO maybe code split per feature
     //*DEVICES
@@ -164,6 +164,28 @@ export const apiSlice = createApi({
       },
       providesTags: ["AveragesAndStds"],
     }),
+    //*MOBILE GROUPS
+    getMobileGroups: builder.query({
+      queryFn: async () => {
+        return { data: {
+          "groups": [
+              {
+                  "_id": "6492087d853620cc9fea8af9",
+                  "groupName": "aa",
+                  "groupDescription": "Delete this group",
+                  "deviceNames": [
+                      "lab013",
+                      "lab015"
+                  ],
+                  "createdAt": "2023-06-20T20:13:49.269Z",
+                  "updatedAt": "2024-02-13T14:57:22.787Z",
+                  "__v": 0
+              },
+          ]
+      } };
+      },
+      providesTags: ["MobileGroups"],
+    }),
   }),
 })
 
@@ -187,4 +209,5 @@ export const {
   useGetAnimalMeasurementsByMobileNamesQuery,
   useGetAnimalMeasurementsBySensorNamesQuery,
   useGetAveragesAndStdsQuery,
+  useGetMobileGroupsQuery,
 } = apiSlice

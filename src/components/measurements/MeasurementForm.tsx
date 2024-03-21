@@ -16,7 +16,7 @@ import {
   BookmarkAddOutlined as AddFilter,
 } from "@mui/icons-material"
 import Grid from "@mui/system/Unstable_Grid"
-import { useGetDevicesQuery, useGetGroupsQuery } from "@/features/api/apiSlice"
+import { useGetMobileGroupsQuery, useGetGroupsQuery } from "@/features/api/apiSlice"
 import Group from "@/interfaces/Group"
 import Device from "@/interfaces/Device"
 import { setFilter } from "@/components/measurements/measurementsSlice"
@@ -93,8 +93,8 @@ const MeasurementForm = ({
     isSuccess: groupIsSuccess,
     isError: groupIsError,
     error: groupError,
-  } = useGetGroupsQuery({})
-
+  } = page === 'device' ? useGetGroupsQuery({}) : useGetMobileGroupsQuery({});
+  
   let deviceContent: JSX.Element | null = null
   let deviceNames: string[] = []
   if (deviceIsFetching) {
