@@ -25,7 +25,7 @@ dayjs.extend(utc)
 
 Boost(Highcharts);
 
-const MeasurementChart = ({ ...props }) => {
+const MeasurementChart = ({ query, pageKey, eventName }: any) => {
   const theme = useTheme()
   const isDarkMode = theme.palette.mode === "dark"
   const startTime = useAppSelector((state) => state.measurements.startTime)
@@ -35,9 +35,9 @@ const MeasurementChart = ({ ...props }) => {
     (state) => state.measurements.deviceNames,
   )
   const devicesDepts = JSON.stringify(deviceNames)
-  const { data, isFetching, isLoading, isSuccess, isError, error } = props.query
+  const { data, isFetching, isLoading, isSuccess, isError, error } = query
   const [localStorageKey, setLocalStorageKey] = useState(
-    JSON.parse(localStorage.getItem("chart_settings_" + props.page) || "{}"),
+    JSON.parse(localStorage.getItem("chart_settings_" + pageKey) || "{}"),
   )
 
 
@@ -57,7 +57,7 @@ const MeasurementChart = ({ ...props }) => {
   }
 
   const [measurements, setMeasurements] = useState<any>([])
-  const [filteredMeasurements, setFilteredMeasurements] = useState<any>([])  
+  const [filteredMeasurements, setFilteredMeasurements] = useState<any>([])
 
   const [startZoomArea, setStartZoomArea] = useState<Date | null>()
   const [endZoomArea, setEndZoomArea] = useState<Date | null>()
@@ -66,7 +66,7 @@ const MeasurementChart = ({ ...props }) => {
     xAxisFormat:
       localStorageKey && localStorageKey.xAxisFormat
         ? localStorageKey.xAxisFormat
-        : "HH:mm:ss",    
+        : "HH:mm:ss",
   })
 
   const [chartOptions, setChartOptions] = useState({
@@ -111,7 +111,7 @@ const MeasurementChart = ({ ...props }) => {
         }
       },
     },
-    yAxis: {      
+    yAxis: {
       title: {
         text: null
       },
@@ -171,20 +171,20 @@ const MeasurementChart = ({ ...props }) => {
     })
   }, [isDarkMode])
 
-  useEffect(() => {    
+  useEffect(() => {
     let colors = generateLineColors(measurements.length, isDarkMode)
     let series: any = []
     let index = 0;
     for (const measurement of measurements) {
       let data = []
-      for (const d of measurement.data) {        
+      for (const d of measurement.data) {
         data.push([new Date(d.date).getTime(), d.current])
 
       }
       series.push({ name: measurement.name, data: data, type: 'line', color: colors[index] })
       index++
     }
-    
+
     setChartOptions((prevOptions: any) => {
       return {
         ...prevOptions,
@@ -193,7 +193,7 @@ const MeasurementChart = ({ ...props }) => {
     })
 
   }, [
-    measurements,    
+    measurements,
     isDarkMode,
   ])
 
@@ -258,7 +258,7 @@ const MeasurementChart = ({ ...props }) => {
     }
     setChartSettings((prevSettings) => {
       let newValue = value
-      
+
       return {
         ...prevSettings,
         [field]: newValue !== null ? newValue : "",
@@ -268,15 +268,15 @@ const MeasurementChart = ({ ...props }) => {
 
   useEffect(() => {
     if (
-      chartSettings.xAxisFormat      
+      chartSettings.xAxisFormat
     ) {
       setLocalStorageKey((prevKey: any) => {
         let newChartSettings = {
           ...prevKey,
-          xAxisFormat: chartSettings.xAxisFormat,          
+          xAxisFormat: chartSettings.xAxisFormat,
         }
         localStorage.setItem(
-          "chart_settings_" + props.page,
+          "chart_settings_" + pageKey,
           JSON.stringify(newChartSettings),
         )
         return newChartSettings
@@ -284,15 +284,15 @@ const MeasurementChart = ({ ...props }) => {
     }
   }, [
     chartSettings.xAxisFormat,
-    props.page,
+    pageKey,
   ])
 
   // Handle new measurements events
   useEffect(() => {
-    if (props.eventName) {
+    if (eventName) {
       if (realtime) {
         for (const deviceName of deviceNames) {
-          socket.on(props.eventName + deviceName, (data: any) => {
+          socket.on(eventName + deviceName, (data: any) => {
             let date = new Date(data.date)
             if (
               date >= dayjs(startTime).utc().toDate() &&
@@ -316,17 +316,17 @@ const MeasurementChart = ({ ...props }) => {
         }
       } else {
         for (const deviceName of deviceNames) {
-          socket.off(props.eventName + deviceName)
+          socket.off(eventName + deviceName)
         }
       }
     }
 
     return () => {
       for (const deviceName of deviceNames) {
-        socket.off(props.eventName + deviceName)
+        socket.off(eventName + deviceName)
       }
     }
-  }, [devicesDepts, deviceNames, props.eventName, startTime, endTime, realtime])
+  }, [devicesDepts, deviceNames, eventName, startTime, endTime, realtime])
 
   let content: JSX.Element | null = null
   if (isFetching) {
@@ -368,7 +368,7 @@ const MeasurementChart = ({ ...props }) => {
                 <MenuItem value="MM-DD HH:mm:ss">MM-DD HH:mm:ss</MenuItem>
                 <MenuItem value="YY-MM-DD HH:mm:ss">YY-MM-DD HH:mm:ss</MenuItem>
               </Select>
-            </Grid>            
+            </Grid>
           </Grid>
         </Box>
         <Box>

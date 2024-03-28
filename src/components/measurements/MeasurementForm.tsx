@@ -16,7 +16,6 @@ import {
   BookmarkAddOutlined as AddFilter,
 } from "@mui/icons-material"
 import Grid from "@mui/system/Unstable_Grid"
-import { useGetMobileGroupsQuery, useGetGroupsQuery } from "@/features/api/apiSlice"
 import Group from "@/interfaces/Group"
 import Device from "@/interfaces/Device"
 import { setFilter } from "@/components/measurements/measurementsSlice"
@@ -25,18 +24,11 @@ import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
 dayjs.extend(utc)
 
-//const MeasurementForm = (props: any, page: string) => {
-const MeasurementForm = ({
-  page,
-  ...props
-}: {
-  page: string
-  [key: string]: any
-}) => {
+const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
   const dispatch = useDispatch()
   const theme = useTheme()
   const [localStorageKey, setLocalStorageKey] = useState(
-    JSON.parse(localStorage.getItem("filters_" + page) || "{}"),
+    JSON.parse(localStorage.getItem("filters_" + pageKey) || "{}"),
   )
   const [errorMessage, setErrorMessage] = useState("")
   const [formValues, setFormValues] = useState({
@@ -67,11 +59,11 @@ const MeasurementForm = ({
         : false,
   })
   const [savedFilters, setSavedFilters] = useState<string[]>(
-    JSON.parse(localStorage.getItem("filterList_" + page) || "[]"),
+    JSON.parse(localStorage.getItem("filterList_" + pageKey) || "[]"),
   )
   const [filterName, setFilterName] = useState<string>("")
   const [selectedFilter, setSelectedFilter] = useState(
-    localStorage.getItem("selected_filter_" + page) || null,
+    localStorage.getItem("selected_filter_" + pageKey) || null,
   )
   const [filterApplied, setFilterApplied] = useState(selectedFilter !== null)
 
@@ -83,7 +75,7 @@ const MeasurementForm = ({
     isSuccess: deviceIsSuccess,
     isError: deviceIsError,
     error: deviceError,
-  } = props.query
+  } = query
 
   const {
     data: groupData,
@@ -93,8 +85,8 @@ const MeasurementForm = ({
     isSuccess: groupIsSuccess,
     isError: groupIsError,
     error: groupError,
-  } = page === 'device' ? useGetGroupsQuery({}) : useGetMobileGroupsQuery({});
-  
+  } = groupQuery
+
   let deviceContent: JSX.Element | null = null
   let deviceNames: string[] = []
   if (deviceIsFetching) {
@@ -191,14 +183,14 @@ const MeasurementForm = ({
       }
       setLocalStorageKey(newLocalStorageFilters)
       localStorage.setItem(
-        "filters_" + page,
+        "filters_" + pageKey,
         JSON.stringify(newLocalStorageFilters),
       )
       /*handleSubmit(
         new Event("submit") as unknown as React.FormEvent<HTMLFormElement>,
       )*/
     }
-  }, [formValues])
+  }, [formValues, pageKey, localStorageKey])
 
   const setPastMinutesRange = (minutes: number) => {
     setFormValues((prevFormValues) => {
@@ -284,8 +276,8 @@ const MeasurementForm = ({
               deviceNamesFromGroup.length > 0
                 ? deviceNamesFromGroup
                 : deviceNames && deviceNames.length > 0
-                ? deviceNames
-                : [],
+                  ? deviceNames
+                  : [],
             groupName: groupName ? groupName : "",
             startTime: utcStartTime,
             endTime: utcEndTime,
@@ -301,9 +293,9 @@ const MeasurementForm = ({
 
   useEffect(() => {
     if (savedFilters) {
-      localStorage.setItem("filterList_" + page, JSON.stringify(savedFilters))
+      localStorage.setItem("filterList_" + pageKey, JSON.stringify(savedFilters))
     }
-  }, [savedFilters])
+  }, [savedFilters, pageKey])
 
   const handleSaveFilter = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -316,7 +308,7 @@ const MeasurementForm = ({
       newSavedFilters.sort((a, b) => a.localeCompare(b))
       setSavedFilters(newSavedFilters)
       localStorage.setItem("savedFilters", JSON.stringify(newSavedFilters))
-      localStorage.setItem(filterName + "_" + page, JSON.stringify(formValues))
+      localStorage.setItem(filterName + "_" + pageKey, JSON.stringify(formValues))
       setSelectedFilter(filterName)
       setErrorMessage("")
       setFilterName("")
@@ -327,16 +319,16 @@ const MeasurementForm = ({
 
   useEffect(() => {
     if (selectedFilter) {
-      localStorage.setItem("selected_filter_" + page, selectedFilter)
+      localStorage.setItem("selected_filter_" + pageKey, selectedFilter)
       setFilterApplied(true)
     } else {
-      localStorage.removeItem("selected_filter_" + page)
+      localStorage.removeItem("selected_filter_" + pageKey)
     }
-  }, [selectedFilter])
+  }, [selectedFilter, pageKey])
 
   const handleChangeFilter = (filterName: string) => {
     try {
-      const savedFilter = localStorage.getItem(filterName + "_" + page)
+      const savedFilter = localStorage.getItem(filterName + "_" + pageKey)
       if (savedFilter) {
         setFormValues(JSON.parse(savedFilter))
         setSelectedFilter(filterName)
@@ -427,7 +419,7 @@ const MeasurementForm = ({
                   handleInputChange("deviceNames", newValue)
                 }}
                 renderInput={(params) => (
-                  <TextField {...params} label={props.label} fullWidth />
+                  <TextField {...params} label={label} fullWidth />
                 )}
               />
             </Grid>
