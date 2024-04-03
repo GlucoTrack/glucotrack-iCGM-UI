@@ -14,6 +14,8 @@ import {
 import {
   BookmarkRemoveOutlined as RemoveFilter,
   BookmarkAddOutlined as AddFilter,
+  ChevronRight,
+  ChevronLeft,
 } from "@mui/icons-material"
 import Grid from "@mui/system/Unstable_Grid"
 import Group from "@/interfaces/Group"
@@ -143,8 +145,7 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
           return {
             ...prevFormValues,
             [field]: true,
-            startTime: dayjs().format("YYYY-MM-DDTHH:mm"),
-            endTime: dayjs().add(1, "days").format("YYYY-MM-DDTHH:mm"),
+            endTime: dayjs().add(6, "hours").format("YYYY-MM-DDTHH:mm"),
           }
         } else {
           return {
@@ -192,6 +193,45 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
     }
   }, [formValues, pageKey, localStorageKey])
 
+  const calcCurrentTimeInterval = (): number => {
+    if (formValues.endTime && formValues.startTime) {
+      const d1 = dayjs(formValues.startTime)
+      const d2 = dayjs(formValues.endTime)
+      return d2.diff(d1, 'minute')
+    }    
+    return 0
+  }
+
+  const handleBack = () => {
+    const interval = calcCurrentTimeInterval()
+    setFormValues((prevFormValues) => {
+      return {
+        ...prevFormValues,
+        startTime: dayjs(prevFormValues.startTime)
+          .subtract(interval, "minutes")
+          .format("YYYY-MM-DDTHH:mm"),
+        endTime: dayjs(prevFormValues.endTime)
+          .subtract(interval, "minutes")
+          .format("YYYY-MM-DDTHH:mm"),
+      }
+    })
+  }
+
+  const handleForward = () => {
+    const interval = calcCurrentTimeInterval()
+    setFormValues((prevFormValues) => {
+      return {
+        ...prevFormValues,
+        startTime: dayjs(prevFormValues.startTime)
+          .add(interval, "minutes")
+          .format("YYYY-MM-DDTHH:mm"),
+        endTime: dayjs(prevFormValues.endTime)
+          .add(interval, "minutes")
+          .format("YYYY-MM-DDTHH:mm"),
+      }
+    })
+  }
+
   const setPastMinutesRange = (minutes: number) => {
     setFormValues((prevFormValues) => {
       return {
@@ -220,6 +260,10 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
     setPastMinutesRange(1440)
   }
 
+  const handle48Hours = () => {
+    setPastMinutesRange(2880)
+  }
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
@@ -246,8 +290,8 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
       const start = new Date(startTime)
       const end = new Date(endTime)
       const diffHours = Math.abs(end.getTime() - start.getTime()) / 3600000 // Convert milliseconds to hours
-      if (diffHours > 24) {
-        setErrorMessage("The time difference should not be more than 24 hours")
+      if (diffHours > 48) {
+        setErrorMessage("The time difference should not be more than 48 hours")
         return
       }
     }
@@ -357,9 +401,9 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
                 onChange={(event) => setFilterName(event.target.value)}
                 style={{ marginRight: "1rem", width: "150px" }}
               ></TextField>
-              <Button type="submit" variant="outlined" color="primary">
+              <IconButton type="submit">
                 <AddFilter />
-              </Button>
+              </IconButton>
             </Grid>
           </Grid>
 
@@ -457,7 +501,12 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
               />
             </Grid>
 
-            <Grid xs={6}>
+            <Grid xs={1} alignContent={'center'}>
+              <IconButton onClick={handleBack}>
+                <ChevronLeft />
+              </IconButton>
+            </Grid>
+            <Grid xs={5}>
               <TextField
                 label="Start Time"
                 type="datetime-local"
@@ -475,7 +524,7 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
                 }}
               />
             </Grid>
-            <Grid xs={6}>
+            <Grid xs={5}>
               <TextField
                 label="End Time"
                 type="datetime-local"
@@ -493,6 +542,12 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
                 }}
               />
             </Grid>
+            <Grid xs={1} alignContent={'center'}>
+              <IconButton onClick={handleForward}>
+                <ChevronRight />
+              </IconButton>
+            </Grid>
+
             <Grid xs={12}>
               <Button type="submit" variant="contained" color="primary">
                 Submit
@@ -501,7 +556,7 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
           </Grid>
           <Grid xs={4}>
             <Grid container spacing={1}>
-              <Grid xs={6}>
+              <Grid>
                 <Button
                   onClick={handle30Minutes}
                   sx={{ width: 1, mb: 1 }}
@@ -511,7 +566,7 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
                   Past 30 minutes
                 </Button>
               </Grid>
-              <Grid xs={6}>
+              <Grid>
                 <Button
                   onClick={handle1Hour}
                   sx={{ width: 1, mb: 1 }}
@@ -521,7 +576,7 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
                   Past 1 hour
                 </Button>
               </Grid>
-              <Grid xs={6}>
+              <Grid>
                 <Button
                   onClick={handle2Hours}
                   sx={{ width: 1, mb: 1 }}
@@ -531,7 +586,7 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
                   Past 2 hours
                 </Button>
               </Grid>
-              <Grid xs={6}>
+              <Grid>
                 <Button
                   onClick={handle24Hours}
                   sx={{ width: 1, mb: 0 }}
@@ -539,6 +594,16 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
                   color="primary"
                 >
                   Past 24 hours
+                </Button>
+              </Grid>
+              <Grid>
+                <Button
+                  onClick={handle48Hours}
+                  sx={{ width: 1, mb: 0 }}
+                  variant="outlined"
+                  color="primary"
+                >
+                  Past 48 hours
                 </Button>
               </Grid>
             </Grid>
