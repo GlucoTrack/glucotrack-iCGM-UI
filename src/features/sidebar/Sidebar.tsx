@@ -54,6 +54,11 @@ const navItems = [
     icon: <MobileFriendlyOutlined />,
   },
   {
+    text: "Groups",
+    icon: <GroupWorkOutlined />,
+    path: "mobile-groups",
+  },
+  {
     text: "Animal",
     icon: <TimelineOutlined />,
     path: "animal-measurements",

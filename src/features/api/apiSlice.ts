@@ -165,13 +165,32 @@ export const apiSlice = createApi({
       providesTags: ["AveragesAndStds"],
     }),
     //*MOBILE GROUPS
+    addMobileGroup: builder.mutation({
+      query: (groupData) => ({
+        url: "mobileGroups",
+        method: "POST",
+        body: groupData,
+      }),
+      invalidatesTags: ["MobileGroups"],
+    }),
     getMobileGroups: builder.query({
-      queryFn: async () => {
-        return { data: {
-          "groups": []
-      } };
-      },
+      query: () => "mobileGroups",
       providesTags: ["MobileGroups"],
+    }),
+    editMobileGroup: builder.mutation({
+      query: ({ groupId, ...groupData }) => ({
+        url: `mobileGroups/${groupId}`,
+        method: "PATCH",
+        body: groupData,
+      }),
+      invalidatesTags: ["MobileGroups"],
+    }),
+    deleteMobileGroup: builder.mutation({
+      query: (groupId) => ({
+        url: `mobileGroups/${groupId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["MobileGroups"],
     }),
   }),
 })
@@ -196,5 +215,8 @@ export const {
   useGetAnimalMeasurementsByMobileNamesQuery,
   useGetAnimalMeasurementsBySensorNamesQuery,
   useGetAveragesAndStdsQuery,
+  useAddMobileGroupMutation,
   useGetMobileGroupsQuery,
+  useEditMobileGroupMutation,
+  useDeleteMobileGroupMutation,
 } = apiSlice
