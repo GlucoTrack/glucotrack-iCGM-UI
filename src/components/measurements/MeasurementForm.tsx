@@ -314,6 +314,17 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
       }
     }
 
+    if (groupName && groupData && groupData.mobileGroups) {
+      const groupObject = groupData.mobileGroups.find(
+        (group: MobileGroup) => group.mobileGroupName === groupName,
+      )
+      if (groupObject) {
+        deviceNamesFromGroup = groupObject.mobileNames
+      } else {
+        throw new Error(`${groupName} not found.`)
+      }
+    }
+
     if (
       ((deviceNames && deviceNames.length > 0) ||
         (deviceNamesFromGroup && deviceNamesFromGroup.length > 0)) &&
