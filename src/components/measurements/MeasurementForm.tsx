@@ -24,6 +24,7 @@ import { setFilter } from "@/components/measurements/measurementsSlice"
 import Mobile from "@/interfaces/Mobile"
 import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
+import MobileGroup from "@/interfaces/MobileGroup"
 dayjs.extend(utc)
 
 const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
@@ -98,7 +99,7 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
   } else if (deviceIsError) {
     deviceContent = <p>{JSON.stringify(deviceError)}</p>
   } else if (deviceIsSuccess) {
-    if (deviceData.mobileDevices) {
+    if (deviceData.mobileDevices) {      
       deviceNames = deviceData.mobileDevices.map((device: Mobile) => {
         return device.mobileName
       })
@@ -118,9 +119,15 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
   } else if (groupIsError) {
     groupContent = <p>{JSON.stringify(groupError)}</p>
   } else if (groupIsSuccess) {
-    groupName = groupData.groups.map((group: Group) => {
-      return group.groupName
-    })
+    if (groupData.mobileGroups) {
+      groupName = groupData.mobileGroups.map((group: MobileGroup) => {
+        return group.mobileGroupName
+      })
+    } else {
+      groupName = groupData.groups.map((group: Group) => {
+        return group.groupName
+      })
+    }
   }
 
   const handleInputChange = (

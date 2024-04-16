@@ -8,20 +8,19 @@ import { useGetAnimalMeasurementsByMobileNamesQuery, useGetMobileGroupsQuery } f
 import { useGetMobilesQuery } from "@/features/api/apiSlice"
 
 const AnimalMeasurements: React.FC = () => {
-  const deviceNames = useAppSelector((state) => state.measurements.deviceNames)
-  const groupName = useAppSelector((state) => state.measurements.groupName)
+  const mobileNames = useAppSelector((state) => state.measurements.deviceNames)
   const startTime = useAppSelector((state) => state.measurements.startTime)
   const endTime = useAppSelector((state) => state.measurements.endTime)
 
-  const deviceNamesString: string = deviceNames.join(",")
+  const mobileNamesString: string = mobileNames.join(",")
 
   const query = useGetAnimalMeasurementsByMobileNamesQuery(
     {
-      deviceNames: deviceNamesString,
+      deviceNames: mobileNamesString,
       startTime: startTime,
       endTime: endTime,
     },
-    { skip: deviceNamesString.length === 0 },
+    { skip: mobileNamesString.length === 0 },
   )
 
   const mobileQuery = useGetMobilesQuery({})
