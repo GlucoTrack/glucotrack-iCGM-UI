@@ -11,10 +11,10 @@ import {
 } from "@mui/material"
 import Header from "@/components/Header"
 import {
-  useDeleteGroupMutation,
-  useEditGroupMutation,
+  useDeleteMobileGroupMutation,
+  useEditMobileGroupMutation,
   useGetMobilesQuery,
-  useEditDevicesMutation
+  //useEditDevicesMutation
 } from "@/features/api/apiSlice"
 import { RootState } from "@/store/store"
 import { resetMobileGroup } from "./groupsSlice"
@@ -62,8 +62,8 @@ const EditMobileGroup: React.FC = () => {
   const theme = useTheme()
   const { openSnackbar } = useContext(SnackbarContext);
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
-  const [formDeviceValues, setFormDeviceValues] = useState<DeviceValues>(initialDeviceValues)
-  const [isDeviceSubmitting, setIsDeviceSubmitting] = useState(false)
+  /*const [formDeviceValues, setFormDeviceValues] = useState<DeviceValues>(initialDeviceValues)
+  const [isDeviceSubmitting, setIsDeviceSubmitting] = useState(false)*/
   const { data, isFetching, isLoading } = useGetMobilesQuery({})
   const { groupId } = useParams<Record<string, string>>()
   const { mobileGroupName, mobileGroupDescription, mobileNames } = useSelector(
@@ -77,7 +77,7 @@ const EditMobileGroup: React.FC = () => {
       error: editError,
       isSuccess: isEditSuccess,
     },
-  ] = useEditGroupMutation()
+  ] = useEditMobileGroupMutation()
   const [
     deleteGroup,
     {
@@ -86,22 +86,23 @@ const EditMobileGroup: React.FC = () => {
       error: deleteError,
       isSuccess: isDeleteSuccess,
     },
-  ] = useDeleteGroupMutation()
-  const [
+  ] = useDeleteMobileGroupMutation()
+  /*const [
     editDevices,
-  ] = useEditDevicesMutation()  
-
+  ] = useEditDevicesMutation() */
+  
+  
   useEffect(() => {
-    const savedFormValues = localStorage.getItem("mobilemobileGroupValues_" + groupId)
-
+    const savedFormValues = localStorage.getItem("mobileGroupValues_" + groupId)
+    
     const setDefaultValues = () => {
       localStorage.setItem(
-        "mobilemobileGroupValues_" + groupId,
+        "mobileGroupValues_" + groupId,
         JSON.stringify({ mobileGroupName, mobileGroupDescription, mobileNames }),
       )
       setFormValues({ mobileGroupName, mobileGroupDescription, mobileNames })
     }
-
+    
     if (savedFormValues) {
       const parsedFormValues = JSON.parse(savedFormValues)
       if (
@@ -135,7 +136,7 @@ const EditMobileGroup: React.FC = () => {
     }))
   }
 
-  const canSaveDevice = [
+  /*const canSaveDevice = [
     formDeviceValues.measurementInterval,
     formDeviceValues.transmitDelay,
     formDeviceValues.checkParametersInterval,
@@ -144,7 +145,7 @@ const EditMobileGroup: React.FC = () => {
     formDeviceValues.glm,
     formDeviceValues.enzyme,
     formDeviceValues.testStation,
-  ].some((value) => value !== undefined && value !== null && value !== '');
+  ].some((value) => value !== undefined && value !== null && value !== '');*/
 
   const handleCancel = () => {
     setTimeout(() => {
@@ -157,7 +158,6 @@ const EditMobileGroup: React.FC = () => {
     e.preventDefault()
     if (canSave) {
       try {
-        console.log(groupId, formValues)
         await editGroup({
           groupId,
           ...formValues,
@@ -210,14 +210,14 @@ const EditMobileGroup: React.FC = () => {
     }
   }, [isEditingGroup, isDeletingGroup, isEditError, isDeleteError]);
 
-  const handleEditDevicesResponse = (response: any, devices: any) => {
+  /*const handleEditDevicesResponse = (response: any, devices: any) => {
     if (response?.error?.data) {
       const errorMessage = response.error.data.errors ? response.error.data.errors.join(', ') : response.error.data.message;
       openSnackbar(errorMessage, 'error');
     } else {
-      if (response?.data?.devices?.updatedDeviceIds) {
-        const updatedDeviceIds = response.data.devices.updatedDeviceIds;
-        const failedDeviceIds = response.data.devices.failedDeviceIds;
+      if (response?.data?.mobileDevices?.updatedDeviceIds) {
+        const updatedDeviceIds = response.data.mobileDevices.updatedDeviceIds;
+        const failedDeviceIds = response.data.mobileDevices.failedDeviceIds;
         const allDevicesUpdated = devices.every((deviceId: any) => updatedDeviceIds.includes(deviceId));
         const message = allDevicesUpdated ? "All devices updated successfully" : `The following devices were not updated: ${failedDeviceIds.join(', ')}`;
         setFormDeviceValues(initialDeviceValues);
@@ -234,7 +234,7 @@ const EditMobileGroup: React.FC = () => {
     if (canSaveDevice) {
       try {
         const devices = formValues.mobileNames.map(mobileName => {
-          const device = data.devices.find((device: any) => device.mobileName === mobileName);
+          const device = data.mobileDevices.find((device: any) => device.mobileName === mobileName);
           return device ? device._id : null;
         }).filter(id => id !== null);
 
@@ -257,7 +257,7 @@ const EditMobileGroup: React.FC = () => {
         [name]: value,
       }));
     }
-  };
+  };*/
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
@@ -329,7 +329,7 @@ const EditMobileGroup: React.FC = () => {
         </form>
       </Box>
 
-      <Divider sx={{ mt: 3, mb: 3 }} />
+      {/*<Divider sx={{ mt: 3, mb: 3 }} />
 
       <Box flexGrow={5} overflow="auto" width="100%">
         <Typography sx={{ mb: 2 }}>
@@ -428,7 +428,7 @@ const EditMobileGroup: React.FC = () => {
             </Box>
           </Box>
         </form>
-      </Box>
+      </Box>*/}
     </Box>
   )
 }
