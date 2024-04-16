@@ -9,14 +9,14 @@ import { useAddMobileGroupMutation } from "@/features/api/apiSlice"
 import { SnackbarContext } from '../../providers/SnackbarProvider';
 
 interface FormValues {
-  groupName: string
-  groupDescription: string
+  mobileGroupName: string
+  mobileGroupDescription: string
   mobileNames: string[]
 }
 
 const initialValues: FormValues = {
-  groupName: "",
-  groupDescription: "",
+  mobileGroupName: "",
+  mobileGroupDescription: "",
   mobileNames: [],
 }
 
@@ -30,8 +30,8 @@ const AddMobileGroup: React.FC = () => {
   const [addGroup, { isLoading, isError, error, isSuccess }] = useAddMobileGroupMutation()
   const canSave =
     [
-      formValues.groupName,
-      formValues.groupDescription,
+      formValues.mobileGroupName,
+      formValues.mobileGroupDescription,
       formValues.mobileNames,
     ].every(Boolean) && !isLoading
 
@@ -93,20 +93,20 @@ const AddMobileGroup: React.FC = () => {
       <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">
         <form onSubmit={handleSubmit}>
           <TextField
-            id="groupName"
-            name="groupName"
+            id="mobileGroupName"
+            name="mobileGroupName"
             label="Group Name"
-            value={formValues.groupName}
+            value={formValues.mobileGroupName}
             onChange={handleChange}
             required
             fullWidth
             margin="normal"
           />
           <TextField
-            id="groupDescription"
-            name="groupDescription"
+            id="mobileGroupDescription"
+            name="mobileGroupDescription"
             label="Group Description"
-            value={formValues.groupDescription}
+            value={formValues.mobileGroupDescription}
             onChange={handleChange}
             required
             fullWidth
@@ -116,8 +116,8 @@ const AddMobileGroup: React.FC = () => {
             multiple
             loading={isFetching || isLoading}
             options={
-              data && data.mobiles
-                ? data.mobiles.map((mobile: any) => mobile.mobileName)
+              data && data.mobileDevices
+                ? data.mobileDevices.map((mobile: any) => mobile.mobileName)
                 : []
             }
             value={formValues.mobileNames ?? []}

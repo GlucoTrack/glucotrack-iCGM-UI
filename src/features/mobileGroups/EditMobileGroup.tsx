@@ -105,8 +105,8 @@ const EditMobileGroup: React.FC = () => {
     if (savedFormValues) {
       const parsedFormValues = JSON.parse(savedFormValues)
       if (
-        parsedFormValues.groupName &&
-        parsedFormValues.groupDescription &&
+        parsedFormValues.mobileGroupName &&
+        parsedFormValues.mobileGroupDescription &&
         parsedFormValues.mobileNames
       ) {
         setFormValues(parsedFormValues)
@@ -157,6 +157,7 @@ const EditMobileGroup: React.FC = () => {
     e.preventDefault()
     if (canSave) {
       try {
+        console.log(groupId, formValues)
         await editGroup({
           groupId,
           ...formValues,
@@ -267,8 +268,8 @@ const EditMobileGroup: React.FC = () => {
       <Box flexGrow={1} overflow="auto" width="100%">
         <form onSubmit={handleSubmit}>
           <TextField
-            id="groupName"
-            name="groupName"
+            id="mobileGroupName"
+            name="mobileGroupName"
             label="Group Name"
             value={formValues.mobileGroupName}
             onChange={handleChange}
@@ -277,8 +278,8 @@ const EditMobileGroup: React.FC = () => {
             margin="normal"
           />
           <TextField
-            id="groupDescription"
-            name="groupDescription"
+            id="mobileGroupDescription"
+            name="mobileGroupDescription"
             label="Group Description"
             value={formValues.mobileGroupDescription}
             onChange={handleChange}
@@ -290,8 +291,8 @@ const EditMobileGroup: React.FC = () => {
             multiple
             loading={isFetching || isLoading}
             options={
-              data && data.devices
-                ? data.devices.map((device: any) => device.deviceName)
+              data && data.mobileDevices
+                ? data.mobileDevices.map((mobile: any) => mobile.mobileName)
                 : []
             }
             value={formValues.mobileNames ?? []}
