@@ -14,9 +14,10 @@ import {
 import {
   BookmarkRemoveOutlined as RemoveFilter,
   BookmarkAddOutlined as AddFilter,
+  ChevronRight,
+  ChevronLeft,
 } from "@mui/icons-material"
 import Grid from "@mui/system/Unstable_Grid"
-import { useGetDevicesQuery, useGetGroupsQuery } from "@/features/api/apiSlice"
 import Group from "@/interfaces/Group"
 import Device from "@/interfaces/Device"
 import { setFilter } from "@/components/measurements/measurementsSlice"
@@ -25,18 +26,11 @@ import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
 dayjs.extend(utc)
 
-//const MeasurementForm = (props: any, page: string) => {
-const MeasurementForm = ({
-  page,
-  ...props
-}: {
-  page: string
-  [key: string]: any
-}) => {
+const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
   const dispatch = useDispatch()
   const theme = useTheme()
   const [localStorageKey, setLocalStorageKey] = useState(
-    JSON.parse(localStorage.getItem("filters_" + page) || "{}"),
+    JSON.parse(localStorage.getItem("filters_" + pageKey) || "{}"),
   )
   const [errorMessage, setErrorMessage] = useState("")
   const [formValues, setFormValues] = useState({
@@ -67,11 +61,11 @@ const MeasurementForm = ({
         : false,
   })
   const [savedFilters, setSavedFilters] = useState<string[]>(
-    JSON.parse(localStorage.getItem("filterList_" + page) || "[]"),
+    JSON.parse(localStorage.getItem("filterList_" + pageKey) || "[]"),
   )
   const [filterName, setFilterName] = useState<string>("")
   const [selectedFilter, setSelectedFilter] = useState(
-    localStorage.getItem("selected_filter_" + page) || null,
+    localStorage.getItem("selected_filter_" + pageKey) || null,
   )
   const [filterApplied, setFilterApplied] = useState(selectedFilter !== null)
 
@@ -83,7 +77,7 @@ const MeasurementForm = ({
     isSuccess: deviceIsSuccess,
     isError: deviceIsError,
     error: deviceError,
-  } = props.query
+  } = query
 
   const {
     data: groupData,
@@ -93,7 +87,7 @@ const MeasurementForm = ({
     isSuccess: groupIsSuccess,
     isError: groupIsError,
     error: groupError,
-  } = useGetGroupsQuery({})
+  } = groupQuery
 
   let deviceContent: JSX.Element | null = null
   let deviceNames: string[] = []
@@ -151,8 +145,7 @@ const MeasurementForm = ({
           return {
             ...prevFormValues,
             [field]: true,
-            startTime: dayjs().format("YYYY-MM-DDTHH:mm"),
-            endTime: dayjs().add(1, "days").format("YYYY-MM-DDTHH:mm"),
+            endTime: dayjs().add(6, "hours").format("YYYY-MM-DDTHH:mm"),
           }
         } else {
           return {
@@ -191,14 +184,53 @@ const MeasurementForm = ({
       }
       setLocalStorageKey(newLocalStorageFilters)
       localStorage.setItem(
-        "filters_" + page,
+        "filters_" + pageKey,
         JSON.stringify(newLocalStorageFilters),
       )
       /*handleSubmit(
         new Event("submit") as unknown as React.FormEvent<HTMLFormElement>,
       )*/
     }
-  }, [formValues])
+  }, [formValues, pageKey, localStorageKey])
+
+  const calcCurrentTimeInterval = (): number => {
+    if (formValues.endTime && formValues.startTime) {
+      const d1 = dayjs(formValues.startTime)
+      const d2 = dayjs(formValues.endTime)
+      return d2.diff(d1, 'minute')
+    }    
+    return 0
+  }
+
+  const handleBack = () => {
+    const interval = calcCurrentTimeInterval()
+    setFormValues((prevFormValues) => {
+      return {
+        ...prevFormValues,
+        startTime: dayjs(prevFormValues.startTime)
+          .subtract(interval, "minutes")
+          .format("YYYY-MM-DDTHH:mm"),
+        endTime: dayjs(prevFormValues.endTime)
+          .subtract(interval, "minutes")
+          .format("YYYY-MM-DDTHH:mm"),
+      }
+    })
+  }
+
+  const handleForward = () => {
+    const interval = calcCurrentTimeInterval()
+    setFormValues((prevFormValues) => {
+      return {
+        ...prevFormValues,
+        startTime: dayjs(prevFormValues.startTime)
+          .add(interval, "minutes")
+          .format("YYYY-MM-DDTHH:mm"),
+        endTime: dayjs(prevFormValues.endTime)
+          .add(interval, "minutes")
+          .format("YYYY-MM-DDTHH:mm"),
+      }
+    })
+  }
 
   const setPastMinutesRange = (minutes: number) => {
     setFormValues((prevFormValues) => {
@@ -228,6 +260,10 @@ const MeasurementForm = ({
     setPastMinutesRange(1440)
   }
 
+  const handle48Hours = () => {
+    setPastMinutesRange(2880)
+  }
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
@@ -254,8 +290,8 @@ const MeasurementForm = ({
       const start = new Date(startTime)
       const end = new Date(endTime)
       const diffHours = Math.abs(end.getTime() - start.getTime()) / 3600000 // Convert milliseconds to hours
-      if (diffHours > 24) {
-        setErrorMessage("The time difference should not be more than 24 hours")
+      if (diffHours > 48) {
+        setErrorMessage("The time difference should not be more than 48 hours")
         return
       }
     }
@@ -284,8 +320,8 @@ const MeasurementForm = ({
               deviceNamesFromGroup.length > 0
                 ? deviceNamesFromGroup
                 : deviceNames && deviceNames.length > 0
-                ? deviceNames
-                : [],
+                  ? deviceNames
+                  : [],
             groupName: groupName ? groupName : "",
             startTime: utcStartTime,
             endTime: utcEndTime,
@@ -301,9 +337,9 @@ const MeasurementForm = ({
 
   useEffect(() => {
     if (savedFilters) {
-      localStorage.setItem("filterList_" + page, JSON.stringify(savedFilters))
+      localStorage.setItem("filterList_" + pageKey, JSON.stringify(savedFilters))
     }
-  }, [savedFilters])
+  }, [savedFilters, pageKey])
 
   const handleSaveFilter = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -316,7 +352,7 @@ const MeasurementForm = ({
       newSavedFilters.sort((a, b) => a.localeCompare(b))
       setSavedFilters(newSavedFilters)
       localStorage.setItem("savedFilters", JSON.stringify(newSavedFilters))
-      localStorage.setItem(filterName + "_" + page, JSON.stringify(formValues))
+      localStorage.setItem(filterName + "_" + pageKey, JSON.stringify(formValues))
       setSelectedFilter(filterName)
       setErrorMessage("")
       setFilterName("")
@@ -327,16 +363,16 @@ const MeasurementForm = ({
 
   useEffect(() => {
     if (selectedFilter) {
-      localStorage.setItem("selected_filter_" + page, selectedFilter)
+      localStorage.setItem("selected_filter_" + pageKey, selectedFilter)
       setFilterApplied(true)
     } else {
-      localStorage.removeItem("selected_filter_" + page)
+      localStorage.removeItem("selected_filter_" + pageKey)
     }
-  }, [selectedFilter])
+  }, [selectedFilter, pageKey])
 
   const handleChangeFilter = (filterName: string) => {
     try {
-      const savedFilter = localStorage.getItem(filterName + "_" + page)
+      const savedFilter = localStorage.getItem(filterName + "_" + pageKey)
       if (savedFilter) {
         setFormValues(JSON.parse(savedFilter))
         setSelectedFilter(filterName)
@@ -365,9 +401,9 @@ const MeasurementForm = ({
                 onChange={(event) => setFilterName(event.target.value)}
                 style={{ marginRight: "1rem", width: "150px" }}
               ></TextField>
-              <Button type="submit" variant="outlined" color="primary">
+              <IconButton type="submit">
                 <AddFilter />
-              </Button>
+              </IconButton>
             </Grid>
           </Grid>
 
@@ -427,7 +463,7 @@ const MeasurementForm = ({
                   handleInputChange("deviceNames", newValue)
                 }}
                 renderInput={(params) => (
-                  <TextField {...params} label={props.label} fullWidth />
+                  <TextField {...params} label={label} fullWidth />
                 )}
               />
             </Grid>
@@ -465,7 +501,12 @@ const MeasurementForm = ({
               />
             </Grid>
 
-            <Grid xs={6}>
+            <Grid xs={1} alignContent={'center'}>
+              <IconButton onClick={handleBack}>
+                <ChevronLeft />
+              </IconButton>
+            </Grid>
+            <Grid xs={5}>
               <TextField
                 label="Start Time"
                 type="datetime-local"
@@ -483,7 +524,7 @@ const MeasurementForm = ({
                 }}
               />
             </Grid>
-            <Grid xs={6}>
+            <Grid xs={5}>
               <TextField
                 label="End Time"
                 type="datetime-local"
@@ -501,6 +542,12 @@ const MeasurementForm = ({
                 }}
               />
             </Grid>
+            <Grid xs={1} alignContent={'center'}>
+              <IconButton onClick={handleForward}>
+                <ChevronRight />
+              </IconButton>
+            </Grid>
+
             <Grid xs={12}>
               <Button type="submit" variant="contained" color="primary">
                 Submit
@@ -509,7 +556,7 @@ const MeasurementForm = ({
           </Grid>
           <Grid xs={4}>
             <Grid container spacing={1}>
-              <Grid xs={6}>
+              <Grid>
                 <Button
                   onClick={handle30Minutes}
                   sx={{ width: 1, mb: 1 }}
@@ -519,7 +566,7 @@ const MeasurementForm = ({
                   Past 30 minutes
                 </Button>
               </Grid>
-              <Grid xs={6}>
+              <Grid>
                 <Button
                   onClick={handle1Hour}
                   sx={{ width: 1, mb: 1 }}
@@ -529,7 +576,7 @@ const MeasurementForm = ({
                   Past 1 hour
                 </Button>
               </Grid>
-              <Grid xs={6}>
+              <Grid>
                 <Button
                   onClick={handle2Hours}
                   sx={{ width: 1, mb: 1 }}
@@ -539,7 +586,7 @@ const MeasurementForm = ({
                   Past 2 hours
                 </Button>
               </Grid>
-              <Grid xs={6}>
+              <Grid>
                 <Button
                   onClick={handle24Hours}
                   sx={{ width: 1, mb: 0 }}
@@ -547,6 +594,16 @@ const MeasurementForm = ({
                   color="primary"
                 >
                   Past 24 hours
+                </Button>
+              </Grid>
+              <Grid>
+                <Button
+                  onClick={handle48Hours}
+                  sx={{ width: 1, mb: 0 }}
+                  variant="outlined"
+                  color="primary"
+                >
+                  Past 48 hours
                 </Button>
               </Grid>
             </Grid>

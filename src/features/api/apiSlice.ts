@@ -5,7 +5,7 @@ export const apiSlice = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: import.meta.env.VITE_API_BASE_URL,
   }),
-  tagTypes: ["Devices", "Mobiles", "Groups", "Measurements", "AveragesAndStds"],
+  tagTypes: ["Devices", "Mobiles", "Groups", "Measurements", "AveragesAndStds", "MobileGroups"],
   endpoints: (builder) => ({
     //TODO maybe code split per feature
     //*DEVICES
@@ -164,6 +164,34 @@ export const apiSlice = createApi({
       },
       providesTags: ["AveragesAndStds"],
     }),
+    //*MOBILE GROUPS
+    addMobileGroup: builder.mutation({
+      query: (groupData) => ({
+        url: "mobileGroups",
+        method: "POST",
+        body: groupData,
+      }),
+      invalidatesTags: ["MobileGroups"],
+    }),
+    getMobileGroups: builder.query({
+      query: () => "mobileGroups",
+      providesTags: ["MobileGroups"],
+    }),
+    editMobileGroup: builder.mutation({
+      query: ({ groupId, ...groupData }) => ({
+        url: `mobileGroups/${groupId}`,
+        method: "PATCH",
+        body: groupData,
+      }),
+      invalidatesTags: ["MobileGroups"],
+    }),
+    deleteMobileGroup: builder.mutation({
+      query: (groupId) => ({
+        url: `mobileGroups/${groupId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["MobileGroups"],
+    }),
   }),
 })
 
@@ -187,4 +215,8 @@ export const {
   useGetAnimalMeasurementsByMobileNamesQuery,
   useGetAnimalMeasurementsBySensorNamesQuery,
   useGetAveragesAndStdsQuery,
+  useAddMobileGroupMutation,
+  useGetMobileGroupsQuery,
+  useEditMobileGroupMutation,
+  useDeleteMobileGroupMutation,
 } = apiSlice

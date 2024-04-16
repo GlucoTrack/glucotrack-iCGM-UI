@@ -4,7 +4,7 @@ import Header from "@/components/Header"
 import MeasurementForm from "@/components/measurements/MeasurementForm"
 import { useAppSelector } from "@/hooks/useStore"
 import MeasurementChart from "@/components/measurements/MeasurementChart"
-import { useGetAnimalMeasurementsByMobileNamesQuery } from "@/features/api/apiSlice"
+import { useGetAnimalMeasurementsByMobileNamesQuery, useGetMobileGroupsQuery } from "@/features/api/apiSlice"
 import { useGetMobilesQuery } from "@/features/api/apiSlice"
 
 const AnimalMeasurements: React.FC = () => {
@@ -26,6 +26,8 @@ const AnimalMeasurements: React.FC = () => {
 
   const mobileQuery = useGetMobilesQuery({})
 
+  const groupQuery = useGetMobileGroupsQuery({});
+
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header
@@ -35,6 +37,7 @@ const AnimalMeasurements: React.FC = () => {
       />
       <MeasurementForm
         query={mobileQuery}
+        groupQuery={groupQuery}
         label={"Mobile Names"}
         page={"mobile"}
       />
