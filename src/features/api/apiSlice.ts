@@ -5,7 +5,14 @@ export const apiSlice = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: import.meta.env.VITE_API_BASE_URL,
   }),
-  tagTypes: ["Devices", "Mobiles", "Groups", "Measurements", "AveragesAndStds", "MobileGroups"],
+  tagTypes: [
+    "Devices",
+    "Mobiles",
+    "Groups",
+    "Measurements",
+    "AveragesAndStds",
+    "MobileGroups",
+  ],
   endpoints: (builder) => ({
     //TODO maybe code split per feature
     //*DEVICES
@@ -102,19 +109,19 @@ export const apiSlice = createApi({
     //*GROUPS
     addGroup: builder.mutation({
       query: (groupData) => ({
-        url: "groups/create",
+        url: "groups",
         method: "POST",
         body: groupData,
       }),
       invalidatesTags: ["Groups"],
     }),
     getGroups: builder.query({
-      query: () => "groups/read",
+      query: () => "groups",
       providesTags: ["Groups"],
     }),
     editGroup: builder.mutation({
       query: ({ groupId, ...groupData }) => ({
-        url: `groups/updateByGroupId/${groupId}`,
+        url: `groups/${groupId}`,
         method: "PATCH",
         body: groupData,
       }),
@@ -122,7 +129,7 @@ export const apiSlice = createApi({
     }),
     deleteGroup: builder.mutation({
       query: (groupId) => ({
-        url: `groups/delete/${groupId}`,
+        url: `groups/${groupId}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Groups"],
