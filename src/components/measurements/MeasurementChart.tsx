@@ -17,13 +17,13 @@ import { socket } from "../../utils/socket"
 import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
 import distinctColors from "distinct-colors"
-import Highcharts from 'highcharts'
-import HighchartsReact from 'highcharts-react-official'
-import Boost from 'highcharts/modules/boost';
+import Highcharts from "highcharts"
+import HighchartsReact from "highcharts-react-official"
+import Boost from "highcharts/modules/boost"
 
 dayjs.extend(utc)
 
-Boost(Highcharts);
+Boost(Highcharts)
 
 const MeasurementChart = ({ query, pageKey, eventName }: any) => {
   const theme = useTheme()
@@ -39,7 +39,6 @@ const MeasurementChart = ({ query, pageKey, eventName }: any) => {
   const [localStorageKey, setLocalStorageKey] = useState(
     JSON.parse(localStorage.getItem("chart_settings_" + pageKey) || "{}"),
   )
-
 
   function generateLineColors(number: number, isDarkMode: boolean) {
     const palette = distinctColors({
@@ -73,60 +72,60 @@ const MeasurementChart = ({ query, pageKey, eventName }: any) => {
     plotOptions: {
       series: {
         marker: {
-          enabled: false,
+          enabled: true,
           states: {
             hover: {
-              enabled: false
-            }
-          }
-        }
-      }
+              enabled: false,
+            },
+          },
+        },
+        lineWidth: 0,
+      },
     },
     title: {
-      text: null
+      text: null,
     },
     xAxis: {
-      type: 'datetime',
+      type: "datetime",
       minRange: 1000 * 5,
-      lineColor: '',
+      lineColor: "",
       labels: {
         style: {
-          color: ''
+          color: "",
         },
         rotation: -30,
         formatter: function (v: any): any {
           return dateFormatter(v.value, chartSettings.xAxisFormat)
-        }
+        },
       },
       events: {
         afterSetExtremes: function (event: any) {
-          if (event.trigger === 'zoom') {
+          if (event.trigger === "zoom") {
             setStartZoomArea(new Date(event.min))
             setEndZoomArea(new Date(event.max))
-          } else if (event.trigger === 'pan') {
+          } else if (event.trigger === "pan") {
             // TODO probably need a debounce here
             setStartZoomArea(new Date(event.min))
             setEndZoomArea(new Date(event.max))
           }
-        }
+        },
       },
     },
     yAxis: {
       title: {
-        text: null
+        text: null,
       },
       labels: {
-        style: {
-        },
+        style: {},
         formatter: function (v: any): any {
           return formatValue(v.value)
-        }
+        },
       },
     },
     series: [],
     boost: {
       useGPUTranslations: true,
-      usePreallocated: true
+      usePreallocated: true,
     },
     tooltip: {
       enabled: false,
@@ -136,15 +135,14 @@ const MeasurementChart = ({ query, pageKey, eventName }: any) => {
     },
     chart: {
       height: 700,
-      zoomType: 'xy',
-      panKey: 'alt',
+      zoomType: "xy",
+      panKey: "alt",
       panning: true,
       backgroundColor: null,
     },
     legend: {
-      itemStyle: {
-      }
-    }
+      itemStyle: {},
+    },
   })
 
   useEffect(() => {
@@ -156,8 +154,8 @@ const MeasurementChart = ({ query, pageKey, eventName }: any) => {
   }, [data?.measurements])
 
   useEffect(() => {
-    const lightChartColor = '#000000'
-    const darkChartColor = '#ffffff'
+    const lightChartColor = "#000000"
+    const darkChartColor = "#ffffff"
     const selectedChartColor = isDarkMode ? darkChartColor : lightChartColor
 
     setChartOptions((prevOptions: any) => {
@@ -174,28 +172,28 @@ const MeasurementChart = ({ query, pageKey, eventName }: any) => {
   useEffect(() => {
     let colors = generateLineColors(measurements.length, isDarkMode)
     let series: any = []
-    let index = 0;
+    let index = 0
     for (const measurement of measurements) {
       let data = []
       for (const d of measurement.data) {
         data.push([new Date(d.date).getTime(), d.current])
-
       }
-      series.push({ name: measurement.name, data: data, type: 'line', color: colors[index] })
+      series.push({
+        name: measurement.name,
+        data: data,
+        type: "line",
+        color: colors[index],
+      })
       index++
     }
 
     setChartOptions((prevOptions: any) => {
       return {
         ...prevOptions,
-        series: series
+        series: series,
       }
     })
-
-  }, [
-    measurements,
-    isDarkMode,
-  ])
+  }, [measurements, isDarkMode])
 
   // Filtered measurements for table
   useEffect(() => {
@@ -209,7 +207,6 @@ const MeasurementChart = ({ query, pageKey, eventName }: any) => {
           if (date >= startZoomArea && date <= endZoomArea) {
             filteredData.push(data)
           }
-
         }
         filteredMes.push({ ...measurement, data: filteredData })
       }
@@ -218,12 +215,7 @@ const MeasurementChart = ({ query, pageKey, eventName }: any) => {
     } else {
       setFilteredMeasurements(measurements)
     }
-
-  }, [
-    measurements,
-    startZoomArea,
-    endZoomArea,
-  ])
+  }, [measurements, startZoomArea, endZoomArea])
 
   const dateFormatter = (date: any, format: string) => {
     if (date) {
@@ -231,7 +223,6 @@ const MeasurementChart = ({ query, pageKey, eventName }: any) => {
     }
     return date
   }
-
 
   function formatValue(value: number) {
     if (value >= 1000000) {
@@ -244,7 +235,7 @@ const MeasurementChart = ({ query, pageKey, eventName }: any) => {
   }
 
   const handleSettingChange = (field: string, value: string | number) => {
-    if (field === 'xAxisFormat') {
+    if (field === "xAxisFormat") {
       setChartOptions((prevOptions: any) => {
         let xAxis = prevOptions.xAxis
         xAxis.labels.formatter = function (v: any): any {
@@ -252,7 +243,7 @@ const MeasurementChart = ({ query, pageKey, eventName }: any) => {
         }
         return {
           ...prevOptions,
-          xAxis
+          xAxis,
         }
       })
     }
@@ -267,9 +258,7 @@ const MeasurementChart = ({ query, pageKey, eventName }: any) => {
   }
 
   useEffect(() => {
-    if (
-      chartSettings.xAxisFormat
-    ) {
+    if (chartSettings.xAxisFormat) {
       setLocalStorageKey((prevKey: any) => {
         let newChartSettings = {
           ...prevKey,
@@ -282,10 +271,7 @@ const MeasurementChart = ({ query, pageKey, eventName }: any) => {
         return newChartSettings
       })
     }
-  }, [
-    chartSettings.xAxisFormat,
-    pageKey,
-  ])
+  }, [chartSettings.xAxisFormat, pageKey])
 
   // Handle new measurements events
   useEffect(() => {
@@ -342,15 +328,10 @@ const MeasurementChart = ({ query, pageKey, eventName }: any) => {
       </p>
     )
   } else if (isSuccess) {
-
     content = (
       <>
         <Box style={{ userSelect: "none", marginTop: 30 }}>
-
-          <HighchartsReact
-            highcharts={Highcharts}
-            options={chartOptions}
-          />
+          <HighchartsReact highcharts={Highcharts} options={chartOptions} />
 
           <Grid container spacing={3} lg={6}>
             <Grid xs={6}>
