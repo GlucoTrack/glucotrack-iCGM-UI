@@ -16,6 +16,9 @@ import Groups from "@/features/groups/Groups"
 import AddGroup from "@/features/groups/AddGroup"
 import EditGroup from "@/features/groups/EditGroup"
 import Measurements from "@/features/measurements/Measurements"
+import MobileGroups from "@/features/mobileGroups/MobileGroups"
+import EditMobileGroup from "@/features/mobileGroups/EditMobileGroup"
+import AddMobileGroup from "@/features/mobileGroups/AddMobileGroup"
 import AnimalMeasurements from "@/features/animalMeasurements/AnimalMeasurements"
 import Users from "@/features/users/Users"
 import New from "@/features/new/New"
@@ -49,6 +52,9 @@ function App() {
                 <Route path="/groups/add" element={<AddGroup />} />
                 <Route path="/groups/edit/:groupId" element={<EditGroup />} />
                 <Route path="/measurements" element={<Measurements />} />
+                <Route path="/mobile-groups" element={<MobileGroups />} />
+                <Route path="/mobile-groups/add" element={<AddMobileGroup />} />
+                <Route path="/mobile-groups/:groupId" element={<EditMobileGroup />} />          
                 <Route
                   path="/animal-measurements"
                   element={<AnimalMeasurements />}

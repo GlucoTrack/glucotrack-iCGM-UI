@@ -3,7 +3,7 @@ import { Box } from "@mui/material"
 import Header from "@/components/Header"
 import MeasurementForm from "@/components/measurements/MeasurementForm"
 import { useAppSelector } from "@/hooks/useStore"
-import { useGetMeasurementsByDeviceNamesQuery } from "@/features/api/apiSlice"
+import { useGetMeasurementsByDeviceNamesQuery, useGetGroupsQuery } from "@/features/api/apiSlice"
 import MeasurementChart from "@/components/measurements/MeasurementChart"
 import { useGetDevicesQuery } from "@/features/api/apiSlice"
 
@@ -26,6 +26,8 @@ const Measurements: React.FC = () => {
 
   const deviceQuery = useGetDevicesQuery({})
 
+  const groupQuery = useGetGroupsQuery({});
+
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header
@@ -35,13 +37,14 @@ const Measurements: React.FC = () => {
       />
       <MeasurementForm
         query={deviceQuery}
+        groupQuery={groupQuery}
         label={"Device Names"}
-        page={"device"}
+        pageKey={"device"}
       />
       <MeasurementChart
         query={query}
         eventName={"new_measurement__"}
-        page={"device"}
+        pageKey={"device"}
       />
     </Box>
   )

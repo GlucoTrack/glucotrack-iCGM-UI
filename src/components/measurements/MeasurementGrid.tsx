@@ -60,6 +60,7 @@ const MeasurementGrid = (props: any) => {
       rows={data}
       getRowId={(row) => row._id}
       columns={columns}
+      pageSizeOptions={[5, 10, 20, 50, 100]}
       initialState={{
         pagination: {
           paginationModel: { pageSize: 5, page: 0 },

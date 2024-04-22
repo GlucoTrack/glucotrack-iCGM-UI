@@ -17,15 +17,15 @@ import { socket } from "../../utils/socket"
 import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
 import distinctColors from "distinct-colors"
-import Highcharts from 'highcharts'
-import HighchartsReact from 'highcharts-react-official'
-import Boost from 'highcharts/modules/boost';
+import Highcharts from "highcharts"
+import HighchartsReact from "highcharts-react-official"
+import Boost from "highcharts/modules/boost"
 
 dayjs.extend(utc)
 
-Boost(Highcharts);
+Boost(Highcharts)
 
-const MeasurementChart = ({ ...props }) => {
+const MeasurementChart = ({ query, pageKey, eventName }: any) => {
   const theme = useTheme()
   const isDarkMode = theme.palette.mode === "dark"
   const startTime = useAppSelector((state) => state.measurements.startTime)
@@ -35,20 +35,19 @@ const MeasurementChart = ({ ...props }) => {
     (state) => state.measurements.deviceNames,
   )
   const devicesDepts = JSON.stringify(deviceNames)
-  const { data, isFetching, isLoading, isSuccess, isError, error } = props.query
+  const { data, isFetching, isLoading, isSuccess, isError, error } = query
   const [localStorageKey, setLocalStorageKey] = useState(
-    JSON.parse(localStorage.getItem("chart_settings_" + props.page) || "{}"),
+    JSON.parse(localStorage.getItem("chart_settings_" + pageKey) || "{}"),
   )
-
 
   function generateLineColors(number: number, isDarkMode: boolean) {
     const palette = distinctColors({
       count: number,
       hueMin: isDarkMode ? 0 : 0,
       hueMax: isDarkMode ? 360 : 360,
-      chromaMin: 0,
+      chromaMin: 50,
       chromaMax: 100,
-      lightMin: isDarkMode ? 30 : 0,
+      lightMin: isDarkMode ? 50 : 20,
       lightMax: isDarkMode ? 100 : 90,
       quality: 50,
       samples: 10000,
@@ -57,7 +56,7 @@ const MeasurementChart = ({ ...props }) => {
   }
 
   const [measurements, setMeasurements] = useState<any>([])
-  const [filteredMeasurements, setFilteredMeasurements] = useState<any>([])  
+  const [filteredMeasurements, setFilteredMeasurements] = useState<any>([])
 
   const [startZoomArea, setStartZoomArea] = useState<Date | null>()
   const [endZoomArea, setEndZoomArea] = useState<Date | null>()
@@ -66,82 +65,84 @@ const MeasurementChart = ({ ...props }) => {
     xAxisFormat:
       localStorageKey && localStorageKey.xAxisFormat
         ? localStorageKey.xAxisFormat
-        : "HH:mm:ss",    
+        : "HH:mm:ss",
   })
 
   const [chartOptions, setChartOptions] = useState({
     plotOptions: {
       series: {
         marker: {
-          enabled: false,
+          enabled: true,
           states: {
             hover: {
-              enabled: false
-            }
-          }
-        }
-      }
+              enabled: false,
+            },
+          },
+        },
+        lineWidth: 0,
+      },
     },
     title: {
-      text: null
+      text: null,
     },
     xAxis: {
-      type: 'datetime',
+      type: "datetime",
       minRange: 1000 * 5,
-      lineColor: '',
+      lineColor: "",
       labels: {
         style: {
-          color: ''
+          color: "",
         },
         rotation: -30,
         formatter: function (v: any): any {
           return dateFormatter(v.value, chartSettings.xAxisFormat)
-        }
+        },
       },
       events: {
         afterSetExtremes: function (event: any) {
-          if (event.trigger === 'zoom') {
+          if (event.trigger === "zoom") {
             setStartZoomArea(new Date(event.min))
             setEndZoomArea(new Date(event.max))
-          } else if (event.trigger === 'pan') {
+          } else if (event.trigger === "pan") {
             // TODO probably need a debounce here
             setStartZoomArea(new Date(event.min))
             setEndZoomArea(new Date(event.max))
           }
-        }
+        },
       },
     },
-    yAxis: {      
+    yAxis: {
       title: {
-        text: null
+        text: null,
       },
       labels: {
-        style: {
-        },
+        style: {},
         formatter: function (v: any): any {
           return formatValue(v.value)
-        }
+        },
       },
     },
     series: [],
     boost: {
       useGPUTranslations: true,
-      usePreallocated: true
+      usePreallocated: true,
     },
     tooltip: {
       enabled: false,
     },
+    accessibility: {
+      enabled: false,
+    },
     chart: {
       height: 700,
-      zoomType: 'xy',
-      panKey: 'alt',
+      zoomType: "xy",
+      panKey: "alt",
       panning: true,
       backgroundColor: null,
     },
     legend: {
-      itemStyle: {
-      }
-    }
+      itemStyle: {},
+    },
   })
 
   useEffect(() => {
@@ -153,8 +154,8 @@ const MeasurementChart = ({ ...props }) => {
   }, [data?.measurements])
 
   useEffect(() => {
-    const lightChartColor = '#000000'
-    const darkChartColor = '#ffffff'
+    const lightChartColor = "#000000"
+    const darkChartColor = "#ffffff"
     const selectedChartColor = isDarkMode ? darkChartColor : lightChartColor
 
     setChartOptions((prevOptions: any) => {
@@ -168,32 +169,31 @@ const MeasurementChart = ({ ...props }) => {
     })
   }, [isDarkMode])
 
-  useEffect(() => {    
+  useEffect(() => {
     let colors = generateLineColors(measurements.length, isDarkMode)
-
     let series: any = []
-    let index = 0;
+    let index = 0
     for (const measurement of measurements) {
       let data = []
-      for (const d of measurement.data) {        
+      for (const d of measurement.data) {
         data.push([new Date(d.date).getTime(), d.current])
-
       }
-      series.push({ name: measurement.name, data: data, type: 'line', color: colors[index] })
+      series.push({
+        name: measurement.name,
+        data: data,
+        type: "line",
+        color: colors[index],
+      })
       index++
     }
-    
+
     setChartOptions((prevOptions: any) => {
       return {
         ...prevOptions,
-        series: series
+        series: series,
       }
     })
-
-  }, [
-    measurements,    
-    isDarkMode,
-  ])
+  }, [measurements, isDarkMode])
 
   // Filtered measurements for table
   useEffect(() => {
@@ -207,7 +207,6 @@ const MeasurementChart = ({ ...props }) => {
           if (date >= startZoomArea && date <= endZoomArea) {
             filteredData.push(data)
           }
-
         }
         filteredMes.push({ ...measurement, data: filteredData })
       }
@@ -216,12 +215,7 @@ const MeasurementChart = ({ ...props }) => {
     } else {
       setFilteredMeasurements(measurements)
     }
-
-  }, [
-    measurements,
-    startZoomArea,
-    endZoomArea,
-  ])
+  }, [measurements, startZoomArea, endZoomArea])
 
   const dateFormatter = (date: any, format: string) => {
     if (date) {
@@ -229,7 +223,6 @@ const MeasurementChart = ({ ...props }) => {
     }
     return date
   }
-
 
   function formatValue(value: number) {
     if (value >= 1000000) {
@@ -242,7 +235,7 @@ const MeasurementChart = ({ ...props }) => {
   }
 
   const handleSettingChange = (field: string, value: string | number) => {
-    if (field === 'xAxisFormat') {
+    if (field === "xAxisFormat") {
       setChartOptions((prevOptions: any) => {
         let xAxis = prevOptions.xAxis
         xAxis.labels.formatter = function (v: any): any {
@@ -250,13 +243,13 @@ const MeasurementChart = ({ ...props }) => {
         }
         return {
           ...prevOptions,
-          xAxis
+          xAxis,
         }
       })
     }
     setChartSettings((prevSettings) => {
       let newValue = value
-      
+
       return {
         ...prevSettings,
         [field]: newValue !== null ? newValue : "",
@@ -265,32 +258,27 @@ const MeasurementChart = ({ ...props }) => {
   }
 
   useEffect(() => {
-    if (
-      chartSettings.xAxisFormat      
-    ) {
+    if (chartSettings.xAxisFormat) {
       setLocalStorageKey((prevKey: any) => {
         let newChartSettings = {
           ...prevKey,
-          xAxisFormat: chartSettings.xAxisFormat,          
+          xAxisFormat: chartSettings.xAxisFormat,
         }
         localStorage.setItem(
-          "chart_settings_" + props.page,
+          "chart_settings_" + pageKey,
           JSON.stringify(newChartSettings),
         )
         return newChartSettings
       })
     }
-  }, [
-    chartSettings.xAxisFormat,
-    props.page,
-  ])
+  }, [chartSettings.xAxisFormat, pageKey])
 
   // Handle new measurements events
   useEffect(() => {
-    if (props.eventName) {
+    if (eventName) {
       if (realtime) {
         for (const deviceName of deviceNames) {
-          socket.on(props.eventName + deviceName, (data: any) => {
+          socket.on(eventName + deviceName, (data: any) => {
             let date = new Date(data.date)
             if (
               date >= dayjs(startTime).utc().toDate() &&
@@ -314,17 +302,17 @@ const MeasurementChart = ({ ...props }) => {
         }
       } else {
         for (const deviceName of deviceNames) {
-          socket.off(props.eventName + deviceName)
+          socket.off(eventName + deviceName)
         }
       }
     }
 
     return () => {
       for (const deviceName of deviceNames) {
-        socket.off(props.eventName + deviceName)
+        socket.off(eventName + deviceName)
       }
     }
-  }, [devicesDepts, deviceNames, props.eventName, startTime, endTime, realtime])
+  }, [devicesDepts, deviceNames, eventName, startTime, endTime, realtime])
 
   let content: JSX.Element | null = null
   if (isFetching) {
@@ -340,15 +328,10 @@ const MeasurementChart = ({ ...props }) => {
       </p>
     )
   } else if (isSuccess) {
-
     content = (
       <>
         <Box style={{ userSelect: "none", marginTop: 30 }}>
-
-          <HighchartsReact
-            highcharts={Highcharts}
-            options={chartOptions}
-          />
+          <HighchartsReact highcharts={Highcharts} options={chartOptions} />
 
           <Grid container spacing={3} lg={6}>
             <Grid xs={6}>
@@ -366,7 +349,7 @@ const MeasurementChart = ({ ...props }) => {
                 <MenuItem value="MM-DD HH:mm:ss">MM-DD HH:mm:ss</MenuItem>
                 <MenuItem value="YY-MM-DD HH:mm:ss">YY-MM-DD HH:mm:ss</MenuItem>
               </Select>
-            </Grid>            
+            </Grid>
           </Grid>
         </Box>
         <Box>
