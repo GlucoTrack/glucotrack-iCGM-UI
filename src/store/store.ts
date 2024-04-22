@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit"
 import navbarReducer from "@/features/navbar/navbarSlice"
 import groupsReducer from "@/features/groups/groupsSlice"
+import mobileGroupsReducer from "@/features/mobileGroups/groupsSlice"
 import measurementsReducer from "@/components/measurements/measurementsSlice"
 import { apiSlice } from "@/features/api/apiSlice"
 
@@ -8,6 +9,7 @@ export const store = configureStore({
   reducer: {
     navbar: navbarReducer,
     groups: groupsReducer,
+    mobileGroups: mobileGroupsReducer,
     measurements: measurementsReducer,
     [apiSlice.reducerPath]: apiSlice.reducer,
   },
