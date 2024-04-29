@@ -14,7 +14,7 @@ import {
   useDeleteMobileGroupMutation,
   useEditMobileGroupMutation,
   useGetMobilesQuery,
-  //useEditDevicesMutation
+  useEditMobilesMutation
 } from "@/features/api/apiSlice"
 import { RootState } from "@/store/store"
 import { resetMobileGroup } from "./groupsSlice"
@@ -33,27 +33,23 @@ const initialValues: FormValues = {
   mobileNames: [],
 }
 
-interface DeviceValues {
+interface MobileValues {
   _id?: string
   measurementInterval: string
-  transmitDelay: string
+  reportInterval: string
+  refMillivolts: string
+  weMillivolts: string
+  filterLength: string
   checkParametersInterval: string
-  pstatVoltage: string
-  pstatTIA: string
-  glm: string
-  enzyme: string
-  testStation: string
 }
 
-const initialDeviceValues: DeviceValues = {
+const initialMobileValues: MobileValues = {
   measurementInterval: '',
-  transmitDelay: '',
+  reportInterval: '',
+  refMillivolts: '',
+  weMillivolts: '',
+  filterLength: '',
   checkParametersInterval: '',
-  pstatVoltage: '',
-  pstatTIA: '',
-  glm: '',
-  enzyme: '',
-  testStation: '',
 }
 
 const EditMobileGroup: React.FC = () => {
@@ -62,8 +58,8 @@ const EditMobileGroup: React.FC = () => {
   const theme = useTheme()
   const { openSnackbar } = useContext(SnackbarContext);
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
-  /*const [formDeviceValues, setFormDeviceValues] = useState<DeviceValues>(initialDeviceValues)
-  const [isDeviceSubmitting, setIsDeviceSubmitting] = useState(false)*/
+  const [formMobileValues, setFormMobileValues] = useState<MobileValues>(initialMobileValues)
+  const [isMobileSubmitting, setIsMobileSubmitting] = useState(false)
   const { data, isFetching, isLoading } = useGetMobilesQuery({})
   const { groupId } = useParams<Record<string, string>>()
   const { mobileGroupName, mobileGroupDescription, mobileNames } = useSelector(
@@ -87,9 +83,9 @@ const EditMobileGroup: React.FC = () => {
       isSuccess: isDeleteSuccess,
     },
   ] = useDeleteMobileGroupMutation()
-  /*const [
-    editDevices,
-  ] = useEditDevicesMutation() */
+  const [
+    editMobiles,
+  ] = useEditMobilesMutation()
   
   
   useEffect(() => {
@@ -136,16 +132,14 @@ const EditMobileGroup: React.FC = () => {
     }))
   }
 
-  /*const canSaveDevice = [
-    formDeviceValues.measurementInterval,
-    formDeviceValues.transmitDelay,
-    formDeviceValues.checkParametersInterval,
-    formDeviceValues.pstatVoltage,
-    formDeviceValues.pstatTIA,
-    formDeviceValues.glm,
-    formDeviceValues.enzyme,
-    formDeviceValues.testStation,
-  ].some((value) => value !== undefined && value !== null && value !== '');*/
+  const canSaveMobile = [
+    formMobileValues.measurementInterval,
+    formMobileValues.reportInterval,
+    formMobileValues.refMillivolts,
+    formMobileValues.weMillivolts,
+    formMobileValues.filterLength,
+    formMobileValues.checkParametersInterval,
+  ].some((value) => value !== undefined && value !== null && value !== '');
 
   const handleCancel = () => {
     setTimeout(() => {
@@ -210,41 +204,41 @@ const EditMobileGroup: React.FC = () => {
     }
   }, [isEditingGroup, isDeletingGroup, isEditError, isDeleteError]);
 
-  /*const handleEditDevicesResponse = (response: any, devices: any) => {
+  const handleEditMobilesResponse = (response: any, mobiles: any) => {
     if (response?.error?.data) {
       const errorMessage = response.error.data.errors ? response.error.data.errors.join(', ') : response.error.data.message;
       openSnackbar(errorMessage, 'error');
     } else {
-      if (response?.data?.mobileDevices?.updatedDeviceIds) {
-        const updatedDeviceIds = response.data.mobileDevices.updatedDeviceIds;
-        const failedDeviceIds = response.data.mobileDevices.failedDeviceIds;
-        const allDevicesUpdated = devices.every((deviceId: any) => updatedDeviceIds.includes(deviceId));
-        const message = allDevicesUpdated ? "All devices updated successfully" : `The following devices were not updated: ${failedDeviceIds.join(', ')}`;
-        setFormDeviceValues(initialDeviceValues);
-        openSnackbar(message, allDevicesUpdated ? 'success' : 'warning');
+      if (response?.data?.mobiles?.updatedMobileIds) {
+        const updatedMobileIds = response.data.mobiles.updatedMobileIds;
+        const failedMobileIds = response.data.mobiles.failedMobileIds;
+        const allMobilesUpdated = mobiles.every((mobileId: any) => updatedMobileIds.includes(mobileId));
+        const message = allMobilesUpdated ? "All mobiles updated successfully" : `The following mobiles were not updated: ${failedMobileIds.join(', ')}`;
+        setFormMobileValues(initialMobileValues);
+        openSnackbar(message, allMobilesUpdated ? 'success' : 'warning');
       } else {
-        openSnackbar("Failed to edit devices", 'error');
+        openSnackbar("Failed to edit mobiles", 'error');
       }
     }
   }
 
-  const handleDevices = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleMobiles = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setIsDeviceSubmitting(true)
-    if (canSaveDevice) {
+    setIsMobileSubmitting(true)
+    if (canSaveMobile) {
       try {
-        const devices = formValues.mobileNames.map(mobileName => {
+        const mobiles = formValues.mobileNames.map(mobileName => {
           const device = data.mobileDevices.find((device: any) => device.mobileName === mobileName);
           return device ? device._id : null;
         }).filter(id => id !== null);
 
-        const nonEmptyFormDeviceValues = Object.fromEntries(Object.entries(formDeviceValues).filter(([key, value]) => value !== ''));
-        const response = await editDevices({ deviceIds: devices, ...nonEmptyFormDeviceValues });        
-        handleEditDevicesResponse(response, devices);
+        const nonEmptyFormMobileValues = Object.fromEntries(Object.entries(formMobileValues).filter(([key, value]) => value !== ''));
+        const response = await editMobiles({ mobileIds: mobiles, ...nonEmptyFormMobileValues });        
+        handleEditMobilesResponse(response, mobiles);
       } catch (error: any) {
-        openSnackbar("Failed to edit device: " + error.message, 'error');
+        openSnackbar("Failed to edit mobile: " + error.message, 'error');
       } finally {
-        setIsDeviceSubmitting(false)
+        setIsMobileSubmitting(false)
       }
     }
   }
@@ -252,12 +246,12 @@ const EditMobileGroup: React.FC = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (!isNaN(Number(value)) || value === '') {
-      setFormDeviceValues(prevState => ({
+      setFormMobileValues(prevState => ({
         ...prevState,
         [name]: value,
       }));
     }
-  };*/
+  };
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
@@ -329,28 +323,55 @@ const EditMobileGroup: React.FC = () => {
         </form>
       </Box>
 
-      {/*<Divider sx={{ mt: 3, mb: 3 }} />
+      <Divider sx={{ mt: 3, mb: 3 }} />
 
       <Box flexGrow={5} overflow="auto" width="100%">
         <Typography sx={{ mb: 2 }}>
-          Modify the attributes of every device within this group
+          Modify the attributes of every mobile within this group
         </Typography>
 
-        <form onSubmit={handleDevices}>
+        <form onSubmit={handleMobiles}>
           <TextField
             id="measurementInterval"
             name="measurementInterval"
             label="Measurement Interval"
-            value={formDeviceValues.measurementInterval}
+            value={formMobileValues.measurementInterval}
             onChange={handleInputChange}
             margin="normal"
             sx={{ mr: 2 }}
           />
           <TextField
-            id="transmitDelay"
-            name="transmitDelay"
-            label="Transmit Delay"
-            value={formDeviceValues.transmitDelay}
+            id="reportInterval"
+            name="reportInterval"
+            label="Report Interval"
+            value={formMobileValues.reportInterval}
+            onChange={handleInputChange}
+            margin="normal"
+            sx={{ mr: 2 }}
+          />
+          <TextField
+            id="refMillivolts"
+            name="refMillivolts"
+            label="Ref Millivolts"
+            value={formMobileValues.refMillivolts}
+            onChange={handleInputChange}
+            margin="normal"
+            sx={{ mr: 2 }}
+          />
+          <TextField
+            id="weMillivolts"
+            name="weMillivolts"
+            label="We Millivolts"
+            value={formMobileValues.weMillivolts}
+            onChange={handleInputChange}
+            margin="normal"
+            sx={{ mr: 2 }}
+          />
+          <TextField
+            id="filterLength"
+            name="filterLength"
+            label="Filter Length"
+            value={formMobileValues.filterLength}
             onChange={handleInputChange}
             margin="normal"
             sx={{ mr: 2 }}
@@ -359,52 +380,7 @@ const EditMobileGroup: React.FC = () => {
             id="checkParametersInterval"
             name="checkParametersInterval"
             label="Check Parameters Interval"
-            value={formDeviceValues.checkParametersInterval}
-            onChange={handleInputChange}
-            margin="normal"
-            sx={{ mr: 2 }}
-          />
-          <TextField
-            id="pstatVoltage"
-            name="pstatVoltage"
-            label="Pstat Voltage"
-            value={formDeviceValues.pstatVoltage}
-            onChange={handleInputChange}
-            margin="normal"
-            sx={{ mr: 2 }}
-          />
-          <TextField
-            id="pstatTIA"
-            name="pstatTIA"
-            label="Pstat TIA"
-            value={formDeviceValues.pstatTIA}
-            onChange={handleInputChange}
-            margin="normal"
-            sx={{ mr: 2 }}
-          />
-          <TextField
-            id="glm"
-            name="glm"
-            label="GLM"
-            value={formDeviceValues.glm}
-            onChange={handleInputChange}
-            margin="normal"
-            sx={{ mr: 2 }}
-          />
-          <TextField
-            id="enzyme"
-            name="enzyme"
-            label="Enzyme"
-            value={formDeviceValues.enzyme}
-            onChange={handleInputChange}
-            margin="normal"
-            sx={{ mr: 2 }}
-          />
-          <TextField
-            id="testStation"
-            name="testStation"
-            label="Test Station"
-            value={formDeviceValues.testStation}
+            value={formMobileValues.checkParametersInterval}
             onChange={handleInputChange}
             margin="normal"
             sx={{ mr: 2 }}
@@ -413,7 +389,7 @@ const EditMobileGroup: React.FC = () => {
           <Box mt={2} display="flex" justifyContent="space-between">
             <Box display="flex" justifyContent="flex-start" gap={2}>
               <Button variant="outlined" color="secondary" onClick={() => {
-                setFormDeviceValues(initialDeviceValues);
+                setFormMobileValues(initialMobileValues);
               }}>
                 Cancel
               </Button>
@@ -421,14 +397,14 @@ const EditMobileGroup: React.FC = () => {
                 type="submit"
                 variant="contained"
                 color="primary"
-                disabled={isDeviceSubmitting || !canSaveDevice}
+                disabled={isMobileSubmitting || !canSaveMobile}
               >
                 Submit
               </Button>
             </Box>
           </Box>
         </form>
-      </Box>*/}
+      </Box>
     </Box>
   )
 }
