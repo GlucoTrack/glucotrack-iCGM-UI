@@ -96,6 +96,17 @@ export const apiSlice = createApi({
         "Mobiles",
       ],
     }),
+    editMobiles: builder.mutation({
+      query: ({ mobileIds, ...mobileData }) => ({
+        url: `mobile/updateMobileIds/${mobileIds}`,
+        method: "PATCH",
+        body: mobileData,
+      }),
+      invalidatesTags: (result, error, arg) => [
+        { type: "Mobiles", id: arg },
+        "Mobiles",
+      ],
+    }),
     deleteMobile: builder.mutation({
       query: (mobileId) => ({
         url: `mobile/deleteByMobileId/${mobileId}`,
@@ -213,6 +224,7 @@ export const {
   useGetMobilesQuery,
   useGetMobileQuery,
   useEditMobileMutation,
+  useEditMobilesMutation,
   useDeleteMobileMutation,
   useAddGroupMutation,
   useGetGroupsQuery,
