@@ -40,10 +40,12 @@ const navItems = [
   {
     text: "Device Groups",
     icon: <GroupWorkOutlined />,
+    path: "groups",
   },
   {
     text: "Device Measurements",
     icon: <TimelineOutlined />,
+    path: "measurements",
   },
   {
     text: "Divider",
