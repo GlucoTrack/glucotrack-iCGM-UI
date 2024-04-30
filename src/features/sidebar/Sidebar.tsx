@@ -38,11 +38,11 @@ const navItems = [
     icon: <DeviceThermostatOutlined />,
   },
   {
-    text: "Groups",
+    text: "Device Groups",
     icon: <GroupWorkOutlined />,
   },
   {
-    text: "Measurements",
+    text: "Device Measurements",
     icon: <TimelineOutlined />,
   },
   {
@@ -54,31 +54,31 @@ const navItems = [
     icon: <MobileFriendlyOutlined />,
   },
   {
-    text: "Groups",
+    text: "Mobile Groups",
     icon: <GroupWorkOutlined />,
     path: "mobile-groups",
   },
   {
-    text: "Animal",
+    text: "Mobile Measurements",
     icon: <TimelineOutlined />,
     path: "animal-measurements",
   },
-  {
-    text: "Divider",
-    icon: null,
-  },
-  {
-    text: "Users",
-    icon: <GroupOutlined />,
-  },
-  {
-    text: "Divider",
-    icon: null,
-  },
-  {
-    text: "New",
-    icon: <TipsAndUpdatesOutlined />,
-  },
+  // {
+  //   text: "Divider",
+  //   icon: null,
+  // },
+  // {
+  //   text: "Users",
+  //   icon: <GroupOutlined />,
+  // },
+  // {
+  //   text: "Divider",
+  //   icon: null,
+  // },
+  // {
+  //   text: "New",
+  //   icon: <TipsAndUpdatesOutlined />,
+  // },
 ]
 
 interface SidebarProps {
