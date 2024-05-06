@@ -1,11 +1,18 @@
 import React, { useEffect } from "react"
-import { DataGrid, GridToolbarExport, GridToolbarContainer, GridToolbarColumnsButton, GridToolbarFilterButton, GridToolbarDensitySelector } from "@mui/x-data-grid"
+import {
+  DataGrid,
+  GridToolbarExport,
+  GridToolbarContainer,
+  GridToolbarColumnsButton,
+  GridToolbarFilterButton,
+  GridToolbarDensitySelector,
+} from "@mui/x-data-grid"
 import { Box } from "@mui/material"
 import Measurements from "@/interfaces/Measurement"
 import dayjs from "dayjs"
 
 function CustomToolbar() {
-  const fileName = new Date().toISOString().replace(/:/g, '-');
+  const fileName = new Date().toISOString().replace(/:/g, "-")
 
   return (
     <GridToolbarContainer>
@@ -14,20 +21,19 @@ function CustomToolbar() {
       <GridToolbarDensitySelector />
       <GridToolbarExport csvOptions={{ fileName }} />
     </GridToolbarContainer>
-  );
+  )
 }
 
 const MeasurementGrid = (props: any) => {
-  const [data, setData] = React.useState<Measurements[]>([]);
+  const [data, setData] = React.useState<Measurements[]>([])
 
   useEffect(() => {
     if (props) {
-
-      let rowId = 0;
-      let mergedMesurements: any[] = [];
+      let rowId = 0
+      let mergedMesurements: any[] = []
       const allData = props?.measurements.map((measurement: any) => {
         let dd = measurement.data.map((data: any) => {
-          rowId++;
+          rowId++
           return {
             current: data.current,
             voltage: data.voltage,
@@ -35,41 +41,49 @@ const MeasurementGrid = (props: any) => {
             _id: rowId,
             deviceName: measurement.name,
           }
-        });
-        return dd;
-      });
+        })
+        return dd
+      })
       for (let d of allData) {
-        mergedMesurements = mergedMesurements.concat(d);
+        mergedMesurements = mergedMesurements.concat(d)
       }
 
-      setData(mergedMesurements);
+      setData(mergedMesurements)
     }
-  }, [props]);
-
+  }, [props])
 
   const columns = [
     { field: "deviceName", headerName: "Name", flex: 0.5 },
-    { field: "date", headerName: "Date", flex: 1, valueFormatter: (params: any) => dayjs(params?.value).format('YYYY-MM-DD HH:mm:ss'), },
+    {
+      field: "date",
+      headerName: "Date",
+      flex: 1,
+      valueFormatter: (params: any) =>
+        dayjs(params?.value).format("YYYY-MM-DD HH:mm:ss"),
+    },
     { field: "voltage", headerName: "Voltage", flex: 1 },
     { field: "current", headerName: "Current", flex: 1 },
   ]
 
-  return <Box sx={{ mt: 4 }} flexGrow={1} overflow="auto" width="100%">
-    <DataGrid<Measurements>
-      slots={{ toolbar: CustomToolbar }}
-      rows={data}
-      getRowId={(row) => row._id}
-      columns={columns}
-      pageSizeOptions={[5, 10, 20, 50, 100]}
-      initialState={{
-        pagination: {
-          paginationModel: { pageSize: 5, page: 0 },
-        },
-      }}
-    />
-      
-  </Box>
+  return (
+    <Box sx={{ mt: 4 }} flexGrow={1} overflow="auto" width="100%">
+      <DataGrid<Measurements>
+        slots={{ toolbar: CustomToolbar }}
+        rows={data}
+        getRowId={(row) => row._id}
+        columns={columns}
+        pageSizeOptions={[5, 10, 20, 50, 100]}
+        initialState={{
+          sorting: {
+            sortModel: [{ field: "date", sort: "desc" }],
+          },
+          pagination: {
+            paginationModel: { pageSize: 5, page: 0 },
+          },
+        }}
+      />
+    </Box>
+  )
 }
 
 export default MeasurementGrid
-
