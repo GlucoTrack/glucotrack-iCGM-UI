@@ -2,7 +2,13 @@ import React, { createContext, useState } from 'react';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 
-export const SnackbarContext = createContext<{ openSnackbar: (msg: string, severity: 'error' | 'success' | 'info' | 'warning' | undefined) => void }>({ openSnackbar: () => {} });
+export const SnackbarContext = createContext<{
+    openSnackbar: (msg: string, severity: 'error' | 'success' | 'info' | 'warning' | undefined) => void,
+    closeSnackbar: (event: React.SyntheticEvent | Event, reason?: string) => void
+  }>({ 
+    openSnackbar: () => {}, 
+    closeSnackbar: () => {} 
+  });
 
 export function SnackbarProvider({ children }: { children: React.ReactNode }) {
     const [open, setOpen] = useState(false);
@@ -24,7 +30,7 @@ export function SnackbarProvider({ children }: { children: React.ReactNode }) {
       };
 
     return (
-        <SnackbarContext.Provider value={{ openSnackbar }}>
+        <SnackbarContext.Provider value={{ openSnackbar, closeSnackbar }}>
             <Snackbar
                 open={open}
                 autoHideDuration={5000}

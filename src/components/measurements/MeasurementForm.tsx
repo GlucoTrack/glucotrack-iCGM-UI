@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import { useDispatch } from "react-redux"
 import {
   Autocomplete,
@@ -25,15 +25,16 @@ import Mobile from "@/interfaces/Mobile"
 import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
 import MobileGroup from "@/interfaces/MobileGroup"
+import { SnackbarContext } from "@/providers/SnackbarProvider"
 dayjs.extend(utc)
 
 const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
   const dispatch = useDispatch()
   const theme = useTheme()
+  const { openSnackbar, closeSnackbar } = useContext(SnackbarContext);
   const [localStorageKey, setLocalStorageKey] = useState(
     JSON.parse(localStorage.getItem("filters_" + pageKey) || "{}"),
   )
-  const [errorMessage, setErrorMessage] = useState("")
   const [formValues, setFormValues] = useState({
     deviceNames:
       localStorageKey && localStorageKey.deviceNames
@@ -158,6 +159,7 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
           return {
             ...prevFormValues,
             [field]: false,
+            endTime: dayjs().format("YYYY-MM-DDTHH:mm"),
           }
         }
       } else {
@@ -246,7 +248,9 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
         startTime: dayjs()
           .subtract(minutes, "minutes")
           .format("YYYY-MM-DDTHH:mm"),
-        endTime: dayjs().format("YYYY-MM-DDTHH:mm"),
+        endTime: formValues.realtime 
+          ? prevFormValues.endTime 
+          : dayjs().format("YYYY-MM-DDTHH:mm"),
       }
     })
   }
@@ -284,12 +288,12 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
       (deviceNames && deviceNames.length > 0 && groupName) ||
       ((!deviceNames || deviceNames.length === 0) && !groupName)
     ) {
-      setErrorMessage("Please select either Device Name(s) OR Group Name")
+      openSnackbar("Please select either Device Name(s) OR Group Name", 'error')
       return
     }
 
     if (!startTime || !endTime) {
-      setErrorMessage("Please select start and end date")
+      openSnackbar("Please select start and end date", 'error');
       return
     }
 
@@ -298,7 +302,7 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
       const end = new Date(endTime)
       const diffHours = Math.abs(end.getTime() - start.getTime()) / 3600000 // Convert milliseconds to hours
       if (diffHours > 48) {
-        setErrorMessage("The time difference should not be more than 48 hours")
+        openSnackbar("The time difference should not be more than 48 hours", 'error');
         return
       }
     }
@@ -346,9 +350,9 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
             realtime,
           }),
         )
-        setErrorMessage("")
+        closeSnackbar(event)
       } catch (error) {
-        setErrorMessage("Failed to set filter...")
+        openSnackbar("Failed to set filter...", 'error')
       }
     }
   }
@@ -362,7 +366,7 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
   const handleSaveFilter = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!filterName) {
-      setErrorMessage("Please enter a name to save the filter")
+      openSnackbar("Please enter a name to save the filter", 'error')
       return
     }
     try {
@@ -372,10 +376,10 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
       localStorage.setItem("savedFilters", JSON.stringify(newSavedFilters))
       localStorage.setItem(filterName + "_" + pageKey, JSON.stringify(formValues))
       setSelectedFilter(filterName)
-      setErrorMessage("")
+      closeSnackbar(event)
       setFilterName("")
     } catch (error) {
-      setErrorMessage("Failed to save filter...")
+      openSnackbar("Failed to save filter...", 'error')
     }
   }
 
@@ -396,7 +400,7 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
         setSelectedFilter(filterName)
       }
     } catch (error) {
-      setErrorMessage("Failed to load filter...")
+      openSnackbar("Failed to load filter...", 'error')
     }
   }
 
@@ -543,22 +547,23 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
               />
             </Grid>
             <Grid xs={5}>
-              <TextField
-                label="End Time"
-                type="datetime-local"
-                value={formValues.endTime}
-                onChange={(event) => {
-                  handleInputChange("endTime", event.target.value)
-                }}
-                required
-                fullWidth
-                disabled={formValues.realtime}
-                InputLabelProps={{
-                  shrink:
-                    formValues.endTime !== undefined &&
-                    formValues.endTime !== null,
-                }}
-              />
+              {!formValues.realtime && (                
+                <TextField
+                  label="End Time"
+                  type="datetime-local"
+                  value={formValues.endTime}
+                  onChange={(event) => {
+                    handleInputChange("endTime", event.target.value)
+                  }}
+                  required
+                  fullWidth
+                  InputLabelProps={{
+                    shrink:
+                      formValues.endTime !== undefined &&
+                      formValues.endTime !== null,
+                  }}
+                />
+              )}
             </Grid>
             <Grid xs={1} alignContent={'center'}>
               <IconButton onClick={handleForward}>
@@ -638,11 +643,6 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
             />
           </Grid>
         </Grid>
-        {errorMessage && (
-          <p style={{ color: theme.palette.error.main, marginLeft: "1rem" }}>
-            {errorMessage}
-          </p>
-        )}
         {deviceContent}
         {groupContent}
       </form>
