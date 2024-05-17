@@ -31,7 +31,6 @@ const MeasurementChart = ({ query, pageKey, eventName }: any) => {
   const theme = useTheme()
   const isDarkMode = theme.palette.mode === "dark"
   const startTime = useAppSelector((state) => state.measurements.startTime)
-  const endTime = useAppSelector((state) => state.measurements.endTime)
   const realtime = useAppSelector((state) => state.measurements.realtime)
   const deviceNames: string[] = useAppSelector(
     (state) => state.measurements.deviceNames,
@@ -73,7 +72,7 @@ const MeasurementChart = ({ query, pageKey, eventName }: any) => {
         ? localStorageKey.yAxisValue
         : "current",
   })
-  
+
   const [chartOptions, setChartOptions] = useState({
     plotOptions: {
       series: {
@@ -180,7 +179,7 @@ const MeasurementChart = ({ query, pageKey, eventName }: any) => {
     let series: any = []
     let index = 0
     for (const measurement of measurements) {
-      let data = []      
+      let data = []
       for (const d of measurement.data) {
         data.push([new Date(d.date).getTime(), d[chartSettings.yAxisValue]])
       }
@@ -292,8 +291,7 @@ const MeasurementChart = ({ query, pageKey, eventName }: any) => {
           socket.on(eventName + deviceName, (data: any) => {
             let date = new Date(data.date)
             if (
-              date >= dayjs(startTime).utc().toDate() &&
-              date <= dayjs(endTime).utc().toDate()
+              date >= dayjs(startTime).utc().toDate()
             ) {
               setMeasurements((oldMeasurements: any) => {
                 let newMeasurements = []
@@ -323,7 +321,7 @@ const MeasurementChart = ({ query, pageKey, eventName }: any) => {
         socket.off(eventName + deviceName)
       }
     }
-  }, [devicesDepts, deviceNames, eventName, startTime, endTime, realtime])
+  }, [devicesDepts, deviceNames, eventName, startTime, realtime])
 
   let content: JSX.Element | null = null
   if (isFetching) {
@@ -356,7 +354,7 @@ const MeasurementChart = ({ query, pageKey, eventName }: any) => {
                   onChange={(event) => {
                     handleSettingChange("xAxisFormat", event.target.value)
                   }}
-                  >
+                >
                   <MenuItem value="HH:mm:ss">HH:mm:ss</MenuItem>
                   <MenuItem value="DD HH:mm:ss">DD HH:mm:ss</MenuItem>
                   <MenuItem value="MM-DD HH:mm:ss">MM-DD HH:mm:ss</MenuItem>
@@ -381,7 +379,7 @@ const MeasurementChart = ({ query, pageKey, eventName }: any) => {
                 </Select>
               </FormControl>
             </Grid>
-            {realtime && (  
+            {realtime && (
               <Grid xs={4}>
                 <Box style={{ animation: 'blink 2s linear infinite', userSelect: "none", marginTop: 16, marginLeft: 10 }}>
                   <Typography variant="body1" color={"#ffeb3b"}>Realtime</Typography>
