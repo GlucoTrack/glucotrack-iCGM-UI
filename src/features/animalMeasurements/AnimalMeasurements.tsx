@@ -41,6 +41,10 @@ const AnimalMeasurements: React.FC = () => {
         groupQuery={groupQuery}
         label={"Mobile Names"}
         pageKey={"mobile"}
+        groupsField={"mobileGroups"}
+        groupNameField={"mobileGroupName"}
+        devicesField={"mobileDevices"}
+        deviceNameField={"mobileName"}
       />
       <MeasurementChart
         query={query}

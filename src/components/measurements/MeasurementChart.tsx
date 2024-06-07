@@ -195,9 +195,7 @@ const MeasurementChart = ({ query, pageKey, eventName, fields, dateField='date' 
 
       for (const d of measurement.data) {        
         data.push([new Date(d[dateField]).getTime(), d[chartSettings.yAxisValue]])
-      }
-      console.log(measurement)
-      console.log(data)
+      }      
       series.push({
         name: measurement.name,
         data: data,
