@@ -18,17 +18,13 @@ import {
   ChevronLeft,
 } from "@mui/icons-material"
 import Grid from "@mui/system/Unstable_Grid"
-import Group from "@/interfaces/Group"
-import Device from "@/interfaces/Device"
 import { setFilter } from "@/components/measurements/measurementsSlice"
-import Mobile from "@/interfaces/Mobile"
 import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
-import MobileGroup from "@/interfaces/MobileGroup"
 import { SnackbarContext } from "@/providers/SnackbarProvider"
 dayjs.extend(utc)
 
-const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
+const MeasurementForm = ({ label, pageKey, query, groupQuery, groupsField = 'groups', devicesField = 'devices', deviceNameField = 'deviceName', groupNameField = 'groupName', deviceNamesField='deviceNames' }: any) => {
   const dispatch = useDispatch()
   const theme = useTheme()
   const { openSnackbar, closeSnackbar } = useContext(SnackbarContext);
@@ -100,15 +96,9 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
   } else if (deviceIsError) {
     deviceContent = <p>{JSON.stringify(deviceError)}</p>
   } else if (deviceIsSuccess) {
-    if (deviceData.mobileDevices) {      
-      deviceNames = deviceData.mobileDevices.map((device: Mobile) => {
-        return device.mobileName
-      })
-    } else {
-      deviceNames = deviceData.devices.map((device: Device) => {
-        return device.deviceName
-      })
-    }
+    deviceNames = deviceData[devicesField].map((device: any) => {
+      return device[deviceNameField]
+    })
   }
 
   let groupContent: JSX.Element | null = null
@@ -120,15 +110,9 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
   } else if (groupIsError) {
     groupContent = <p>{JSON.stringify(groupError)}</p>
   } else if (groupIsSuccess) {
-    if (groupData.mobileGroups) {
-      groupName = groupData.mobileGroups.map((group: MobileGroup) => {
-        return group.mobileGroupName
-      })
-    } else {
-      groupName = groupData.groups.map((group: Group) => {
-        return group.groupName
-      })
-    }
+    groupName = groupData[groupsField].map((group: any) => {
+      return group[groupNameField]
+    })
   }
 
   const handleInputChange = (
@@ -207,7 +191,7 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
       const d1 = dayjs(formValues.startTime)
       const d2 = dayjs(formValues.endTime)
       return d2.diff(d1, 'minute')
-    }    
+    }
     return 0
   }
 
@@ -248,8 +232,8 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
         startTime: dayjs()
           .subtract(minutes, "minutes")
           .format("YYYY-MM-DDTHH:mm"),
-        endTime: formValues.realtime 
-          ? prevFormValues.endTime 
+        endTime: formValues.realtime
+          ? prevFormValues.endTime
           : dayjs().format("YYYY-MM-DDTHH:mm"),
       }
     })
@@ -307,27 +291,17 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
       }
     }
 
-    if (groupName && groupData && groupData.groups) {
-      const groupObject = groupData.groups.find(
-        (group: Group) => group.groupName === groupName,
+    if (groupName && groupData) {
+      const groupObject = groupData[groupsField].find(
+        (group: any) => group[groupNameField] === groupName,
       )
       if (groupObject) {
-        deviceNamesFromGroup = groupObject.deviceNames
+        deviceNamesFromGroup = groupObject[deviceNamesField]
       } else {
         throw new Error(`${groupName} not found.`)
       }
     }
-
-    if (groupName && groupData && groupData.mobileGroups) {
-      const groupObject = groupData.mobileGroups.find(
-        (group: MobileGroup) => group.mobileGroupName === groupName,
-      )
-      if (groupObject) {
-        deviceNamesFromGroup = groupObject.mobileNames
-      } else {
-        throw new Error(`${groupName} not found.`)
-      }
-    }
+    
 
     if (
       ((deviceNames && deviceNames.length > 0) ||
@@ -547,7 +521,7 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery }: any) => {
               />
             </Grid>
             <Grid xs={5}>
-              {!formValues.realtime && (                
+              {!formValues.realtime && (
                 <TextField
                   label="End Time"
                   type="datetime-local"
