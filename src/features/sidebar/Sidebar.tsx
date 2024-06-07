@@ -65,6 +65,11 @@ const navItems = [
     icon: <TimelineOutlined />,
     path: "animal-measurements",
   },
+  {
+    text: "Raw Measurements",
+    icon: <TimelineOutlined />,
+    path: "raw-measurements",
+  },
   // {
   //   text: "Divider",
   //   icon: null,

@@ -164,6 +164,15 @@ export const apiSlice = createApi({
       },
       providesTags: ["Measurements"],
     }),
+    getRawMeasurementsByMobileNames: builder.query({
+      query: (args) => {
+        const { deviceNames, startTime, endTime } = args
+        return {
+          url: `measurements/raw/${deviceNames}?startTime=${startTime}&endTime=${endTime}`,
+        }
+      },
+      providesTags: ["Measurements"],
+    }),
     getAnimalMeasurementsBySensorNames: builder.query({
       query: (args) => {
         const { deviceNames, startTime, endTime } = args
@@ -232,6 +241,7 @@ export const {
   useDeleteGroupMutation,
   useGetMeasurementsByDeviceNamesQuery,
   useGetAnimalMeasurementsByMobileNamesQuery,
+  useGetRawMeasurementsByMobileNamesQuery,
   useGetAnimalMeasurementsBySensorNamesQuery,
   useGetAveragesAndStdsQuery,
   useAddMobileGroupMutation,
