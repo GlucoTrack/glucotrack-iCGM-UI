@@ -1,18 +1,15 @@
 import React, { useEffect, useState } from "react"
 import {
   Box,
-  Button,
   FormControl,
   InputLabel,
-  // Grid,
   MenuItem,
-  Paper,
   Select,
   Typography,
   useTheme,
 } from "@mui/material"
 import { useAppSelector } from "@/hooks/useStore"
-import chroma, { Color } from "chroma-js"
+import chroma from "chroma-js"
 import MeasurementGrid from "./MeasurementGrid"
 import Grid from "@mui/system/Unstable_Grid"
 import { socket } from "../../utils/socket"
@@ -211,7 +208,7 @@ const MeasurementChart = ({ query, pageKey, eventName, fields, dateField='date' 
         series: series,
       }
     })
-  }, [measurements, isDarkMode, chartSettings.yAxisValue])
+  }, [measurements, isDarkMode, chartSettings.yAxisValue, dateField])
 
   // Filtered measurements for table
   useEffect(() => {
@@ -220,7 +217,7 @@ const MeasurementChart = ({ query, pageKey, eventName, fields, dateField='date' 
       for (const measurement of measurements) {
         let filteredData = []
         for (const data of measurement.data) {
-          let date = new Date(data.date)
+          let date = new Date(data[dateField])
 
           if (date >= startZoomArea && date <= endZoomArea) {
             filteredData.push(data)
@@ -233,7 +230,7 @@ const MeasurementChart = ({ query, pageKey, eventName, fields, dateField='date' 
     } else {
       setFilteredMeasurements(measurements)
     }
-  }, [measurements, startZoomArea, endZoomArea])
+  }, [measurements, startZoomArea, endZoomArea, dateField])
 
   const dateFormatter = (date: any, format: string) => {
     if (date) {
@@ -294,7 +291,7 @@ const MeasurementChart = ({ query, pageKey, eventName, fields, dateField='date' 
 
     updateChartSettings('xAxisFormat');
     updateChartSettings('yAxisValue');
-  }, [chartSettings.xAxisFormat, chartSettings.yAxisValue, pageKey]);
+  }, [chartSettings.xAxisFormat, chartSettings.yAxisValue, pageKey, chartSettings]);
 
   // Handle new measurements events
   useEffect(() => {
