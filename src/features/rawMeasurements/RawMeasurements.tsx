@@ -6,7 +6,7 @@ import { useAppSelector } from "@/hooks/useStore"
 import MeasurementChart from "@/components/measurements/MeasurementChart"
 import { useGetRawMeasurementsByMobileNamesQuery, useGetMobileGroupsQuery, useGetMobilesQuery } from "@/features/api/apiSlice"
 
-const fields = [{ label: "Voltage", field: "ceVoltage" }, { label: "Current", field: "weCurrent" }, { label: "Battery", field: "battery" }, { label: "we_reVoltage", field: "we_reVoltage" }]
+const fields = [{ label: "Current", field: "weCurrent" }, { label: "Voltage", field: "ceVoltage" }, { label: "we_reVoltage", field: "we_reVoltage" }, { label: "Battery", field: "battery" }]
 
 const RawMeasurements: React.FC = () => {
   const mobileNames = useAppSelector((state) => state.measurements.deviceNames)
@@ -44,6 +44,7 @@ const RawMeasurements: React.FC = () => {
         groupNameField={"mobileGroupName"}
         devicesField={"mobileDevices"}
         deviceNameField={"mobileName"}
+        deviceNamesField={"mobileNames"}
       />
       <MeasurementChart
         query={query}

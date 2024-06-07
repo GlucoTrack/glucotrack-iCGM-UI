@@ -10,7 +10,7 @@ import {
 import MeasurementChart from "@/components/measurements/MeasurementChart"
 import { useGetDevicesQuery } from "@/features/api/apiSlice"
 
-const fields = [{label:"Voltage", field:"voltage"}, {label:"Current", field:"current"}]
+const fields = [{ label: "Current", field: "current" }, { label: "Voltage", field: "voltage" }]
 
 const Measurements: React.FC = () => {
   const deviceNames = useAppSelector((state) => state.measurements.deviceNames)
