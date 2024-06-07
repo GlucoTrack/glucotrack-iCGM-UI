@@ -24,7 +24,7 @@ function CustomToolbar() {
   )
 }
 
-const MeasurementGrid = ({ measurements, fields }: any) => {
+const MeasurementGrid = ({ measurements, fields, dateField }: any) => {
   const [data, setData] = React.useState<Measurements[]>([])
 
   useEffect(() => {
@@ -35,7 +35,7 @@ const MeasurementGrid = ({ measurements, fields }: any) => {
         let dd = measurement.data.map((data: any) => {
           rowId++
           let d:any = {            
-            date: data.date,
+            date: data[dateField],
             _id: rowId,
             deviceName: measurement.name,
           }

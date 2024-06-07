@@ -405,7 +405,7 @@ const MeasurementChart = ({ query, pageKey, eventName, fields, dateField='date' 
           </Grid>
         </Box>
         <Box>
-          <MeasurementGrid measurements={filteredMeasurements} fields={fields} />
+          <MeasurementGrid measurements={filteredMeasurements} fields={fields} dateField={dateField} />
         </Box>
       </>
     )
