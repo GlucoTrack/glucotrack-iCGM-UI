@@ -4,19 +4,18 @@ import Header from "@/components/Header"
 import MeasurementForm from "@/components/measurements/MeasurementForm"
 import { useAppSelector } from "@/hooks/useStore"
 import MeasurementChart from "@/components/measurements/MeasurementChart"
-import { useGetAnimalMeasurementsByMobileNamesQuery, useGetMobileGroupsQuery } from "@/features/api/apiSlice"
-import { useGetMobilesQuery } from "@/features/api/apiSlice"
+import { useGetRawMeasurementsByMobileNamesQuery, useGetMobileGroupsQuery, useGetMobilesQuery } from "@/features/api/apiSlice"
 
-const fields = [{label:"Voltage", field:"voltage"}, {label:"Current", field:"current"}]
+const fields = [{label:"Voltage", field:"ceVoltage"}, {label:"Current", field:"weCurrent"}, {label:"Battery", field:"battery"}, {label:"we_reVoltage", field:"we_reVoltage"}]
 
-const AnimalMeasurements: React.FC = () => {
+const RawMeasurements: React.FC = () => {
   const mobileNames = useAppSelector((state) => state.measurements.deviceNames)
   const startTime = useAppSelector((state) => state.measurements.startTime)
   const endTime = useAppSelector((state) => state.measurements.endTime)
 
   const mobileNamesString: string = mobileNames.join(",")
 
-  const query = useGetAnimalMeasurementsByMobileNamesQuery(
+  const query = useGetRawMeasurementsByMobileNamesQuery(
     {
       deviceNames: mobileNamesString,
       startTime: startTime,
@@ -32,7 +31,7 @@ const AnimalMeasurements: React.FC = () => {
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header
-        title="Animal Measurements"
+        title="Raw Measurements"
         // subtitle={`Queried measurements: ${status}`}
         subtitle={`Fill out your criteria and hit submit to see measurements`}
       />
@@ -40,16 +39,17 @@ const AnimalMeasurements: React.FC = () => {
         query={mobileQuery}
         groupQuery={groupQuery}
         label={"Mobile Names"}
-        pageKey={"mobile"}
+        page={"mobile"}        
       />
       <MeasurementChart
         query={query}
         eventName={"new_animal_measurement__"}
         pageKey={"mobile"}
         fields={fields}
+        dateField={"time"}
       />
     </Box>
   )
 }
 
-export default AnimalMeasurements
+export default RawMeasurements

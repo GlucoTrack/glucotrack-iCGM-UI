@@ -25,7 +25,7 @@ dayjs.extend(utc)
 
 Boost(Highcharts)
 
-const MeasurementChart = ({ query, pageKey, eventName }: any) => {
+const MeasurementChart = ({ query, pageKey, eventName, fields, dateField='date' }: any) => {
   const theme = useTheme()
   const isDarkMode = theme.palette.mode === "dark"
   const startTime = useAppSelector((state) => state.measurements.startTime)
@@ -66,6 +66,10 @@ const MeasurementChart = ({ query, pageKey, eventName }: any) => {
       localStorageKey && localStorageKey.xAxisFormat
         ? localStorageKey.xAxisFormat
         : "HH:mm:ss",
+    yAxisValue:
+      localStorageKey && localStorageKey.yAxisValue
+        ? localStorageKey.yAxisValue
+        : fields[0].field,
   })
 
   const [chartOptions, setChartOptions] = useState({
@@ -146,12 +150,24 @@ const MeasurementChart = ({ query, pageKey, eventName }: any) => {
   })
 
   useEffect(() => {
-    if (data?.measurements) {
+    if (data?.measurements) {      
       setMeasurements(data.measurements)
       setStartZoomArea(null)
       setEndZoomArea(null)
     }
   }, [data?.measurements])
+
+  useEffect(() => {
+    let validField = fields.find((field: any) => field.field === chartSettings.yAxisValue)
+    if (!validField) {
+      setChartSettings((prevSettings) => {
+        return {
+          ...prevSettings,
+          yAxisValue: fields[0].field,
+        }
+      })
+    }
+  }, [chartSettings.yAxisValue, fields])
 
   useEffect(() => {
     const lightChartColor = "#000000"
@@ -175,9 +191,12 @@ const MeasurementChart = ({ query, pageKey, eventName }: any) => {
     let index = 0
     for (const measurement of measurements) {
       let data = []
-      for (const d of measurement.data) {
-        data.push([new Date(d.date).getTime(), d.current])
+
+      for (const d of measurement.data) {        
+        data.push([new Date(d[dateField]).getTime(), d[chartSettings.yAxisValue]])
       }
+      console.log(measurement)
+      console.log(data)
       series.push({
         name: measurement.name,
         data: data,
@@ -350,10 +369,38 @@ const MeasurementChart = ({ query, pageKey, eventName }: any) => {
                 <MenuItem value="YY-MM-DD HH:mm:ss">YY-MM-DD HH:mm:ss</MenuItem>
               </Select>
             </Grid>
+
+            <Grid xs={4}>
+              <FormControl fullWidth>
+                <InputLabel id="yAxisValue">Y-Axis Value</InputLabel>
+                <Select
+                  labelId="yAxisValue"
+                  label="X-Axis Value"
+                  type="string"
+                  value={chartSettings.yAxisValue}
+                  onChange={(event) => {
+                    handleSettingChange("yAxisValue", event.target.value)
+                  }}
+                >
+                  {fields.map((field: any) => (
+                    <MenuItem value={field.field} key={field.field}>{field.label}</MenuItem>
+                  ))}
+                  
+                </Select>
+              </FormControl>
+            </Grid>
+            {realtime && (
+              <Grid xs={4}>
+                <Box style={{ animation: 'blink 2s linear infinite', userSelect: "none", marginTop: 16, marginLeft: 10 }}>
+                  <Typography variant="body1" color={"#ffeb3b"}>Realtime</Typography>
+                </Box>
+              </Grid>
+            )}
+
           </Grid>
         </Box>
         <Box>
-          <MeasurementGrid measurements={filteredMeasurements} />
+          <MeasurementGrid measurements={filteredMeasurements} fields={fields} />
         </Box>
       </>
     )

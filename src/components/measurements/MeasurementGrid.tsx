@@ -24,23 +24,25 @@ function CustomToolbar() {
   )
 }
 
-const MeasurementGrid = (props: any) => {
+const MeasurementGrid = ({ measurements, fields }: any) => {
   const [data, setData] = React.useState<Measurements[]>([])
 
   useEffect(() => {
-    if (props) {
+    if (measurements) {
       let rowId = 0
       let mergedMesurements: any[] = []
-      const allData = props?.measurements.map((measurement: any) => {
+      const allData = measurements.map((measurement: any) => {
         let dd = measurement.data.map((data: any) => {
           rowId++
-          return {
-            current: data.current,
-            voltage: data.voltage,
+          let d:any = {            
             date: data.date,
             _id: rowId,
             deviceName: measurement.name,
           }
+          for (let field of fields) {
+            d[field.field] = data[field.field]
+          }
+          return d
         })
         return dd
       })
@@ -50,7 +52,7 @@ const MeasurementGrid = (props: any) => {
 
       setData(mergedMesurements)
     }
-  }, [props])
+  }, [measurements])
 
   const columns = [
     { field: "deviceName", headerName: "Name", flex: 0.5 },
@@ -61,9 +63,13 @@ const MeasurementGrid = (props: any) => {
       valueFormatter: (params: any) =>
         dayjs(params?.value).format("YYYY-MM-DD HH:mm:ss"),
     },
-    { field: "voltage", headerName: "Voltage", flex: 1 },
-    { field: "current", headerName: "Current", flex: 1 },
   ]
+
+  if (fields) {
+    for (let field of fields) {
+      columns.push({ field: field.field, headerName: field.label, flex: 1 })
+    }
+  }
 
   return (
     <Box sx={{ mt: 4 }} flexGrow={1} overflow="auto" width="100%">
