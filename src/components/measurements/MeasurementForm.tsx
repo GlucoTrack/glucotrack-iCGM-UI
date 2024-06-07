@@ -24,7 +24,7 @@ import utc from "dayjs/plugin/utc"
 import { SnackbarContext } from "@/providers/SnackbarProvider"
 dayjs.extend(utc)
 
-const MeasurementForm = ({ label, pageKey, query, groupQuery, groupsField = 'groups', devicesField = 'devices', deviceNameField = 'deviceName', groupNameField = 'groupName' }: any) => {
+const MeasurementForm = ({ label, pageKey, query, groupQuery, groupsField = 'groups', devicesField = 'devices', deviceNameField = 'deviceName', groupNameField = 'groupName', deviceNamesField='deviceNames' }: any) => {
   const dispatch = useDispatch()
   const theme = useTheme()
   const { openSnackbar, closeSnackbar } = useContext(SnackbarContext);
@@ -291,12 +291,12 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery, groupsField = 'gro
       }
     }
 
-    if (groupName && groupData && groupData.groups) {
+    if (groupName && groupData) {
       const groupObject = groupData[groupsField].find(
         (group: any) => group[groupNameField] === groupName,
       )
       if (groupObject) {
-        deviceNamesFromGroup = groupObject[deviceNameField]
+        deviceNamesFromGroup = groupObject[deviceNamesField]
       } else {
         throw new Error(`${groupName} not found.`)
       }

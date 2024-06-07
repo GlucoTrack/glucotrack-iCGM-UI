@@ -7,7 +7,7 @@ import MeasurementChart from "@/components/measurements/MeasurementChart"
 import { useGetAnimalMeasurementsByMobileNamesQuery, useGetMobileGroupsQuery } from "@/features/api/apiSlice"
 import { useGetMobilesQuery } from "@/features/api/apiSlice"
 
-const fields = [{label:"Voltage", field:"voltage"}, {label:"Current", field:"current"}]
+const fields = [{ label: "Current", field: "current" }, { label: "Voltage", field: "voltage" }]
 
 const AnimalMeasurements: React.FC = () => {
   const mobileNames = useAppSelector((state) => state.measurements.deviceNames)
@@ -45,6 +45,7 @@ const AnimalMeasurements: React.FC = () => {
         groupNameField={"mobileGroupName"}
         devicesField={"mobileDevices"}
         deviceNameField={"mobileName"}
+        deviceNamesField={"mobileNames"}
       />
       <MeasurementChart
         query={query}
