@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react"
 import {
   Box,
   Button,
+  FormControl,
+  InputLabel,
   // Grid,
   MenuItem,
   Paper,
   Select,
-  TextField,
+  Typography,
   useTheme,
 } from "@mui/material"
 import { useAppSelector } from "@/hooks/useStore"
@@ -29,7 +31,6 @@ const MeasurementChart = ({ query, pageKey, eventName, fields, dateField='date' 
   const theme = useTheme()
   const isDarkMode = theme.palette.mode === "dark"
   const startTime = useAppSelector((state) => state.measurements.startTime)
-  const endTime = useAppSelector((state) => state.measurements.endTime)
   const realtime = useAppSelector((state) => state.measurements.realtime)
   const deviceNames: string[] = useAppSelector(
     (state) => state.measurements.deviceNames,
@@ -212,7 +213,7 @@ const MeasurementChart = ({ query, pageKey, eventName, fields, dateField='date' 
         series: series,
       }
     })
-  }, [measurements, isDarkMode])
+  }, [measurements, isDarkMode, chartSettings.yAxisValue])
 
   // Filtered measurements for table
   useEffect(() => {
@@ -277,20 +278,25 @@ const MeasurementChart = ({ query, pageKey, eventName, fields, dateField='date' 
   }
 
   useEffect(() => {
-    if (chartSettings.xAxisFormat) {
-      setLocalStorageKey((prevKey: any) => {
-        let newChartSettings = {
-          ...prevKey,
-          xAxisFormat: chartSettings.xAxisFormat,
-        }
-        localStorage.setItem(
-          "chart_settings_" + pageKey,
-          JSON.stringify(newChartSettings),
-        )
-        return newChartSettings
-      })
-    }
-  }, [chartSettings.xAxisFormat, pageKey])
+    const updateChartSettings = (key: 'xAxisFormat' | 'yAxisValue') => {
+      if (chartSettings[key]) {
+        setLocalStorageKey((prevKey: any) => {
+          const newChartSettings = {
+            ...prevKey,
+            [key]: chartSettings[key],
+          };
+          localStorage.setItem(
+            `chart_settings_${pageKey}`,
+            JSON.stringify(newChartSettings),
+          );
+          return newChartSettings;
+        });
+      }
+    };
+
+    updateChartSettings('xAxisFormat');
+    updateChartSettings('yAxisValue');
+  }, [chartSettings.xAxisFormat, chartSettings.yAxisValue, pageKey]);
 
   // Handle new measurements events
   useEffect(() => {
@@ -300,8 +306,7 @@ const MeasurementChart = ({ query, pageKey, eventName, fields, dateField='date' 
           socket.on(eventName + deviceName, (data: any) => {
             let date = new Date(data.date)
             if (
-              date >= dayjs(startTime).utc().toDate() &&
-              date <= dayjs(endTime).utc().toDate()
+              date >= dayjs(startTime).utc().toDate()
             ) {
               setMeasurements((oldMeasurements: any) => {
                 let newMeasurements = []
@@ -331,7 +336,7 @@ const MeasurementChart = ({ query, pageKey, eventName, fields, dateField='date' 
         socket.off(eventName + deviceName)
       }
     }
-  }, [devicesDepts, deviceNames, eventName, startTime, endTime, realtime])
+  }, [devicesDepts, deviceNames, eventName, startTime, realtime])
 
   let content: JSX.Element | null = null
   if (isFetching) {
@@ -352,22 +357,25 @@ const MeasurementChart = ({ query, pageKey, eventName, fields, dateField='date' 
         <Box style={{ userSelect: "none", marginTop: 30 }}>
           <HighchartsReact highcharts={Highcharts} options={chartOptions} />
 
-          <Grid container spacing={3} lg={6}>
-            <Grid xs={6}>
-              <Select
-                label="X-Axis Format"
-                type="string"
-                value={chartSettings.xAxisFormat}
-                onChange={(event) => {
-                  handleSettingChange("xAxisFormat", event.target.value)
-                }}
-                sx={{ width: 1, mt: 4 }}
-              >
-                <MenuItem value="HH:mm:ss">HH:mm:ss</MenuItem>
-                <MenuItem value="DD HH:mm:ss">DD HH:mm:ss</MenuItem>
-                <MenuItem value="MM-DD HH:mm:ss">MM-DD HH:mm:ss</MenuItem>
-                <MenuItem value="YY-MM-DD HH:mm:ss">YY-MM-DD HH:mm:ss</MenuItem>
-              </Select>
+          <Grid container spacing={3} lg={9}>
+            <Grid xs={4}>
+              <FormControl fullWidth>
+                <InputLabel id="xAxisFormat">X-Axis Format</InputLabel>
+                <Select
+                  labelId="xAxisFormat"
+                  label="X-Axis Format"
+                  type="string"
+                  value={chartSettings.xAxisFormat}
+                  onChange={(event) => {
+                    handleSettingChange("xAxisFormat", event.target.value)
+                  }}
+                >
+                  <MenuItem value="HH:mm:ss">HH:mm:ss</MenuItem>
+                  <MenuItem value="DD HH:mm:ss">DD HH:mm:ss</MenuItem>
+                  <MenuItem value="MM-DD HH:mm:ss">MM-DD HH:mm:ss</MenuItem>
+                  <MenuItem value="YY-MM-DD HH:mm:ss">YY-MM-DD HH:mm:ss</MenuItem>
+                </Select>
+              </FormControl>
             </Grid>
 
             <Grid xs={4}>
@@ -384,8 +392,7 @@ const MeasurementChart = ({ query, pageKey, eventName, fields, dateField='date' 
                 >
                   {fields.map((field: any) => (
                     <MenuItem value={field.field} key={field.field}>{field.label}</MenuItem>
-                  ))}
-                  
+                  ))}                  
                 </Select>
               </FormControl>
             </Grid>
