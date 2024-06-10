@@ -51,6 +51,7 @@ const RawMeasurements: React.FC = () => {
         eventName={"new_raw_measurement__"}
         pageKey={"mobile"}
         fields={fields}
+        dateField={"time"}
       />
     </Box>
   )
