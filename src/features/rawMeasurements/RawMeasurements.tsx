@@ -48,10 +48,9 @@ const RawMeasurements: React.FC = () => {
       />
       <MeasurementChart
         query={query}
-        eventName={"new_animal_measurement__"}
+        eventName={"new_raw_measurement__"}
         pageKey={"mobile"}
         fields={fields}
-        dateField={"time"}
       />
     </Box>
   )
