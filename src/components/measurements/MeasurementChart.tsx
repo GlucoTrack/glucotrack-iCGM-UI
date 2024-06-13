@@ -24,7 +24,7 @@ dayjs.extend(utc)
 
 Boost(Highcharts)
 
-const MeasurementChart = ({ query, pageKey, eventName, fields, dateField='date' }: any) => {
+const MeasurementChart = ({ query, pageKey, eventName, fields, dateField = 'date' }: any) => {
   const theme = useTheme()
   const isDarkMode = theme.palette.mode === "dark"
   const startTime = useAppSelector((state) => state.measurements.startTime)
@@ -148,7 +148,7 @@ const MeasurementChart = ({ query, pageKey, eventName, fields, dateField='date' 
   })
 
   useEffect(() => {
-    if (data?.measurements) {      
+    if (data?.measurements) {
       setMeasurements(data.measurements)
       setStartZoomArea(null)
       setEndZoomArea(null)
@@ -190,9 +190,9 @@ const MeasurementChart = ({ query, pageKey, eventName, fields, dateField='date' 
     for (const measurement of measurements) {
       let data = []
 
-      for (const d of measurement.data) {        
+      for (const d of measurement.data) {
         data.push([new Date(d[dateField]).getTime(), d[chartSettings.yAxisValue]])
-      }      
+      }
       series.push({
         name: measurement.name,
         data: data,
@@ -387,7 +387,7 @@ const MeasurementChart = ({ query, pageKey, eventName, fields, dateField='date' 
                 >
                   {fields.map((field: any) => (
                     <MenuItem value={field.field} key={field.field}>{field.label}</MenuItem>
-                  ))}                  
+                  ))}
                 </Select>
               </FormControl>
             </Grid>
