@@ -6,7 +6,13 @@ import { useAppSelector } from "@/hooks/useStore"
 import MeasurementChart from "@/components/measurements/MeasurementChart"
 import { useGetRawMeasurementsByMobileNamesQuery, useGetMobileGroupsQuery, useGetMobilesQuery } from "@/features/api/apiSlice"
 
-const fields = [{ label: "Current", field: "weCurrent" }, { label: "Voltage", field: "ceVoltage" }, { label: "we_reVoltage", field: "we_reVoltage" }, { label: "Battery", field: "battery" }]
+const fields = [
+  { label: "Current", field: "weCurrent" },
+  { label: "Voltage", field: "ceVoltage" },
+  { label: "we_reVoltage", field: "we_reVoltage" },
+  { label: "Gain", field: "gain" },
+  { label: "Battery", field: "battery" }
+]
 
 const RawMeasurements: React.FC = () => {
   const mobileNames = useAppSelector((state) => state.measurements.deviceNames)
@@ -48,7 +54,7 @@ const RawMeasurements: React.FC = () => {
       />
       <MeasurementChart
         query={query}
-        eventName={"new_animal_measurement__"}
+        eventName={"new_raw_measurement__"}
         pageKey={"mobile"}
         fields={fields}
         dateField={"time"}
