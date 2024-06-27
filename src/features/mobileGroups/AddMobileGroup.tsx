@@ -87,7 +87,7 @@ const AddMobileGroup: React.FC = () => {
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header
-        title="Add a new group"
+        title="Add a new mobile group"
         subtitle="(add multiple mobiles by separating Mobile Names with a comma)"
       />
       <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">
