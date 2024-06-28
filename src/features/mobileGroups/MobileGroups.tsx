@@ -72,7 +72,7 @@ const MobileGroups: React.FC = () => {
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
-      <Header title="Groups" subtitle={`List of groups: ${getGroupStatus}`}>
+      <Header title="Mobile Groups" subtitle={`List of groups: ${getGroupStatus}`}>
         <Action action="Add" url="add" />
       </Header>
       {content}

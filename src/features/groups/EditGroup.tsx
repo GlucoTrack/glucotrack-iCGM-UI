@@ -19,7 +19,7 @@ import {
 import { RootState } from "@/store/store"
 import { resetGroup } from "./groupsSlice"
 import { Typography } from "@mui/material"
-import { SnackbarContext } from '../../providers/SnackbarProvider';
+import { SnackbarContext } from '../../providers/SnackbarProvider'
 
 interface FormValues {
   groupName: string
@@ -60,7 +60,7 @@ const EditGroup: React.FC = () => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const theme = useTheme()
-  const { openSnackbar } = useContext(SnackbarContext);
+  const { openSnackbar } = useContext(SnackbarContext)
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
   const [formDeviceValues, setFormDeviceValues] = useState<DeviceValues>(initialDeviceValues)
   const [isDeviceSubmitting, setIsDeviceSubmitting] = useState(false)
@@ -91,6 +91,63 @@ const EditGroup: React.FC = () => {
     editDevices,
   ] = useEditDevicesMutation()
 
+
+  // Fill the attributes form with the common values of the selected devices
+  useEffect(() => {
+    if (formValues.deviceNames.length > 0 && data && data.devices) {
+      // Get the devices from the selected device names
+      const devices = formValues.deviceNames.map(name => {
+        const device = data.devices.find((device: any) => device.deviceName === name)
+        return device ? device : null
+      }).filter(device => device !== null)
+      console.log(devices)
+
+      // Get the common values from the first device
+      const commonValue: DeviceValues = {
+        measurementInterval: devices[0].measurementInterval,
+        transmitDelay: devices[0].transmitDelay,
+        checkParametersInterval: devices[0].checkParametersInterval,
+        pstatVoltage: devices[0].pstatVoltage,
+        pstatTIA: devices[0].pstatTIA,
+        glm: devices[0].glm,
+        enzyme: devices[0].enzyme,
+        testStation: devices[0].testStation,
+      }
+
+      // Check if all the devices have the same values, instead i put empty string
+      for (let i = 1; i < devices.length; i++) {
+        const device = devices[i];
+        if (device.measurementInterval !== commonValue.measurementInterval) {
+          commonValue.measurementInterval = ''
+        }
+        if (device.transmitDelay !== commonValue.transmitDelay) {
+          commonValue.transmitDelay = ''
+        }
+        if (device.checkParametersInterval !== commonValue.checkParametersInterval) {
+          commonValue.checkParametersInterval = ''
+        }
+        if (device.pstatVoltage !== commonValue.pstatVoltage) {
+          commonValue.pstatVoltage = ''
+        }
+        if (device.pstatTIA !== commonValue.pstatTIA) {
+          commonValue.pstatTIA = ''
+        }
+        if (device.glm !== commonValue.glm) {
+          commonValue.glm = ''
+        }
+        if (device.enzyme !== commonValue.enzyme) {
+          commonValue.enzyme = ''
+        }
+        if (device.testStation !== commonValue.testStation) {
+          commonValue.testStation = ''
+        }
+      }
+
+      setFormDeviceValues(commonValue)
+
+    }
+  }, [data, formValues.deviceNames])
+
   useEffect(() => {
     const savedFormValues = localStorage.getItem("groupValues_" + groupId)
 
@@ -116,7 +173,7 @@ const EditGroup: React.FC = () => {
     } else {
       setDefaultValues()
     }
-  }, [groupName, groupDescription, deviceNames])
+  }, [groupName, groupDescription, deviceNames, groupId])
 
   const canSave =
     [
@@ -144,7 +201,7 @@ const EditGroup: React.FC = () => {
     formDeviceValues.glm,
     formDeviceValues.enzyme,
     formDeviceValues.testStation,
-  ].some((value) => value !== undefined && value !== null && value !== '');
+  ].some((value) => value !== undefined && value !== null && value !== '')
 
   const handleCancel = () => {
     setTimeout(() => {
@@ -192,37 +249,37 @@ const EditGroup: React.FC = () => {
 
   useEffect(() => {
     if (isEditingGroup || isDeletingGroup) {
-      openSnackbar('loading...', 'warning');
+      openSnackbar('loading...', 'warning')
     } else if (isEditError || isDeleteError) {
       const errorMessageString = isEditError
         ? JSON.stringify(editError)
         : JSON.stringify(deleteError)
-      const errorMessageParsed = JSON.parse(errorMessageString);
-      const errorMessage = JSON.stringify(errorMessageParsed.data.message);
-      openSnackbar(errorMessage, 'error');
+      const errorMessageParsed = JSON.parse(errorMessageString)
+      const errorMessage = JSON.stringify(errorMessageParsed.data.message)
+      openSnackbar(errorMessage, 'error')
     } else if (isEditSuccess) {
-      openSnackbar('Group updated successfully', 'success');
-      handleMutationSuccess();
+      openSnackbar('Group updated successfully', 'success')
+      handleMutationSuccess()
     } else if (isDeleteSuccess) {
-      openSnackbar('Group deleted successfully', 'success');
-      handleMutationSuccess();
+      openSnackbar('Group deleted successfully', 'success')
+      handleMutationSuccess()
     }
-  }, [isEditingGroup, isDeletingGroup, isEditError, isDeleteError]);
+  }, [isEditingGroup, isDeletingGroup, isEditError, isDeleteError, isEditSuccess, isDeleteSuccess, openSnackbar, editError, deleteError, handleMutationSuccess])
 
   const handleEditDevicesResponse = (response: any, devices: any) => {
     if (response?.error?.data) {
-      const errorMessage = response.error.data.errors ? response.error.data.errors.join(', ') : response.error.data.message;
-      openSnackbar(errorMessage, 'error');
+      const errorMessage = response.error.data.errors ? response.error.data.errors.join(', ') : response.error.data.message
+      openSnackbar(errorMessage, 'error')
     } else {
       if (response?.data?.devices?.updatedDeviceIds) {
-        const updatedDeviceIds = response.data.devices.updatedDeviceIds;
-        const failedDeviceIds = response.data.devices.failedDeviceIds;
-        const allDevicesUpdated = devices.every((deviceId: any) => updatedDeviceIds.includes(deviceId));
-        const message = allDevicesUpdated ? "All devices updated successfully" : `The following devices were not updated: ${failedDeviceIds.join(', ')}`;
-        setFormDeviceValues(initialDeviceValues);
-        openSnackbar(message, allDevicesUpdated ? 'success' : 'warning');
+        const updatedDeviceIds = response.data.devices.updatedDeviceIds
+        const failedDeviceIds = response.data.devices.failedDeviceIds
+        const allDevicesUpdated = devices.every((deviceId: any) => updatedDeviceIds.includes(deviceId))
+        const message = allDevicesUpdated ? "All devices updated successfully" : `The following devices were not updated: ${failedDeviceIds.join(', ')}`
+        setFormDeviceValues(initialDeviceValues)
+        openSnackbar(message, allDevicesUpdated ? 'success' : 'warning')
       } else {
-        openSnackbar("Failed to edit devices", 'error');
+        openSnackbar("Failed to edit devices", 'error')
       }
     }
   }
@@ -233,15 +290,15 @@ const EditGroup: React.FC = () => {
     if (canSaveDevice) {
       try {
         const devices = formValues.deviceNames.map(deviceName => {
-          const device = data.devices.find((device: any) => device.deviceName === deviceName);
-          return device ? device._id : null;
-        }).filter(id => id !== null);
+          const device = data.devices.find((device: any) => device.deviceName === deviceName)
+          return device ? device._id : null
+        }).filter(id => id !== null)
 
-        const nonEmptyFormDeviceValues = Object.fromEntries(Object.entries(formDeviceValues).filter(([key, value]) => value !== ''));
-        const response = await editDevices({ deviceIds: devices, ...nonEmptyFormDeviceValues });        
-        handleEditDevicesResponse(response, devices);
+        const nonEmptyFormDeviceValues = Object.fromEntries(Object.entries(formDeviceValues).filter(([key, value]) => value !== ''))
+        const response = await editDevices({ deviceIds: devices, ...nonEmptyFormDeviceValues })
+        handleEditDevicesResponse(response, devices)
       } catch (error: any) {
-        openSnackbar("Failed to edit device: " + error.message, 'error');
+        openSnackbar("Failed to edit device: " + error.message, 'error')
       } finally {
         setIsDeviceSubmitting(false)
       }
@@ -249,14 +306,14 @@ const EditGroup: React.FC = () => {
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+    const { name, value } = e.target
     if (!isNaN(Number(value)) || value === '') {
       setFormDeviceValues(prevState => ({
         ...prevState,
         [name]: value,
-      }));
+      }))
     }
-  };
+  }
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
@@ -302,7 +359,7 @@ const EditGroup: React.FC = () => {
               }))
             }}
             renderInput={(params) => (
-              <TextField {...params} label={"Device Names"} fullWidth />
+              <TextField sx={{ mt: 2 }} {...params} label={"Device Names"} fullWidth />
             )}
           />
           {content}
@@ -412,7 +469,7 @@ const EditGroup: React.FC = () => {
           <Box mt={2} display="flex" justifyContent="space-between">
             <Box display="flex" justifyContent="flex-start" gap={2}>
               <Button variant="outlined" color="secondary" onClick={() => {
-                setFormDeviceValues(initialDeviceValues);
+                setFormDeviceValues(initialDeviceValues)
               }}>
                 Cancel
               </Button>
