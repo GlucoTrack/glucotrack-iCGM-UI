@@ -60,6 +60,7 @@ const Mobiles = () => {
           getRowId={(row) => row._id}
           columns={columns}
           onCellClick={handleCellClick}
+          sortModel={[{ field: "mobileName", sort: "asc" }]}
         />
       </Box>
     )
