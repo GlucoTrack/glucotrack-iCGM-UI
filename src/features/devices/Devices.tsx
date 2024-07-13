@@ -59,6 +59,7 @@ const Devices = () => {
           getRowId={(row) => row._id}
           columns={columns}
           onCellClick={handleCellClick}
+          sortModel={[{ field: "deviceName", sort: "asc" }]}
         />
       </Box>
     )
