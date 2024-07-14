@@ -1,7 +1,12 @@
-import React from "react"
+import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Box } from "@mui/material"
-import { DataGrid, GridCellParams, GridToolbar } from "@mui/x-data-grid"
+import {
+  DataGrid,
+  GridCellParams,
+  GridSortModel,
+  GridToolbar,
+} from "@mui/x-data-grid"
 
 import Header from "@/components/Header"
 import HeaderAction from "@/components/HeaderAction"
@@ -12,6 +17,14 @@ const Devices = () => {
   const navigate = useNavigate()
   const { data, status, isFetching, isLoading, isSuccess, isError, error } =
     useGetDevicesQuery({})
+
+  const [sortModel, setSortModel] = useState<GridSortModel>([
+    { field: "deviceName", sort: "asc" },
+  ])
+
+  const handleSortModelChange = (newModel: GridSortModel) => {
+    setSortModel(newModel)
+  }
 
   const handleCellClick = (params: GridCellParams) => {
     const { _id: deviceId } = params.row
@@ -59,7 +72,8 @@ const Devices = () => {
           getRowId={(row) => row._id}
           columns={columns}
           onCellClick={handleCellClick}
-          sortModel={[{ field: "deviceName", sort: "asc" }]}
+          sortModel={sortModel}
+          onSortModelChange={handleSortModelChange}
         />
       </Box>
     )
