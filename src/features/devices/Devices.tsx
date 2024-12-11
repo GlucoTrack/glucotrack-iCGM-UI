@@ -82,7 +82,7 @@ const Devices = () => {
     }
 
     content = (
-      <Box flexGrow={1} overflow="auto" width="100%">
+      <Box flexGrow={1} overflow="auto" width="50%" margin="auto">
         <DataGrid<Device>
           slots={{ toolbar: GridToolbar }}
           rows={data.devices}
