@@ -24,10 +24,20 @@ import utc from "dayjs/plugin/utc"
 import { SnackbarContext } from "@/providers/SnackbarProvider"
 dayjs.extend(utc)
 
-const MeasurementForm = ({ label, pageKey, query, groupQuery, groupsField = 'groups', devicesField = 'devices', deviceNameField = 'deviceName', groupNameField = 'groupName', deviceNamesField='deviceNames' }: any) => {
+const MeasurementForm = ({
+  label,
+  pageKey,
+  query,
+  groupQuery,
+  groupsField = "groups",
+  devicesField = "devices",
+  deviceNameField = "deviceName",
+  groupNameField = "groupName",
+  deviceNamesField = "deviceNames",
+}: any) => {
   const dispatch = useDispatch()
   const theme = useTheme()
-  const { openSnackbar, closeSnackbar } = useContext(SnackbarContext);
+  const { openSnackbar, closeSnackbar } = useContext(SnackbarContext)
   const [localStorageKey, setLocalStorageKey] = useState(
     JSON.parse(localStorage.getItem("filters_" + pageKey) || "{}"),
   )
@@ -190,7 +200,7 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery, groupsField = 'gro
     if (formValues.endTime && formValues.startTime) {
       const d1 = dayjs(formValues.startTime)
       const d2 = dayjs(formValues.endTime)
-      return d2.diff(d1, 'minute')
+      return d2.diff(d1, "minute")
     }
     return 0
   }
@@ -272,12 +282,12 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery, groupsField = 'gro
       (deviceNames && deviceNames.length > 0 && groupName) ||
       ((!deviceNames || deviceNames.length === 0) && !groupName)
     ) {
-      openSnackbar("Please select either Device Name(s) OR Group Name", 'error')
+      openSnackbar("Please select either Device Name(s) OR Group Name", "error")
       return
     }
 
     if (!startTime || !endTime) {
-      openSnackbar("Please select start and end date", 'error');
+      openSnackbar("Please select start and end date", "error")
       return
     }
 
@@ -285,8 +295,11 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery, groupsField = 'gro
       const start = new Date(startTime)
       const end = new Date(endTime)
       const diffHours = Math.abs(end.getTime() - start.getTime()) / 3600000 // Convert milliseconds to hours
-      if (diffHours > 48) {
-        openSnackbar("The time difference should not be more than 48 hours", 'error');
+      if (diffHours > 48 * 7) {
+        openSnackbar(
+          "The time difference should not be more than 1 week",
+          "error",
+        )
         return
       }
     }
@@ -301,7 +314,6 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery, groupsField = 'gro
         throw new Error(`${groupName} not found.`)
       }
     }
-    
 
     if (
       ((deviceNames && deviceNames.length > 0) ||
@@ -316,8 +328,8 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery, groupsField = 'gro
               deviceNamesFromGroup.length > 0
                 ? deviceNamesFromGroup
                 : deviceNames && deviceNames.length > 0
-                  ? deviceNames
-                  : [],
+                ? deviceNames
+                : [],
             groupName: groupName ? groupName : "",
             startTime: utcStartTime,
             endTime: utcEndTime,
@@ -326,21 +338,24 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery, groupsField = 'gro
         )
         closeSnackbar(event)
       } catch (error) {
-        openSnackbar("Failed to set filter...", 'error')
+        openSnackbar("Failed to set filter...", "error")
       }
     }
   }
 
   useEffect(() => {
     if (savedFilters) {
-      localStorage.setItem("filterList_" + pageKey, JSON.stringify(savedFilters))
+      localStorage.setItem(
+        "filterList_" + pageKey,
+        JSON.stringify(savedFilters),
+      )
     }
   }, [savedFilters, pageKey])
 
   const handleSaveFilter = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!filterName) {
-      openSnackbar("Please enter a name to save the filter", 'error')
+      openSnackbar("Please enter a name to save the filter", "error")
       return
     }
     try {
@@ -348,12 +363,15 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery, groupsField = 'gro
       newSavedFilters.sort((a, b) => a.localeCompare(b))
       setSavedFilters(newSavedFilters)
       localStorage.setItem("savedFilters", JSON.stringify(newSavedFilters))
-      localStorage.setItem(filterName + "_" + pageKey, JSON.stringify(formValues))
+      localStorage.setItem(
+        filterName + "_" + pageKey,
+        JSON.stringify(formValues),
+      )
       setSelectedFilter(filterName)
       closeSnackbar(event)
       setFilterName("")
     } catch (error) {
-      openSnackbar("Failed to save filter...", 'error')
+      openSnackbar("Failed to save filter...", "error")
     }
   }
 
@@ -374,7 +392,7 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery, groupsField = 'gro
         setSelectedFilter(filterName)
       }
     } catch (error) {
-      openSnackbar("Failed to load filter...", 'error')
+      openSnackbar("Failed to load filter...", "error")
     }
   }
 
@@ -497,7 +515,7 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery, groupsField = 'gro
               />
             </Grid>
 
-            <Grid xs={1} alignContent={'center'}>
+            <Grid xs={1} alignContent={"center"}>
               <IconButton onClick={handleBack}>
                 <ChevronLeft />
               </IconButton>
@@ -539,17 +557,13 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery, groupsField = 'gro
                 />
               )}
             </Grid>
-            <Grid xs={1} alignContent={'center'}>
+            <Grid xs={1} alignContent={"center"}>
               <IconButton onClick={handleForward}>
                 <ChevronRight />
               </IconButton>
             </Grid>
 
-            <Grid xs={12}>
-              <Button type="submit" variant="contained" color="primary">
-                Submit
-              </Button>
-            </Grid>
+            <Grid xs={12}></Grid>
           </Grid>
           <Grid xs={4}>
             <Grid container spacing={1}>
@@ -604,17 +618,24 @@ const MeasurementForm = ({ label, pageKey, query, groupQuery, groupsField = 'gro
                 </Button>
               </Grid>
             </Grid>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={formValues.realtime || false}
-                  onChange={(event) => {
-                    handleInputChange("realtime", event.target.checked)
-                  }}
-                />
-              }
-              label="Realtime"
-            />
+            <Grid>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={formValues.realtime || false}
+                    onChange={(event) => {
+                      handleInputChange("realtime", event.target.checked)
+                    }}
+                  />
+                }
+                label="Realtime"
+              />
+            </Grid>
+            <Grid>
+              <Button type="submit" variant="contained" color="primary">
+                Submit
+              </Button>
+            </Grid>
           </Grid>
         </Grid>
         {deviceContent}
