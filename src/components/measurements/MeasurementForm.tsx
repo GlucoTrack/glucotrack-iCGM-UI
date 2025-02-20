@@ -295,7 +295,7 @@ const MeasurementForm = ({
       const start = new Date(startTime)
       const end = new Date(endTime)
       const diffHours = Math.abs(end.getTime() - start.getTime()) / 3600000 // Convert milliseconds to hours
-      if (diffHours > 24 * 7) {
+      if (diffHours > 24 * 8) {
         openSnackbar(
           "The time difference should not be more than 1 week",
           "error",
