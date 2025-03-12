@@ -102,7 +102,7 @@ const AddFirmware: React.FC = () => {
           />
           <TextField
             name="url"
-            label="URK"
+            label="URL"
             type="text"
             value={formValues.url}
             onChange={handleChange}

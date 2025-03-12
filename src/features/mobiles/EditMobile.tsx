@@ -196,8 +196,6 @@ const EditMobile: React.FC = () => {
     handleMutationSuccess()
   }
 
-  console.log(content)
-
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header

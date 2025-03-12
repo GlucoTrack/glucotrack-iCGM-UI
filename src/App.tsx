@@ -75,7 +75,7 @@ function App() {
                 />
                 <Route path="/firmwares" element={<Firmwares />} />
                 <Route path="/firmwares/add" element={<AddFirmware />} />
-                <Route path="/firmwares/edit/:groupId" element={<EditFirmware />} />
+                <Route path="/firmwares/edit/:firmwareId" element={<EditFirmware />} />
                 <Route path="/users" element={<Users />} />
                 <Route path="/new" element={<New />} />
               </Route>

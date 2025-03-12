@@ -3,7 +3,7 @@ import { Box, Button, TextField, useTheme } from "@mui/material"
 import React, { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import {
-  useGetFirmwaresQuery,
+  useGetFirmwareQuery,
   useEditFirmwareMutation,
   useDeleteFirmwareMutation,
 } from "@/features/api/apiSlice"
@@ -34,7 +34,7 @@ const EditFirmware: React.FC = () => {
     isSuccess: getfirmwareIsSuccess,
     isError: getfirmwareIsError,
     error: getfirmwareError,
-  } = useGetFirmwaresQuery(firmwareId)
+  } = useGetFirmwareQuery(firmwareId)
 
   const [
     deletefirmware,
@@ -148,8 +148,6 @@ const EditFirmware: React.FC = () => {
   } else if (isEditSuccess || isDeleteSuccess) {
     handleMutationSuccess()
   }
-
-  console.log(content)
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">

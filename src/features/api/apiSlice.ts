@@ -223,14 +223,16 @@ export const apiSlice = createApi({
     //*FIRMWARES
     addFirmware: builder.mutation({
       query: (firmwareData) => ({
-        url: "firmware",
+        url: "firmware/create",
         method: "POST",
         body: firmwareData,
       }),
       invalidatesTags: ["Firmwares"],
     }),
-    getFirmwares: builder.query({
-      query: () => "firmware/read",
+    getFirmware: builder.query({
+      query: (firmwareId) => ({
+        url: `firmware/read/${firmwareId}`,
+      }),
       providesTags: ["Firmwares"],
     }),
     editFirmware: builder.mutation({
@@ -247,6 +249,10 @@ export const apiSlice = createApi({
         method: "DELETE",
       }),
       invalidatesTags: ["Firmwares"],
+    }),
+    getFirmwares: builder.query({
+      query: () => "firmware/read",
+      providesTags: ["Firmwares"],
     }),
   }),
 })
@@ -279,6 +285,7 @@ export const {
   useDeleteMobileGroupMutation,
   useAddFirmwareMutation,
   useGetFirmwaresQuery,
+  useGetFirmwareQuery,
   useEditFirmwareMutation,
   useDeleteFirmwareMutation,
 } = apiSlice
