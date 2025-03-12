@@ -12,6 +12,7 @@ export const apiSlice = createApi({
     "Measurements",
     "AveragesAndStds",
     "MobileGroups",
+    "Firmwares",
   ],
   endpoints: (builder) => ({
     //TODO maybe code split per feature
@@ -219,6 +220,34 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["MobileGroups"],
     }),
+    //*FIRMWARES
+    addFirmware: builder.mutation({
+      query: (firmwareData) => ({
+        url: "firmware",
+        method: "POST",
+        body: firmwareData,
+      }),
+      invalidatesTags: ["Firmwares"],
+    }),
+    getFirmwares: builder.query({
+      query: () => "firmware/read",
+      providesTags: ["Firmwares"],
+    }),
+    editFirmware: builder.mutation({
+      query: ({ firmwareId, ...firmwareData }) => ({
+        url: `firmware/${firmwareId}`,
+        method: "PATCH",
+        body: firmwareData,
+      }),
+      invalidatesTags: ["Firmwares"],
+    }),
+    deleteFirmware: builder.mutation({
+      query: (firmwareId) => ({
+        url: `firmware/${firmwareId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Firmwares"],
+    }),
   }),
 })
 
@@ -248,4 +277,8 @@ export const {
   useGetMobileGroupsQuery,
   useEditMobileGroupMutation,
   useDeleteMobileGroupMutation,
+  useAddFirmwareMutation,
+  useGetFirmwaresQuery,
+  useEditFirmwareMutation,
+  useDeleteFirmwareMutation,
 } = apiSlice

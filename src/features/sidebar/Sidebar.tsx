@@ -14,6 +14,7 @@ import {
 } from "@mui/material"
 import {
   ChevronLeft,
+  DataSaverOn,
   DeviceThermostatOutlined,
   GroupOutlined,
   GroupWorkOutlined,
@@ -70,6 +71,16 @@ const navItems = [
     icon: <TimelineOutlined />,
     path: "raw-measurements",
   },
+  {
+    text: "Divider",
+    icon: null,
+  },
+  {
+    text: "Firmwares",
+    icon: <DataSaverOn />,
+    path: "firmwares",
+  },
+
   // {
   //   text: "Divider",
   //   icon: null,
