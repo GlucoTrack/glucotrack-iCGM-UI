@@ -1,6 +1,7 @@
 import Header from "@/components/Header"
-import { Box, Button, TextField, useTheme } from "@mui/material"
+import { Box, Button, Link, TextField, useTheme } from "@mui/material"
 import React, { useEffect, useState } from "react"
+import { MuiFileInput } from "mui-file-input"
 import { useNavigate, useParams } from "react-router-dom"
 import {
   useGetFirmwareQuery,
@@ -11,19 +12,21 @@ import {
 interface FormValues {
   name: string
   version: string
-  url: string
+  file?: string
 }
 
 const initialValues: FormValues = {
-  name: "XXXXXX",
+  name: "",
   version: "",
-  url: "",
+  file: "",
 }
 
 const EditFirmware: React.FC = () => {
   const navigate = useNavigate()
   const theme = useTheme()
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
+  const [fileUrl, setFileUrl] = useState<string | null>(null)
+  const [tempFileValue, setTempFileValue] = useState<File | null>(null)
 
   const { firmwareId } = useParams<Record<string, string>>()
 
@@ -60,10 +63,10 @@ const EditFirmware: React.FC = () => {
     if (getFirmwareData) {
       const { name, version, url } = getFirmwareData
 
+      setFileUrl(url)
       setFormValues({
         name,
         version,
-        url,
       })
     }
   }, [getFirmwareData])
@@ -88,7 +91,7 @@ const EditFirmware: React.FC = () => {
   }
 
   const canSave =
-    [formValues.name, formValues.version, formValues.url].every(
+    [formValues.name, formValues.version].every(
       (value) => value !== undefined && value !== null && value !== "",
     ) &&
     !getfirmwareIsLoading &&
@@ -132,6 +135,21 @@ const EditFirmware: React.FC = () => {
     }
   }
 
+  const handleFileChange = (file: File | null) => {
+    if (file) {
+      setTempFileValue(file)
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setFormValues((prevValues) => ({
+          ...prevValues,
+          file: reader.result as string,
+          name: file.name,
+        }))
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
   let content: JSX.Element | null = null
   if (isEditingfirmware || isDeletingfirmware) {
     content = <h3>Loading...</h3>
@@ -159,16 +177,6 @@ const EditFirmware: React.FC = () => {
       <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">
         <form onSubmit={handleSubmit}>
           <TextField
-            name="name"
-            label="Name("
-            type="text"
-            value={formValues.name}
-            onChange={handleChange}
-            required
-            fullWidth
-            margin="normal"
-          />
-          <TextField
             name="version"
             label="Version"
             type="text"
@@ -178,16 +186,20 @@ const EditFirmware: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          <TextField
-            name="url"
-            label="URL"
-            type="text"
-            value={formValues.url}
-            onChange={handleChange}
-            required
-            fullWidth
-            margin="normal"
-          />          
+
+          <MuiFileInput
+            value={tempFileValue}
+            placeholder="Change the file"
+            onChange={handleFileChange}
+            sx={{ mt: 2, mb: 1 }}
+            inputProps={{ accept: ".fota" }}
+          />
+          {fileUrl && (
+            <Link href={fileUrl} target="_blank" rel="noopener noreferrer">
+              Download current firmware
+            </Link>
+          )}
+
           {content}
 
           <Box mt={2} display="flex" justifyContent="space-between">
