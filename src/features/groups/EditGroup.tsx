@@ -99,8 +99,7 @@ const EditGroup: React.FC = () => {
       const devices = formValues.deviceNames.map(name => {
         const device = data.devices.find((device: any) => device.deviceName === name)
         return device ? device : null
-      }).filter(device => device !== null)
-      console.log(devices)
+      }).filter(device => device !== null)      
 
       // Get the common values from the first device
       const commonValue: DeviceValues = {

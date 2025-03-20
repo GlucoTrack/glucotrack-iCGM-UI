@@ -27,6 +27,9 @@ import { useAppSelector } from "@/hooks/useStore"
 
 import "./index.css"
 import { SnackbarProvider } from "./providers/SnackbarProvider"
+import Firmwares from "./features/firmwares/Firmwares"
+import AddFirmware from "./features/firmwares/AddFirmware"
+import EditFirmware from "./features/firmwares/EditFirmware"
 
 function App() {
   const mode = useAppSelector((state) => state.navbar.mode)
@@ -45,10 +48,16 @@ function App() {
                 <Route path="/home" element={<Home />} />
                 <Route path="/devices" element={<Devices />} />
                 <Route path="/devices/add" element={<AddDevice />} />
-                <Route path="/devices/edit/:deviceId" element={<EditDevice />} />
+                <Route
+                  path="/devices/edit/:deviceId"
+                  element={<EditDevice />}
+                />
                 <Route path="/mobiles" element={<Mobiles />} />
                 <Route path="/mobiles/add" element={<AddMobile />} />
-                <Route path="/mobiles/edit/:mobileId" element={<EditMobile />} />
+                <Route
+                  path="/mobiles/edit/:mobileId"
+                  element={<EditMobile />}
+                />
                 <Route path="/groups" element={<Groups />} />
                 <Route path="/groups/add" element={<AddGroup />} />
                 <Route path="/groups/edit/:groupId" element={<EditGroup />} />
@@ -56,11 +65,17 @@ function App() {
                 <Route path="/raw-measurements" element={<RawMeasurements />} />
                 <Route path="/mobile-groups" element={<MobileGroups />} />
                 <Route path="/mobile-groups/add" element={<AddMobileGroup />} />
-                <Route path="/mobile-groups/:groupId" element={<EditMobileGroup />} />
+                <Route
+                  path="/mobile-groups/:groupId"
+                  element={<EditMobileGroup />}
+                />
                 <Route
                   path="/animal-measurements"
                   element={<AnimalMeasurements />}
                 />
+                <Route path="/firmwares" element={<Firmwares />} />
+                <Route path="/firmwares/add" element={<AddFirmware />} />
+                <Route path="/firmwares/edit/:firmwareId" element={<EditFirmware />} />
                 <Route path="/users" element={<Users />} />
                 <Route path="/new" element={<New />} />
               </Route>
