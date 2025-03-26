@@ -12,11 +12,14 @@ import Header from "@/components/Header"
 import HeaderAction from "@/components/HeaderAction"
 import User from "@/interfaces/User"
 import { useGetUsersQuery } from "@/features/api/apiSlice"
+import { useSelector } from "react-redux"
+import { RootState } from "@/store/store"
 
 const Users = () => {
   const navigate = useNavigate()
+  const token = useSelector((state: RootState) => state.auth.token)
   const { data, status, isFetching, isLoading, isSuccess, isError, error } =
-    useGetUsersQuery({})
+    useGetUsersQuery(undefined, { skip: !token })
 
   const [sortModel, setSortModel] = useState<GridSortModel>([
     { field: "userId", sort: "asc" },
@@ -40,7 +43,28 @@ const Users = () => {
     content = <p>{JSON.stringify(error)}</p>
   } else if (isSuccess) {
     const columns = [
-      { field: "userId", headerName: "ID", flex: 0.7 },      
+      { field: "userId", headerName: "Clerk ID", flex: 0.7 },
+      { field: "blinded", headerName: "Blinded", flex: 0.7 },
+      { field: "sensorId", headerName: "sID", flex: 1 },
+      {
+        field: "measurementInterval",
+        headerName: "Meas",
+        flex: 0.5,
+      },
+      {
+        field: "reportInterval",
+        headerName: "Report",
+        flex: 0.5,
+      },
+      { field: "refMillivolts", headerName: "ref", flex: 0.5 },
+      { field: "weMillivolts", headerName: "we", flex: 0.5 },
+      { field: "filterLength", headerName: "Filter", flex: 0.5 },
+      {
+        field: "checkParametersInterval",
+        headerName: "Check",
+        flex: 0.5,
+      },
+      { field: "comment", headerName: "Comment", flex: 1 },
     ]
     content = (
       <Box flexGrow={1} overflow="auto" width="100%">

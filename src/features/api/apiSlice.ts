@@ -5,9 +5,18 @@ export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
     baseUrl: import.meta.env.VITE_API_BASE_URL,
-    prepareHeaders: (headers, { getState }) => {
+    prepareHeaders: (headers, { getState, endpoint }) => {
       const token = (getState() as RootState)?.auth?.token
-      if (token) {
+
+      const endpointsWithAuth = new Set([
+        "getUsers",
+        "getUser",
+        "editUser",
+        "deleteUser",
+        "addUser",
+      ])
+
+      if (endpointsWithAuth.has(endpoint) && token) {
         headers.set("Authorization", `Bearer ${token}`)
       }
       return headers
@@ -263,9 +272,39 @@ export const apiSlice = createApi({
       query: () => "firmware/read",
       providesTags: ["Firmwares"],
     }),
+    //*USERS
     getUsers: builder.query({
       query: () => "user/read",
       providesTags: ["Users"],
+    }),
+    getUser: builder.query({
+      query: (userId) => ({
+        url: `user/readByUserId/${userId}`,
+      }),
+      providesTags: ["Users"],
+    }),
+    editUser: builder.mutation({
+      query: ({ firmwareId: userId, ...userData }) => ({
+        url: `user/updateByUserId/${userId}`,
+        method: "PATCH",
+        body: userData,
+      }),
+      invalidatesTags: ["Users"],
+    }),
+    deleteUser: builder.mutation({
+      query: (userId) => ({
+        url: `user/deleteByUserId/${userId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Users"],
+    }),
+    addUser: builder.mutation({
+      query: (userData) => ({
+        url: "user/create",
+        method: "POST",
+        body: userData,
+      }),
+      invalidatesTags: ["Users"],
     }),
   }),
 })
@@ -302,4 +341,8 @@ export const {
   useEditFirmwareMutation,
   useDeleteFirmwareMutation,
   useGetUsersQuery,
+  useGetUserQuery,
+  useEditUserMutation,
+  useDeleteUserMutation,
+  useAddUserMutation,
 } = apiSlice

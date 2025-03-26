@@ -28,6 +28,8 @@ import { SnackbarProvider } from "@/providers/SnackbarProvider"
 import Firmwares from "@/features/firmwares/Firmwares"
 import AddFirmware from "@/features/firmwares/AddFirmware"
 import EditFirmware from "@/features/firmwares/EditFirmware"
+import AddUser from "@/features/users/AddUser"
+import EditUser from "@/features/users/EditUser"
 import { ClerkProvider } from "@clerk/clerk-react"
 import { dark } from "@clerk/themes"
 import ProtectedRoute from "@/components/ProtectedRoute"
@@ -50,7 +52,6 @@ function App() {
   if (isDarkMode) {
     clerkApparance.baseTheme = dark
   }
-  
 
   return (
     <ClerkProvider
@@ -110,8 +111,30 @@ function App() {
                   <Route
                     path="/users"
                     element={
-                      <ProtectedRoute allowedRoles={["org:admin", "org:manager"]}>
+                      <ProtectedRoute
+                        allowedRoles={["org:admin", "org:manager"]}
+                      >
                         <Users />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/users/add"
+                    element={
+                      <ProtectedRoute
+                        allowedRoles={["org:admin", "org:manager"]}
+                      >
+                        <AddUser />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/users/edit/:userId"
+                    element={
+                      <ProtectedRoute
+                        allowedRoles={["org:admin", "org:manager"]}
+                      >
+                        <EditUser />
                       </ProtectedRoute>
                     }
                   />
