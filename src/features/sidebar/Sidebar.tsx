@@ -21,9 +21,9 @@ import {
   HomeOutlined,
   MobileFriendlyOutlined,
   TimelineOutlined,
-  TipsAndUpdatesOutlined,
 } from "@mui/icons-material"
 import FlexBetweenCenter from "@/components/FlexBetweenCenter"
+import { useAuth, useUser } from "@clerk/clerk-react"
 
 const navItems = [
   {
@@ -80,23 +80,17 @@ const navItems = [
     icon: <DataSaverOn />,
     path: "firmwares",
   },
-
-  // {
-  //   text: "Divider",
-  //   icon: null,
-  // },
-  // {
-  //   text: "Users",
-  //   icon: <GroupOutlined />,
-  // },
-  // {
-  //   text: "Divider",
-  //   icon: null,
-  // },
-  // {
-  //   text: "New",
-  //   icon: <TipsAndUpdatesOutlined />,
-  // },
+  {
+    text: "Divider",
+    icon: null,
+    requireRole: ["org:manager", "org:admin"],
+  },
+  {
+    text: "Users",
+    icon: <GroupOutlined />,
+    path: "users",
+    requireRole: ["org:manager", "org:admin"],
+  },
 ]
 
 interface SidebarProps {
@@ -116,6 +110,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   const theme = useTheme()
   const { pathname } = useLocation()
   const [active, setActive] = useState("")
+  const { isSignedIn } = useUser()
+  const { orgRole } = useAuth()
 
   useEffect(() => {
     setActive(pathname.substring(1))
@@ -158,7 +154,12 @@ const Sidebar: React.FC<SidebarProps> = ({
             <Divider />
 
             <List>
-              {navItems.map(({ text, icon, path }, index) => {
+              {navItems.map(({ text, icon, path, requireRole }, index) => {
+                if (requireRole && requireRole.length > 0) {
+                  if (!isSignedIn || !requireRole.includes(orgRole as string))
+                    return null
+                }
+
                 if (!icon) {
                   return (
                     <Divider
