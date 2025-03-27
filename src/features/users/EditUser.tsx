@@ -310,7 +310,12 @@ const EditUser: React.FC = () => {
             control={
               <Checkbox
                 checked={formValues.blinded || false}
-                onChange={handleChange}
+                onChange={(event) => {
+                  setFormValues((prevValues) => ({
+                    ...prevValues,
+                    "blinded": event.target.checked,
+                  }))
+                }}
               />
             }
             label="Blinded"

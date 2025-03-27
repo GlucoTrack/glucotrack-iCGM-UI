@@ -284,7 +284,7 @@ export const apiSlice = createApi({
       providesTags: ["Users"],
     }),
     editUser: builder.mutation({
-      query: ({ firmwareId: userId, ...userData }) => ({
+      query: ({ userId, ...userData }) => ({
         url: `user/updateByUserId/${userId}`,
         method: "PATCH",
         body: userData,
