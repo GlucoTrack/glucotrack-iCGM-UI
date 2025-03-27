@@ -1,5 +1,12 @@
 import Header from "@/components/Header"
-import { Box, Button, TextField, useTheme } from "@mui/material"
+import {
+  Box,
+  Button,
+  TextField,
+  useTheme,
+  Checkbox,
+  FormControlLabel,
+} from "@mui/material"
 import React, { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import {
@@ -9,31 +16,30 @@ import {
 } from "@/features/api/apiSlice"
 
 interface FormValues {
-  userName: string
+  userId: string
   baseUri: string
-  sensorId: string
-  sensorName: string
   measurementInterval: number
   reportInterval: number
   refMillivolts: number
   weMillivolts: number
   filterLength: number
   checkParametersInterval: number
+  blinded: boolean
+  sensorId?: string
   comment?: string
 }
 
 const initialValues: FormValues = {
-  userName: "XXXXXX",
+  userId: "",
   baseUri: "https://stg-icgm.herokuapp.com/api/v1",
-  sensorId: "XX:XX:XX:XX:XX",
-  sensorName: "XXXXXX",
   measurementInterval: 30,
   reportInterval: 600,
   refMillivolts: 600,
   weMillivolts: 1200,
   filterLength: 10,
   checkParametersInterval: 60,
-  comment: " ",
+  comment: "test",
+  blinded: false,  
 }
 
 const EditUser: React.FC = () => {
@@ -41,7 +47,7 @@ const EditUser: React.FC = () => {
   const theme = useTheme()
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
 
-  const { userId } = useParams<Record<string, string>>()
+  const { id } = useParams<Record<string, string>>()
 
   const {
     data: getUserData,
@@ -51,7 +57,7 @@ const EditUser: React.FC = () => {
     isSuccess: getUserIsSuccess,
     isError: getUserIsError,
     error: getUserError,
-  } = useGetUserQuery(userId)
+  } = useGetUserQuery(id)
 
   const [
     deleteUser,
@@ -76,10 +82,9 @@ const EditUser: React.FC = () => {
   useEffect(() => {
     if (getUserData) {
       const {
-        userName,
+        userId,
         baseUri,
         sensorId,
-        sensorName,
         measurementInterval,
         reportInterval,
         refMillivolts,
@@ -87,13 +92,13 @@ const EditUser: React.FC = () => {
         filterLength,
         checkParametersInterval,
         comment,
+        blinded,
       } = getUserData
 
       setFormValues({
-        userName,
+        userId,
         baseUri,
         sensorId,
-        sensorName,
         measurementInterval,
         reportInterval,
         refMillivolts,
@@ -101,6 +106,7 @@ const EditUser: React.FC = () => {
         filterLength,
         checkParametersInterval,
         comment,
+        blinded,
       })
     }
   }, [getUserData])
@@ -126,17 +132,14 @@ const EditUser: React.FC = () => {
 
   const canSave =
     [
-      formValues.userName,
+      formValues.userId,
       formValues.baseUri,
-      formValues.sensorId,
-      formValues.sensorName,
       formValues.measurementInterval,
       formValues.reportInterval,
       formValues.refMillivolts,
       formValues.weMillivolts,
       formValues.filterLength,
       formValues.checkParametersInterval,
-      formValues.comment,
     ].every((value) => value !== undefined && value !== null && value !== "") &&
     !getUserIsLoading &&
     !isDeletingUser &&
@@ -158,7 +161,7 @@ const EditUser: React.FC = () => {
     e.preventDefault()
     if (canSave) {
       try {
-        await editUser({ userId, ...formValues })
+        await editUser({ id, ...formValues })
       } catch (error: any) {
         console.error(error)
       }
@@ -173,7 +176,7 @@ const EditUser: React.FC = () => {
 
   const handleDelete = async () => {
     try {
-      await deleteUser(userId)
+      await deleteUser(id)
     } catch (error: any) {
       console.error(error)
     }
@@ -206,10 +209,10 @@ const EditUser: React.FC = () => {
       <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">
         <form onSubmit={handleSubmit}>
           <TextField
-            name="userName"
-            label="User Name(s)"
+            name="userId"
+            label="Clerk ID"
             type="text"
-            value={formValues.userName}
+            value={formValues.userId}
             onChange={handleChange}
             required
             fullWidth
@@ -231,17 +234,6 @@ const EditUser: React.FC = () => {
             type="text"
             value={formValues.sensorId}
             onChange={handleChange}
-            required
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            name="sensorName"
-            label="Sensor Name"
-            type="text"
-            value={formValues.sensorName}
-            onChange={handleChange}
-            required
             fullWidth
             margin="normal"
           />
@@ -313,6 +305,15 @@ const EditUser: React.FC = () => {
             onChange={handleChange}
             fullWidth
             margin="normal"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={formValues.blinded || false}
+                onChange={handleChange}
+              />
+            }
+            label="Blinded"
           />
           {content}
 

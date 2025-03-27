@@ -1,5 +1,12 @@
 import Header from "@/components/Header"
-import { Box, Button, TextField, useTheme } from "@mui/material"
+import {
+  Box,
+  Button,
+  Checkbox,
+  FormControlLabel,
+  TextField,
+  useTheme,
+} from "@mui/material"
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAddUserMutation } from "../api/apiSlice"
@@ -121,6 +128,15 @@ const AddUser: React.FC = () => {
             margin="normal"
           />
           <TextField
+            name="sensorId"
+            label="Sensor ID"
+            type="text"
+            value={formValues.sensorId}
+            onChange={handleChange}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
             name="measurementInterval"
             label="Measurement Interval"
             type="number"
@@ -188,6 +204,15 @@ const AddUser: React.FC = () => {
             onChange={handleChange}
             fullWidth
             margin="normal"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={formValues.blinded || false}
+                onChange={handleChange}
+              />
+            }
+            label="Blinded"
           />
           {content}
           <Box mt={2} display={"flex"} justifyContent={"flex-start"} gap={2}>

@@ -83,13 +83,13 @@ const navItems = [
   {
     text: "Divider",
     icon: null,
-    requireRole: ["org:manager", "org:admin"],
+    requireRole: ["org:admin"],
   },
   {
     text: "Users",
     icon: <GroupOutlined />,
     path: "users",
-    requireRole: ["org:manager", "org:admin"],
+    requireRole: ["org:admin"],
   },
 ]
 

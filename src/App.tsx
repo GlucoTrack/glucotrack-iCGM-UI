@@ -37,7 +37,6 @@ import AuthAsync from "@/components/AuthAsync"
 
 import "./index.css"
 
-
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 if (!PUBLISHABLE_KEY) {
   throw new Error("Add your Clerk Publishable Key to the .env file")
@@ -111,9 +110,7 @@ function App() {
                   <Route
                     path="/users"
                     element={
-                      <ProtectedRoute
-                        allowedRoles={["org:admin", "org:manager"]}
-                      >
+                      <ProtectedRoute allowedRoles={["org:admin"]}>
                         <Users />
                       </ProtectedRoute>
                     }
@@ -121,19 +118,15 @@ function App() {
                   <Route
                     path="/users/add"
                     element={
-                      <ProtectedRoute
-                        allowedRoles={["org:admin", "org:manager"]}
-                      >
+                      <ProtectedRoute allowedRoles={["org:admin"]}>
                         <AddUser />
                       </ProtectedRoute>
                     }
                   />
                   <Route
-                    path="/users/edit/:userId"
+                    path="/users/edit/:id"
                     element={
-                      <ProtectedRoute
-                        allowedRoles={["org:admin", "org:manager"]}
-                      >
+                      <ProtectedRoute allowedRoles={["org:admin"]}>
                         <EditUser />
                       </ProtectedRoute>
                     }
