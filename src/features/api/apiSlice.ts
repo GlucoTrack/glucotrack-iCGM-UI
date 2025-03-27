@@ -278,22 +278,22 @@ export const apiSlice = createApi({
       providesTags: ["Users"],
     }),
     getUser: builder.query({
-      query: (userId) => ({
-        url: `user/readByUserId/${userId}`,
+      query: (id) => ({
+        url: `user/readByUserId/${id}`,
       }),
       providesTags: ["Users"],
     }),
     editUser: builder.mutation({
-      query: ({ userId, ...userData }) => ({
-        url: `user/updateByUserId/${userId}`,
+      query: ({ id, ...userData }) => ({
+        url: `user/updateByUserId/${id}`,
         method: "PATCH",
         body: userData,
       }),
       invalidatesTags: ["Users"],
     }),
     deleteUser: builder.mutation({
-      query: (userId) => ({
-        url: `user/deleteByUserId/${userId}`,
+      query: (id) => ({
+        url: `user/deleteByUserId/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Users"],
