@@ -161,7 +161,7 @@ const EditUser: React.FC = () => {
     e.preventDefault()
     if (canSave) {
       try {
-        await editUser({ id, ...formValues })
+        await editUser({ ...formValues })
       } catch (error: any) {
         console.error(error)
       }
