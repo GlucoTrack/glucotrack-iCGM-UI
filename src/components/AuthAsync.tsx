@@ -22,7 +22,7 @@ const AuthSync = () => {
     }
 
     let interval: NodeJS.Timeout
-    interval = setInterval(syncToken, 1 * 60 * 1000)
+    interval = setInterval(syncToken, 40 * 1000)
 
     syncToken()
 
