@@ -16,7 +16,6 @@ import {
 } from "@/features/api/apiSlice"
 
 interface FormValues {
-  userId: string
   baseUri: string
   measurementInterval: number
   reportInterval: number
@@ -30,7 +29,6 @@ interface FormValues {
 }
 
 const initialValues: FormValues = {
-  userId: "",
   baseUri: "https://stg-icgm.herokuapp.com/api/v1",
   measurementInterval: 30,
   reportInterval: 600,
@@ -39,7 +37,7 @@ const initialValues: FormValues = {
   filterLength: 10,
   checkParametersInterval: 60,
   comment: "test",
-  blinded: false,  
+  blinded: false,
 }
 
 const EditUser: React.FC = () => {
@@ -82,7 +80,6 @@ const EditUser: React.FC = () => {
   useEffect(() => {
     if (getUserData) {
       const {
-        userId,
         baseUri,
         sensorId,
         measurementInterval,
@@ -96,7 +93,6 @@ const EditUser: React.FC = () => {
       } = getUserData
 
       setFormValues({
-        userId,
         baseUri,
         sensorId,
         measurementInterval,
@@ -132,7 +128,6 @@ const EditUser: React.FC = () => {
 
   const canSave =
     [
-      formValues.userId,
       formValues.baseUri,
       formValues.measurementInterval,
       formValues.reportInterval,
@@ -208,16 +203,6 @@ const EditUser: React.FC = () => {
       {getUserContent}
       <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">
         <form onSubmit={handleSubmit}>
-          <TextField
-            name="userId"
-            label="Clerk ID"
-            type="text"
-            value={formValues.userId}
-            onChange={handleChange}
-            required
-            fullWidth
-            margin="normal"
-          />
           <TextField
             name="baseUri"
             label="Base URI"
@@ -313,7 +298,7 @@ const EditUser: React.FC = () => {
                 onChange={(event) => {
                   setFormValues((prevValues) => ({
                     ...prevValues,
-                    "blinded": event.target.checked,
+                    blinded: event.target.checked,
                   }))
                 }}
               />
