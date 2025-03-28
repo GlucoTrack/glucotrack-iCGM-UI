@@ -140,9 +140,11 @@ const EditFirmware: React.FC = () => {
       setTempFileValue(file)
       const reader = new FileReader()
       reader.onloadend = () => {
+        const result = reader.result as string
+        const base64 = result.split(",")[1]
         setFormValues((prevValues) => ({
           ...prevValues,
-          file: reader.result as string,
+          file: base64,
           name: file.name,
         }))
       }
