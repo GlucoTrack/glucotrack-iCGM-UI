@@ -21,6 +21,7 @@ import EditMobileGroup from "@/features/mobileGroups/EditMobileGroup"
 import AddMobileGroup from "@/features/mobileGroups/AddMobileGroup"
 import AnimalMeasurements from "@/features/animalMeasurements/AnimalMeasurements"
 import RawMeasurements from "@/features/rawMeasurements/RawMeasurements"
+import RawUserMeasurements from "@/features/rawUserMeasurements/RawUserMeasurements"
 import Users from "@/features/users/Users"
 import New from "@/features/new/New"
 import { useAppSelector } from "@/hooks/useStore"
@@ -128,6 +129,14 @@ function App() {
                     element={
                       <ProtectedRoute allowedRoles={["org:admin"]}>
                         <EditUser />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/raw-user-measurements"
+                    element={
+                      <ProtectedRoute allowedRoles={["org:admin"]}>
+                        <RawUserMeasurements />
                       </ProtectedRoute>
                     }
                   />

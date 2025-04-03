@@ -14,6 +14,7 @@ export const apiSlice = createApi({
         "editUser",
         "deleteUser",
         "addUser",
+        "getRawUserMeasurementsByUserIds",
       ])
 
       if (endpointsWithAuth.has(endpoint) && token) {
@@ -192,6 +193,15 @@ export const apiSlice = createApi({
       },
       providesTags: ["Measurements"],
     }),
+    getRawUserMeasurementsByUserIds: builder.query({
+      query: (args) => {
+        const { userIds, startTime, endTime } = args
+        return {
+          url: `measurements/user/raw/${userIds}?startTime=${startTime}&endTime=${endTime}`,
+        }
+      },
+      providesTags: ["Measurements"],
+    }),
     getAnimalMeasurementsBySensorNames: builder.query({
       query: (args) => {
         const { deviceNames, startTime, endTime } = args
@@ -329,6 +339,7 @@ export const {
   useGetMeasurementsByDeviceNamesQuery,
   useGetAnimalMeasurementsByMobileNamesQuery,
   useGetRawMeasurementsByMobileNamesQuery,
+  useGetRawUserMeasurementsByUserIdsQuery,
   useGetAnimalMeasurementsBySensorNamesQuery,
   useGetAveragesAndStdsQuery,
   useAddMobileGroupMutation,

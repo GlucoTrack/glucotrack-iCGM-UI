@@ -8,7 +8,6 @@ import {
   Checkbox,
   FormControlLabel,
   TextField,
-  useTheme,
   IconButton,
 } from "@mui/material"
 import {
@@ -28,7 +27,7 @@ const MeasurementForm = ({
   label,
   pageKey,
   query,
-  groupQuery,
+  groupQuery = {},
   groupsField = "groups",
   devicesField = "devices",
   deviceNameField = "deviceName",
@@ -36,7 +35,6 @@ const MeasurementForm = ({
   deviceNamesField = "deviceNames",
 }: any) => {
   const dispatch = useDispatch()
-  const theme = useTheme()
   const { openSnackbar, closeSnackbar } = useContext(SnackbarContext)
   const [localStorageKey, setLocalStorageKey] = useState(
     JSON.parse(localStorage.getItem("filters_" + pageKey) || "{}"),
@@ -467,7 +465,7 @@ const MeasurementForm = ({
       <form onSubmit={handleSubmit}>
         <Grid container spacing={4} alignItems={"start"}>
           <Grid container xs={8} spacing={2}>
-            <Grid xs={5}>
+            <Grid xs={groupData ? 5 : 12}>
               <Autocomplete
                 multiple
                 loading={deviceIsLoading || deviceIsFetching}
@@ -481,39 +479,43 @@ const MeasurementForm = ({
                 )}
               />
             </Grid>
-            <Grid xs={2}>
-              <Box
-                sx={{
-                  display: "flex",
-                  height: 1,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                OR
-              </Box>
-            </Grid>
-            <Grid xs={5}>
-              <Autocomplete
-                loading={groupIsLoading || groupIsFetching}
-                options={groupName ? groupName : []}
-                value={
-                  formValues.groupName === "" ? null : formValues.groupName
-                }
-                isOptionEqualToValue={(option, newValue) => {
-                  return option.id === newValue.id
-                }}
-                onChange={(event, newValue) => {
-                  handleInputChange(
-                    "groupName",
-                    newValue !== null ? newValue : "",
-                  )
-                }}
-                renderInput={(params) => (
-                  <TextField {...params} label="Group Name" fullWidth />
-                )}
-              />
-            </Grid>
+            {groupData && (
+              <>
+                <Grid xs={2}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      height: 1,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    OR
+                  </Box>
+                </Grid>
+                <Grid xs={5}>
+                  <Autocomplete
+                    loading={groupIsLoading || groupIsFetching}
+                    options={groupName ? groupName : []}
+                    value={
+                      formValues.groupName === "" ? null : formValues.groupName
+                    }
+                    isOptionEqualToValue={(option: any, newValue: any) => {
+                      return option.id === newValue.id
+                    }}
+                    onChange={(event, newValue: any) => {
+                      handleInputChange(
+                        "groupName",
+                        newValue !== null ? newValue : "",
+                      )
+                    }}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Group Name" fullWidth />
+                    )}
+                  />
+                </Grid>
+              </>
+            )}
 
             <Grid xs={1} alignContent={"center"}>
               <IconButton onClick={handleBack}>

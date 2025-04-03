@@ -91,6 +91,12 @@ const navItems = [
     path: "users",
     requireRole: ["org:admin"],
   },
+  {
+    text: "Raw User Measurements",
+    icon: <TimelineOutlined />,
+    path: "raw-user-measurements",
+    requireRole: ["org:admin"],
+  },
 ]
 
 interface SidebarProps {
