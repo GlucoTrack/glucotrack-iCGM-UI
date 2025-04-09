@@ -23,7 +23,7 @@ import {
   TimelineOutlined,
 } from "@mui/icons-material"
 import FlexBetweenCenter from "@/components/FlexBetweenCenter"
-import { useAuth, useUser } from "@clerk/clerk-react"
+import { useUser, useAuth, useOrganizationList } from "@clerk/clerk-react"
 
 const navItems = [
   {
@@ -118,6 +118,23 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [active, setActive] = useState("")
   const { isSignedIn } = useUser()
   const { orgRole } = useAuth()
+  const {
+    userMemberships,
+    setActive: setActiveOrg,
+    isLoaded: isOrgListLoaded,
+  } = useOrganizationList({
+    userMemberships: true,
+  })
+
+  useEffect(() => {
+    if (!isOrgListLoaded || !isSignedIn) return
+
+    if (!orgRole && userMemberships.data.length > 0) {
+      // If there is no active role, I set the first organization as active
+      // TODO: set the id in the .env
+      setActiveOrg({ organization: userMemberships.data[0].organization.id })
+    }
+  }, [isOrgListLoaded, userMemberships, setActiveOrg, orgRole, isSignedIn])
 
   useEffect(() => {
     setActive(pathname.substring(1))
