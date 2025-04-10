@@ -44,6 +44,7 @@ const RawUserMeasurements: React.FC = () => {
         pageKey={"user"}        
         devicesField={"users"}
         deviceNameField={"userId"}
+        deviceNameLabelField={"email"}
       />
       <MeasurementChart
         query={query}

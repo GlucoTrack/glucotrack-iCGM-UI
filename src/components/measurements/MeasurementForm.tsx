@@ -31,6 +31,7 @@ const MeasurementForm = ({
   groupsField = "groups",
   devicesField = "devices",
   deviceNameField = "deviceName",
+  deviceNameLabelField = "deviceName",
   groupNameField = "groupName",
   deviceNamesField = "deviceNames",
 }: any) => {
@@ -75,6 +76,10 @@ const MeasurementForm = ({
   )
   const [filterApplied, setFilterApplied] = useState(selectedFilter !== null)
 
+  const [currentSelectedOptions, setCurrentSelectedOptions] = useState<any[]>(
+    [],
+  )
+
   const {
     data: deviceData,
     // status: deviceStatus,
@@ -96,18 +101,23 @@ const MeasurementForm = ({
   } = groupQuery
 
   let deviceContent: JSX.Element | null = null
-  let deviceNames: string[] = []
+  const deviceOptions = React.useMemo(() => {
+    if (deviceIsSuccess) {
+      return deviceData[devicesField].map((device: any) => ({
+        label: device[deviceNameLabelField],
+        id: device[deviceNameField],
+      }))
+    }
+    return []
+  }, [deviceIsSuccess, deviceData, devicesField, deviceNameLabelField, deviceNameField])
+
   if (deviceIsFetching) {
     deviceContent = <h3>Fetching devices...</h3>
   } else if (deviceIsLoading) {
     deviceContent = <h3>Loading devices...</h3>
   } else if (deviceIsError) {
     deviceContent = <p>{JSON.stringify(deviceError)}</p>
-  } else if (deviceIsSuccess) {
-    deviceNames = deviceData[devicesField].map((device: any) => {
-      return device[deviceNameField]
-    })
-  }
+  } 
 
   let groupContent: JSX.Element | null = null
   let groupName: string[] = []
@@ -193,6 +203,14 @@ const MeasurementForm = ({
       )*/
     }
   }, [formValues, pageKey, localStorageKey])
+
+  useEffect(() => {
+    setCurrentSelectedOptions(
+      deviceOptions.filter((option: any) =>
+        formValues.deviceNames?.includes(option.id),
+      ),
+    )
+  }, [formValues.deviceNames, setCurrentSelectedOptions, deviceOptions])
 
   const calcCurrentTimeInterval = (): number => {
     if (formValues.endTime && formValues.startTime) {
@@ -469,10 +487,16 @@ const MeasurementForm = ({
               <Autocomplete
                 multiple
                 loading={deviceIsLoading || deviceIsFetching}
-                options={deviceNames ? deviceNames : []}
-                value={formValues.deviceNames ?? []}
+                options={deviceOptions ? deviceOptions : []}
+                value={currentSelectedOptions}
+                isOptionEqualToValue={(option: any, newValue: any) => {
+                  return option.id === newValue.id
+                }}
                 onChange={(event, newValue) => {
-                  handleInputChange("deviceNames", newValue)
+                  const newDeviceNames = newValue.map(
+                    (option: any) => option.id,
+                  )
+                  handleInputChange("deviceNames", newDeviceNames)
                 }}
                 renderInput={(params) => (
                   <TextField {...params} label={label} fullWidth />

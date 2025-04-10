@@ -44,6 +44,8 @@ const EditUser: React.FC = () => {
   const navigate = useNavigate()
   const theme = useTheme()
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
+  const [userId, setUserId] = useState<string | null>(null)
+  const [email, setEmail] = useState<string | null>(null)
 
   const { id } = useParams<Record<string, string>>()
 
@@ -90,7 +92,12 @@ const EditUser: React.FC = () => {
         checkParametersInterval,
         comment,
         blinded,
+        userId,
+        email,
       } = getUserData
+
+      setUserId(userId)
+      setEmail(email)
 
       setFormValues({
         baseUri,
@@ -203,6 +210,27 @@ const EditUser: React.FC = () => {
       {getUserContent}
       <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">
         <form onSubmit={handleSubmit}>
+          <TextField
+            name="userId"
+            label="User ID"
+            type="text"
+            value={userId}            
+            fullWidth
+            margin="normal"
+            disabled
+            InputLabelProps={{ shrink: true }}
+          />
+          <TextField
+            name="email"
+            label="Email"
+            type="text"
+            value={email}            
+            fullWidth
+            margin="normal"
+            disabled
+            InputLabelProps={{ shrink: true }}
+          />
+
           <TextField
             name="baseUri"
             label="Base URI"

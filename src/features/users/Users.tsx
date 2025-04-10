@@ -43,8 +43,9 @@ const Users = () => {
     content = <p>{JSON.stringify(error)}</p>
   } else if (isSuccess) {
     const columns = [
-      { field: "userId", headerName: "Clerk ID", flex: 0.7 },
-      { field: "blinded", headerName: "Blinded", flex: 0.7 },
+      { field: "email", headerName: "Email", flex: 1 },
+      { field: "userId", headerName: "Clerk ID", flex: 0.5 },
+      { field: "blinded", headerName: "Blinded", flex: 1 },
       { field: "sensorId", headerName: "sID", flex: 1 },
       {
         field: "measurementInterval",
@@ -64,7 +65,7 @@ const Users = () => {
         headerName: "Check",
         flex: 0.5,
       },
-      { field: "comment", headerName: "Comment", flex: 1 },
+      { field: "comment", headerName: "Comment", flex: 0.5 },
     ]
     content = (
       <Box flexGrow={1} overflow="auto" width="100%">

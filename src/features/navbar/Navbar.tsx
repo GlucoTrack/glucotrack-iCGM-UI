@@ -22,7 +22,12 @@ import logoDarkMode from "@/images/dark-bg.png"
 import logoLightMode from "@/images/light-bg.png"
 import { setMode } from "@/features/navbar/navbarSlice"
 import { useNavigate } from "react-router-dom"
-import { SignIn, SignedOut, SignOutButton, SignedIn } from "@clerk/clerk-react"
+import {
+  SignIn,
+  SignedOut,
+  useClerk,
+  SignedIn,
+} from "@clerk/clerk-react"
 
 interface NavbarProps {
   isSidebarOpen: boolean
@@ -41,6 +46,7 @@ const Navbar: React.FC<NavbarProps> = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const navigate = useNavigate()
   const theme = useTheme()
   const [isLoginOpen, setIsLoginOpen] = React.useState(false)
+  const { signOut } = useClerk()
   return (
     <AppBar
       sx={{
@@ -84,11 +90,9 @@ const Navbar: React.FC<NavbarProps> = ({ isSidebarOpen, setIsSidebarOpen }) => {
               </IconButton>
             </SignedOut>
             <SignedIn>
-              <SignOutButton>
-                <IconButton>
-                  <LogoutIcon />
-                </IconButton>
-              </SignOutButton>
+              <IconButton onClick={() => signOut()} aria-label="Logout">
+                <LogoutIcon />
+              </IconButton>
             </SignedIn>
             <IconButton onClick={() => dispatch(setMode())}>
               {theme.palette.mode === "dark" ? (
