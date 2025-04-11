@@ -25,15 +25,15 @@ const UserGroups: React.FC = () => {
   const handleCellClick = (params: GridCellParams) => {
     const {
       _id: groupId,
-      userGroupName,
-      userGroupDescription,
+      groupName,
+      groupDescription,
       userIds,
     } = params.row
 
     dispatch(
       setUserGroup({
-        userGroupName,
-        userGroupDescription,
+        groupName,
+        groupDescription,
         userIds,
       }),
     )
@@ -50,9 +50,9 @@ const UserGroups: React.FC = () => {
     content = <p>{JSON.stringify(getGroupsError)}</p>
   } else if (isSuccessGroups) {
     const columns = [
-      { field: "userGroupName", headerName: "Name", flex: 1 },
-      { field: "userGroupDescription", headerName: "Description", flex: 2 },
-      { field: "mobileNames", headerName: "Mobiles", flex: 2 },
+      { field: "groupName", headerName: "Name", flex: 1 },
+      { field: "groupDescription", headerName: "Description", flex: 2 },
+      { field: "userIds", headerName: "Users", flex: 2 },
     ]
 
     content = (
@@ -71,7 +71,7 @@ const UserGroups: React.FC = () => {
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header
-        title="Mobile Groups"
+        title="User Groups"
         subtitle={`List of groups: ${getGroupStatus}`}
       >
         <Action action="Add" url="add" />

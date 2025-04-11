@@ -6,8 +6,8 @@ import Header from "@/components/Header"
 import {
   useDeleteUserGroupMutation,
   useEditUserGroupMutation,
-  useGetMobilesQuery,
-  useEditMobilesMutation,
+  useEditUsersMutation,
+  useGetUsersQuery,
 } from "@/features/api/apiSlice"
 import { RootState } from "@/store/store"
 import { resetUserGroup } from "./groupsSlice"
@@ -15,18 +15,18 @@ import { Typography } from "@mui/material"
 import { SnackbarContext } from "../../providers/SnackbarProvider"
 
 interface FormValues {
-  userGroupName: string
-  userGroupDescription: string
+  groupName: string
+  groupDescription: string
   userIds: string[]
 }
 
 const initialValues: FormValues = {
-  userGroupName: "",
-  userGroupDescription: "",
+  groupName: "",
+  groupDescription: "",
   userIds: [],
 }
 
-interface MobileValues {
+interface UserValues {
   _id?: string
   measurementInterval: string
   reportInterval: string
@@ -36,7 +36,7 @@ interface MobileValues {
   checkParametersInterval: string
 }
 
-const initialMobileValues: MobileValues = {
+const initialUserValues: UserValues = {
   measurementInterval: "",
   reportInterval: "",
   refMillivolts: "",
@@ -50,14 +50,15 @@ const EditUserGroup: React.FC = () => {
   const dispatch = useDispatch()
   const { openSnackbar } = useContext(SnackbarContext)
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
-  const [formMobileValues, setFormMobileValues] =
-    useState<MobileValues>(initialMobileValues)
-  const [isMobileSubmitting, setIsMobileSubmitting] = useState(false)
-  const { data, isFetching, isLoading } = useGetMobilesQuery({})
+  const [formUserValues, setFormUserValues] =
+    useState<UserValues>(initialUserValues)
+  const [isUserSubmitting, setIsUserSubmitting] = useState(false)
+  const { data, isFetching, isLoading } = useGetUsersQuery({})
   const { groupId } = useParams<Record<string, string>>()
-  const { userGroupName, userGroupDescription, userIds } = useSelector(
+  const { groupName, groupDescription, userIds } = useSelector(
     (state: RootState) => state.userGroups,
   )
+  const [currentOptions, setCurrentOptions] = useState<any[]>([])
   const [
     editGroup,
     {
@@ -76,57 +77,70 @@ const EditUserGroup: React.FC = () => {
       isSuccess: isDeleteSuccess,
     },
   ] = useDeleteUserGroupMutation()
-  const [editMobiles] = useEditMobilesMutation()
+  const [editUsers] = useEditUsersMutation()
 
-  // Fill the attributes form with the common values of the selected mobiles
+  // Fill the attributes form with the common values of the selected users
   useEffect(() => {
-    if (formValues.userIds.length > 0 && data && data.userIds) {
-      // Get the mobile from the selected mobile names
-      const mobiles = formValues.userIds
-        .map((usersId) => {
-          const device = data.userIds.find(
-            (device: any) => device.mobileName === usersId,
-          )
-          return device ? device : null
+    if (formValues.userIds.length > 0 && data && data.users) {
+      // Get the user from the selected user names
+      const users = formValues.userIds
+        .map((usr: any) => {
+          if (typeof usr === "string") {
+            return data.users.find((user: any) => user.userId === usr)
+          }
+          return data.users.find((user: any) => user.userId === usr.id)
         })
-        .filter((device) => device !== null)
+        .filter((user) => user !== null)
 
-      // Get the common values from the first mobile
-      const commonValue: MobileValues = {
-        measurementInterval: mobiles[0].measurementInterval,
-        reportInterval: mobiles[0].reportInterval,
-        refMillivolts: mobiles[0].refMillivolts,
-        weMillivolts: mobiles[0].weMillivolts,
-        filterLength: mobiles[0].filterLength,
-        checkParametersInterval: mobiles[0].checkParametersInterval,
+      setCurrentOptions(
+        users.map((user: any) => ({
+          label: user.email,
+          id: user.userId,
+        })),
+      )
+
+      console.log(users)
+      if (users.length === 0) {
+        console.log(formValues.userIds)
+        return
       }
 
-      // Check if all the mobiles have the same values, instead i put empty string
-      for (let i = 1; i < mobiles.length; i++) {
-        const mobile = mobiles[i]
-        if (commonValue.measurementInterval !== mobile.measurementInterval) {
+      // Get the common values from the first user
+      const commonValue: UserValues = {
+        measurementInterval: users[0].measurementInterval,
+        reportInterval: users[0].reportInterval,
+        refMillivolts: users[0].refMillivolts,
+        weMillivolts: users[0].weMillivolts,
+        filterLength: users[0].filterLength,
+        checkParametersInterval: users[0].checkParametersInterval,
+      }
+
+      // Check if all the users have the same values, instead i put empty string
+      for (let i = 1; i < users.length; i++) {
+        const user = users[i]
+        if (commonValue.measurementInterval !== user.measurementInterval) {
           commonValue.measurementInterval = ""
         }
-        if (commonValue.reportInterval !== mobile.reportInterval) {
+        if (commonValue.reportInterval !== user.reportInterval) {
           commonValue.reportInterval = ""
         }
-        if (commonValue.refMillivolts !== mobile.refMillivolts) {
+        if (commonValue.refMillivolts !== user.refMillivolts) {
           commonValue.refMillivolts = ""
         }
-        if (commonValue.weMillivolts !== mobile.weMillivolts) {
+        if (commonValue.weMillivolts !== user.weMillivolts) {
           commonValue.weMillivolts = ""
         }
-        if (commonValue.filterLength !== mobile.filterLength) {
+        if (commonValue.filterLength !== user.filterLength) {
           commonValue.filterLength = ""
         }
         if (
-          commonValue.checkParametersInterval !== mobile.checkParametersInterval
+          commonValue.checkParametersInterval !== user.checkParametersInterval
         ) {
           commonValue.checkParametersInterval = ""
         }
       }
 
-      setFormMobileValues(commonValue)
+      setFormUserValues(commonValue)
     }
   }, [data, formValues.userIds])
 
@@ -136,16 +150,24 @@ const EditUserGroup: React.FC = () => {
     const setDefaultValues = () => {
       localStorage.setItem(
         "userGroupValues_" + groupId,
-        JSON.stringify({ userGroupName, userGroupDescription, userIds }),
+        JSON.stringify({
+          groupName,
+          groupDescription,
+          userIds,
+        }),
       )
-      setFormValues({ userGroupName, userGroupDescription, userIds })
+      setFormValues({
+        groupName,
+        groupDescription,
+        userIds,
+      })
     }
 
     if (savedFormValues) {
       const parsedFormValues = JSON.parse(savedFormValues)
       if (
-        parsedFormValues.userGroupName &&
-        parsedFormValues.userGroupDescription &&
+        parsedFormValues.groupName &&
+        parsedFormValues.groupDescription &&
         parsedFormValues.userIds
       ) {
         setFormValues(parsedFormValues)
@@ -155,12 +177,12 @@ const EditUserGroup: React.FC = () => {
     } else {
       setDefaultValues()
     }
-  }, [userGroupName, userGroupDescription, userIds, groupId])
+  }, [groupName, groupDescription, userIds, groupId])
 
   const canSave =
     [
-      formValues.userGroupName,
-      formValues.userGroupDescription,
+      formValues.groupName,
+      formValues.groupDescription,
       formValues.userIds,
     ].every(Boolean) &&
     !isEditingGroup &&
@@ -174,13 +196,13 @@ const EditUserGroup: React.FC = () => {
     }))
   }
 
-  const canSaveMobile = [
-    formMobileValues.measurementInterval,
-    formMobileValues.reportInterval,
-    formMobileValues.refMillivolts,
-    formMobileValues.weMillivolts,
-    formMobileValues.filterLength,
-    formMobileValues.checkParametersInterval,
+  const canSaveUser = [
+    formUserValues.measurementInterval,
+    formUserValues.reportInterval,
+    formUserValues.refMillivolts,
+    formUserValues.weMillivolts,
+    formUserValues.filterLength,
+    formUserValues.checkParametersInterval,
   ].some((value) => value !== undefined && value !== null && value !== "")
 
   const handleCancel = () => {
@@ -197,7 +219,7 @@ const EditUserGroup: React.FC = () => {
         await editGroup({
           groupId,
           ...formValues,
-          mobileNames: formValues.userIds.join(","),
+          userIds: formValues.userIds.map((user: any) => user.id).join(","),
         })
         localStorage.setItem(
           "userGroupValues_" + groupId,
@@ -238,10 +260,10 @@ const EditUserGroup: React.FC = () => {
       const errorMessage = JSON.stringify(errorMessageParsed.data.message)
       openSnackbar(errorMessage, "error")
     } else if (isEditSuccess) {
-      openSnackbar("Mobile Group updated successfully", "success")
+      openSnackbar("User Group updated successfully", "success")
       handleMutationSuccess()
     } else if (isDeleteSuccess) {
-      openSnackbar("Mobile Group deleted successfully", "success")
+      openSnackbar("User Group deleted successfully", "success")
       handleMutationSuccess()
     }
   }, [
@@ -257,60 +279,56 @@ const EditUserGroup: React.FC = () => {
     handleMutationSuccess,
   ])
 
-  const handleEditMobilesResponse = (response: any, mobiles: any) => {
+  const handleEditUsersResponse = (response: any, users: any) => {
     if (response?.error?.data) {
       const errorMessage = response.error.data.errors
         ? response.error.data.errors.join(", ")
         : response.error.data.message
       openSnackbar(errorMessage, "error")
     } else {
-      if (response?.data?.mobiles?.updatedMobileIds) {
-        const updatedMobileIds = response.data.mobiles.updatedMobileIds
-        const failedMobileIds = response.data.mobiles.failedMobileIds
-        const allMobilesUpdated = mobiles.every((mobileId: any) =>
-          updatedMobileIds.includes(mobileId),
+      if (response?.data?.users?.updatedUserIds) {
+        const updatedUserIds = response.data.users.updatedUserIds
+        const failedUserIds = response.data.users.failedUserIds
+        const allUsersUpdated = users.every((userId: any) =>
+          updatedUserIds.includes(userId),
         )
-        const message = allMobilesUpdated
-          ? "All mobiles updated successfully"
-          : `The following mobiles were not updated: ${failedMobileIds.join(
-              ", ",
-            )}`
-        setFormMobileValues(initialMobileValues)
-        openSnackbar(message, allMobilesUpdated ? "success" : "warning")
+        const message = allUsersUpdated
+          ? "All users updated successfully"
+          : `The following users were not updated: ${failedUserIds.join(", ")}`
+        setFormUserValues(initialUserValues)
+        openSnackbar(message, allUsersUpdated ? "success" : "warning")
       } else {
-        openSnackbar("Failed to edit mobiles", "error")
+        openSnackbar("Failed to edit users", "error")
       }
     }
   }
 
-  const handleMobiles = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleUsers = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setIsMobileSubmitting(true)
-    if (canSaveMobile) {
+    setIsUserSubmitting(true)
+    if (canSaveUser) {
       try {
         const users = formValues.userIds
-          .map((mobileName) => {
-            const device = data.mobileDevices.find(
-              (device: any) => device.mobileName === mobileName,
+          .map((userName) => {
+            const device = data.userDevices.find(
+              (device: any) => device.userName === userName,
             )
             return device ? device._id : null
           })
           .filter((id) => id !== null)
 
-        const nonEmptyFormMobileValues = Object.fromEntries(
-          Object.entries(formMobileValues).filter(
-            ([key, value]) => value !== "",
-          ),
+        const nonEmptyFormUserValues = Object.fromEntries(
+          Object.entries(formUserValues).filter(([key, value]) => value !== ""),
         )
-        const response = await editMobiles({
-          mobileIds: users,
-          ...nonEmptyFormMobileValues,
+        const response = await editUsers({
+          userIds: users,
+          ...nonEmptyFormUserValues,
         })
-        handleEditMobilesResponse(response, users)
+        handleEditUsersResponse(response, users)
       } catch (error: any) {
-        openSnackbar("Failed to edit mobile: " + error.message, "error")
+        openSnackbar("Failed to edit user: " + error.message, "error")
       } finally {
-        setIsMobileSubmitting(false)
+        setIsUserSubmitting(false)
       }
     }
   }
@@ -318,7 +336,7 @@ const EditUserGroup: React.FC = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     if (!isNaN(Number(value)) || value === "") {
-      setFormMobileValues((prevState) => ({
+      setFormUserValues((prevState) => ({
         ...prevState,
         [name]: value,
       }))
@@ -328,26 +346,26 @@ const EditUserGroup: React.FC = () => {
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header
-        title="Edit a mobile group"
+        title="Edit a user group"
         subtitle="(compete each field below to edit a group)"
       />
       <Box flexGrow={1} overflow="auto" width="100%">
         <form onSubmit={handleSubmit}>
           <TextField
-            id="userGroupName"
-            name="userGroupName"
-            label="Mobile Group Name"
-            value={formValues.userGroupName}
+            id="groupName"
+            name="groupName"
+            label="User Group Name"
+            value={formValues.groupName}
             onChange={handleChange}
             required
             fullWidth
             margin="normal"
           />
           <TextField
-            id="userGroupDescription"
-            name="userGroupDescription"
+            id="groupDescription"
+            name="groupDescription"
             label="Group Description"
-            value={formValues.userGroupDescription}
+            value={formValues.groupDescription}
             onChange={handleChange}
             required
             fullWidth
@@ -356,23 +374,28 @@ const EditUserGroup: React.FC = () => {
           <Autocomplete
             multiple
             loading={isFetching || isLoading}
+            isOptionEqualToValue={(option: any, value: any) =>
+              option.id === value.id
+            }
             options={
-              data && data.mobileDevices
-                ? data.mobileDevices.map((mobile: any) => mobile.mobileName)
+              data && data.users
+                ? data.users.map((user: any) => {
+                    return { label: user.email, id: user.userId }
+                  })
                 : []
             }
-            value={formValues.userIds ?? []}
+            value={currentOptions}
             onChange={(_event, newValue) => {
               setFormValues((prevValues) => ({
                 ...prevValues,
-                mobileNames: newValue,
+                userIds: newValue,
               }))
             }}
             renderInput={(params) => (
               <TextField
                 sx={{ mt: 2 }}
                 {...params}
-                label={"Mobile Names"}
+                label={"User Names"}
                 fullWidth
               />
             )}
@@ -404,15 +427,15 @@ const EditUserGroup: React.FC = () => {
 
       <Box flexGrow={5} overflow="auto" width="100%">
         <Typography sx={{ mb: 2 }}>
-          Modify the attributes of every mobile within this group
+          Modify the attributes of every user within this group
         </Typography>
 
-        <form onSubmit={handleMobiles}>
+        <form onSubmit={handleUsers}>
           <TextField
             id="measurementInterval"
             name="measurementInterval"
             label="Measurement Interval"
-            value={formMobileValues.measurementInterval}
+            value={formUserValues.measurementInterval}
             onChange={handleInputChange}
             margin="normal"
             sx={{ mr: 2 }}
@@ -421,7 +444,7 @@ const EditUserGroup: React.FC = () => {
             id="reportInterval"
             name="reportInterval"
             label="Report Interval"
-            value={formMobileValues.reportInterval}
+            value={formUserValues.reportInterval}
             onChange={handleInputChange}
             margin="normal"
             sx={{ mr: 2 }}
@@ -430,7 +453,7 @@ const EditUserGroup: React.FC = () => {
             id="refMillivolts"
             name="refMillivolts"
             label="Ref Millivolts"
-            value={formMobileValues.refMillivolts}
+            value={formUserValues.refMillivolts}
             onChange={handleInputChange}
             margin="normal"
             sx={{ mr: 2 }}
@@ -439,7 +462,7 @@ const EditUserGroup: React.FC = () => {
             id="weMillivolts"
             name="weMillivolts"
             label="We Millivolts"
-            value={formMobileValues.weMillivolts}
+            value={formUserValues.weMillivolts}
             onChange={handleInputChange}
             margin="normal"
             sx={{ mr: 2 }}
@@ -448,7 +471,7 @@ const EditUserGroup: React.FC = () => {
             id="filterLength"
             name="filterLength"
             label="Filter Length"
-            value={formMobileValues.filterLength}
+            value={formUserValues.filterLength}
             onChange={handleInputChange}
             margin="normal"
             sx={{ mr: 2 }}
@@ -457,7 +480,7 @@ const EditUserGroup: React.FC = () => {
             id="checkParametersInterval"
             name="checkParametersInterval"
             label="Check Parameters Interval"
-            value={formMobileValues.checkParametersInterval}
+            value={formUserValues.checkParametersInterval}
             onChange={handleInputChange}
             margin="normal"
             sx={{ mr: 2 }}
@@ -469,7 +492,7 @@ const EditUserGroup: React.FC = () => {
                 variant="outlined"
                 color="secondary"
                 onClick={() => {
-                  setFormMobileValues(initialMobileValues)
+                  setFormUserValues(initialUserValues)
                 }}
               >
                 Cancel
@@ -478,7 +501,7 @@ const EditUserGroup: React.FC = () => {
                 type="submit"
                 variant="contained"
                 color="primary"
-                disabled={isMobileSubmitting || !canSaveMobile}
+                disabled={isUserSubmitting || !canSaveUser}
               >
                 Submit
               </Button>

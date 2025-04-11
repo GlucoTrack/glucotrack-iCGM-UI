@@ -1,20 +1,20 @@
 import React, { useState, useContext, useEffect, useCallback } from "react"
 import { useNavigate } from "react-router-dom"
 import { Box, Button, TextField, Autocomplete } from "@mui/material"
-import { useGetMobilesQuery } from "@/features/api/apiSlice"
+import { useGetUsersQuery } from "@/features/api/apiSlice"
 import Header from "@/components/Header"
 import { useAddUserGroupMutation } from "@/features/api/apiSlice"
 import { SnackbarContext } from "../../providers/SnackbarProvider"
 
 interface FormValues {
-  userGroupName: string
-  userGroupDescription: string
+  groupName: string
+  groupDescription: string
   userIds: string[]
 }
 
 const initialValues: FormValues = {
-  userGroupName: "",
-  userGroupDescription: "",
+  groupName: "",
+  groupDescription: "",
   userIds: [],
 }
 
@@ -22,13 +22,13 @@ const AddUserGroup: React.FC = () => {
   const navigate = useNavigate()
   const { openSnackbar } = useContext(SnackbarContext)
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
-  const { data, isFetching } = useGetMobilesQuery({})
+  const { data, isFetching } = useGetUsersQuery({})
   const [addGroup, { isLoading, isError, error, isSuccess }] =
     useAddUserGroupMutation()
   const canSave =
     [
-      formValues.userGroupName,
-      formValues.userGroupDescription,
+      formValues.groupName,
+      formValues.groupDescription,
       formValues.userIds,
     ].every(Boolean) && !isLoading
 
@@ -44,9 +44,10 @@ const AddUserGroup: React.FC = () => {
     e.preventDefault()
     if (canSave) {
       try {
+        console.log(formValues.userIds)
         await addGroup({
           ...formValues,
-          userIds: formValues.userIds.join(","),
+          userIds: formValues.userIds.map((user:any) => user.id).join(","),
         })
       } catch (error: any) {
         console.error(error)
@@ -57,12 +58,12 @@ const AddUserGroup: React.FC = () => {
   const handleMutationSuccess = useCallback(() => {
     setTimeout(() => {
       setFormValues(initialValues)
-      navigate("/mobile-groups")
+      navigate("/user-groups")
     }, 0)
   }, [navigate])
 
   const handleCancel = () => {
-    navigate("/mobile-groups")
+    navigate("/user-groups")
   }
 
   useEffect(() => {
@@ -91,26 +92,26 @@ const AddUserGroup: React.FC = () => {
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header
-        title="Add a new mobile group"
-        subtitle="(add multiple mobiles by separating Mobile Names with a comma)"
+        title="Add a new user group"
+        subtitle="(add multiple user by separating User with a comma)"
       />
       <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">
         <form onSubmit={handleSubmit}>
           <TextField
-            id="userGroupName"
-            name="userGroupName"
+            id="groupName"
+            name="groupName"
             label="Group Name"
-            value={formValues.userGroupName}
+            value={formValues.groupName}
             onChange={handleChange}
             required
             fullWidth
             margin="normal"
           />
           <TextField
-            id="userGroupDescription"
-            name="userGroupDescription"
+            id="groupDescription"
+            name="groupDescription"
             label="Group Description"
-            value={formValues.userGroupDescription}
+            value={formValues.groupDescription}
             onChange={handleChange}
             required
             fullWidth
@@ -120,9 +121,14 @@ const AddUserGroup: React.FC = () => {
             multiple
             loading={isFetching || isLoading}
             options={
-              data && data.mobileDevices
-                ? data.mobileDevices.map((mobile: any) => mobile.mobileName)
+              data && data.users
+                ? data.users.map((user: any) => {
+                    return { label: user.email, id: user.userId }
+                  })
                 : []
+            }
+            isOptionEqualToValue={(option: any, value: any) =>
+              option.id === value.id
             }
             value={formValues.userIds ?? []}
             onChange={(_event, newValue) => {
@@ -132,7 +138,7 @@ const AddUserGroup: React.FC = () => {
               }))
             }}
             renderInput={(params) => (
-              <TextField {...params} label={"Mobile Names"} fullWidth />
+              <TextField {...params} label={"Users"} fullWidth />
             )}
           />
           {content}

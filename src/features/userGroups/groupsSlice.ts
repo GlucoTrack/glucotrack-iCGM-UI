@@ -1,14 +1,14 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 
 interface UserGroupsState {
-  userGroupName: string
-  userGroupDescription: string
+  groupName: string
+  groupDescription: string
   userIds: string[]
 }
 
 const initialState: UserGroupsState = {
-  userGroupName: "",
-  userGroupDescription: "",
+  groupName: "",
+  groupDescription: "",
   userIds: [],
 }
 
@@ -17,10 +17,10 @@ export const groupsSlice = createSlice({
   initialState,
   reducers: {
     setUserGroup: (state, action: PayloadAction<UserGroupsState>) => {
-      const { userGroupName, userGroupDescription, userIds: mobileNames } = action.payload
-      state.userGroupName = userGroupName
-      state.userGroupDescription = userGroupDescription
-      state.userIds = mobileNames
+      const { groupName, groupDescription, userIds } = action.payload
+      state.groupName = groupName
+      state.groupDescription = groupDescription
+      state.userIds = userIds
     },
     resetUserGroup: (state) => {
       return initialState

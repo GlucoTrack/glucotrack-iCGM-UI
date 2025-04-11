@@ -12,9 +12,15 @@ export const apiSlice = createApi({
         "getUsers",
         "getUser",
         "editUser",
+        "editUsers",
         "deleteUser",
         "addUser",
         "getRawUserMeasurementsByUserIds",
+        "getUserGroups",
+        "addUserGroup",
+        "editUserGroup",
+        "deleteUserGroup",
+        "addUserGroup",
       ])
 
       if (endpointsWithAuth.has(endpoint) && token) {
@@ -302,6 +308,17 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["Users"],
     }),
+    editUsers: builder.mutation({
+      query: ({ usersIds, ...userData }) => ({
+        url: `user/updateUsers/${usersIds}`,
+        method: "PATCH",
+        body: userData,
+      }),
+      invalidatesTags: (result, error, arg) => [
+        { type: "Users", id: arg },
+        "Users",
+      ],
+    }),
     deleteUser: builder.mutation({
       query: (id) => ({
         url: `user/deleteByUserId/${id}`,
@@ -383,6 +400,7 @@ export const {
   useGetUsersQuery,
   useGetUserQuery,
   useEditUserMutation,
+  useEditUsersMutation,
   useDeleteUserMutation,
   useAddUserMutation,
   useGetUserGroupsQuery,
