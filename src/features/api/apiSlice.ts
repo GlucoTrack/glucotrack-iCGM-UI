@@ -309,8 +309,8 @@ export const apiSlice = createApi({
       invalidatesTags: ["Users"],
     }),
     editUsers: builder.mutation({
-      query: ({ usersIds, ...userData }) => ({
-        url: `user/updateUsers/${usersIds}`,
+      query: ({ userIds, ...userData }) => ({
+        url: `user/updateByUserIds/${userIds}`,
         method: "PATCH",
         body: userData,
       }),

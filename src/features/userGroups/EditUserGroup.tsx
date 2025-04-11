@@ -308,18 +308,19 @@ const EditUserGroup: React.FC = () => {
     setIsUserSubmitting(true)
     if (canSaveUser) {
       try {
-        const users = formValues.userIds
-          .map((userName) => {
-            const device = data.userDevices.find(
-              (device: any) => device.userName === userName,
+        const users = currentOptions
+          .map((userSelected: any) => {
+            const user = data.users.find(
+              (user: any) => user.userId === userSelected.id,
             )
-            return device ? device._id : null
+            return user ? user._id : null
           })
           .filter((id) => id !== null)
 
         const nonEmptyFormUserValues = Object.fromEntries(
           Object.entries(formUserValues).filter(([key, value]) => value !== ""),
         )
+
         const response = await editUsers({
           userIds: users,
           ...nonEmptyFormUserValues,
@@ -495,7 +496,7 @@ const EditUserGroup: React.FC = () => {
                   setFormUserValues(initialUserValues)
                 }}
               >
-                Cancel
+                Reset values
               </Button>
               <Button
                 type="submit"
