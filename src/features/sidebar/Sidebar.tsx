@@ -92,6 +92,12 @@ const navItems = [
     requireRole: ["org:admin"],
   },
   {
+    text: "User Groups",
+    icon: <GroupWorkOutlined />,
+    path: "user-groups",
+    requireRole: ["org:admin"],
+  },
+  {
     text: "Raw User Measurements",
     icon: <TimelineOutlined />,
     path: "raw-user-measurements",

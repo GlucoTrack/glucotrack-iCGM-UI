@@ -31,6 +31,9 @@ import AddFirmware from "@/features/firmwares/AddFirmware"
 import EditFirmware from "@/features/firmwares/EditFirmware"
 import AddUser from "@/features/users/AddUser"
 import EditUser from "@/features/users/EditUser"
+import UserGroups from "@/features/userGroups/UserGroups"
+import AddUserGroup from "@/features/userGroups/AddUserGroup"
+import EditUserGroup from "@/features/userGroups/EditUserGroup"
 import { ClerkProvider } from "@clerk/clerk-react"
 import { dark } from "@clerk/themes"
 import ProtectedRoute from "@/components/ProtectedRoute"
@@ -137,6 +140,30 @@ function App() {
                     element={
                       <ProtectedRoute allowedRoles={["org:admin"]}>
                         <RawUserMeasurements />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/user-groups"
+                    element={
+                      <ProtectedRoute allowedRoles={["org:admin"]}>
+                        <UserGroups />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/user-groups/add"
+                    element={
+                      <ProtectedRoute allowedRoles={["org:admin"]}>
+                        <AddUserGroup />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/user-groups/:groupId"
+                    element={
+                      <ProtectedRoute allowedRoles={["org:admin"]}>
+                        <EditUserGroup />
                       </ProtectedRoute>
                     }
                   />

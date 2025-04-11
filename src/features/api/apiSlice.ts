@@ -32,6 +32,7 @@ export const apiSlice = createApi({
     "MobileGroups",
     "Firmwares",
     "Users",
+    "UserGroups",
   ],
   endpoints: (builder) => ({
     //TODO maybe code split per feature
@@ -316,6 +317,34 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["Users"],
     }),
+    //*USER GROUPS
+    addUserGroup: builder.mutation({
+      query: (groupData) => ({
+        url: "userGroups",
+        method: "POST",
+        body: groupData,
+      }),
+      invalidatesTags: ["UserGroups"],
+    }),
+    getUserGroups: builder.query({
+      query: () => "userGroups",
+      providesTags: ["UserGroups"],
+    }),
+    editUserGroup: builder.mutation({
+      query: ({ groupId, ...groupData }) => ({
+        url: `userGroups/${groupId}`,
+        method: "PATCH",
+        body: groupData,
+      }),
+      invalidatesTags: ["UserGroups"],
+    }),
+    deleteUserGroup: builder.mutation({
+      query: (groupId) => ({
+        url: `userGroups/${groupId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["UserGroups"],
+    }),
   }),
 })
 
@@ -356,4 +385,8 @@ export const {
   useEditUserMutation,
   useDeleteUserMutation,
   useAddUserMutation,
+  useGetUserGroupsQuery,
+  useEditUserGroupMutation,
+  useDeleteUserGroupMutation,
+  useAddUserGroupMutation,
 } = apiSlice
