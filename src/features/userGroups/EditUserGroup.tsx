@@ -284,9 +284,9 @@ const EditUserGroup: React.FC = () => {
         : response.error.data.message
       openSnackbar(errorMessage, "error")
     } else {
-      if (response?.data?.users?.updatedUserIds) {
-        const updatedUserIds = response.data.users.updatedUserIds
-        const failedUserIds = response.data.users.failedUserIds
+      if (response?.data?.users?.updatedIds) {
+        const updatedUserIds = response.data.users.updatedIds
+        const failedUserIds = response.data.users.failedIds
         const allUsersUpdated = users.every((userId: any) =>
           updatedUserIds.includes(userId),
         )
