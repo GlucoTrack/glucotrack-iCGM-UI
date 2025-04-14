@@ -99,9 +99,7 @@ const EditUserGroup: React.FC = () => {
         })),
       )
 
-      console.log(users)
       if (users.length === 0) {
-        console.log(formValues.userIds)
         return
       }
 
