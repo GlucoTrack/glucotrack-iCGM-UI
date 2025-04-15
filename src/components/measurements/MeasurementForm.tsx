@@ -109,7 +109,13 @@ const MeasurementForm = ({
       }))
     }
     return []
-  }, [deviceIsSuccess, deviceData, devicesField, deviceNameLabelField, deviceNameField])
+  }, [
+    deviceIsSuccess,
+    deviceData,
+    devicesField,
+    deviceNameLabelField,
+    deviceNameField,
+  ])
 
   if (deviceIsFetching) {
     deviceContent = <h3>Fetching devices...</h3>
@@ -117,7 +123,7 @@ const MeasurementForm = ({
     deviceContent = <h3>Loading devices...</h3>
   } else if (deviceIsError) {
     deviceContent = <p>{JSON.stringify(deviceError)}</p>
-  } 
+  }
 
   let groupContent: JSX.Element | null = null
   let groupName: string[] = []
@@ -324,6 +330,9 @@ const MeasurementForm = ({
       const groupObject = groupData[groupsField].find(
         (group: any) => group[groupNameField] === groupName,
       )
+      if (!deviceNamesField) {
+        throw new Error("deviceNamesField is not defined")
+      }
       if (groupObject) {
         deviceNamesFromGroup = groupObject[deviceNamesField]
       } else {
@@ -524,9 +533,6 @@ const MeasurementForm = ({
                     value={
                       formValues.groupName === "" ? null : formValues.groupName
                     }
-                    isOptionEqualToValue={(option: any, newValue: any) => {
-                      return option.id === newValue.id
-                    }}
                     onChange={(event, newValue: any) => {
                       handleInputChange(
                         "groupName",

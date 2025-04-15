@@ -1,14 +1,7 @@
 import React, { useContext, useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
-import {
-  Autocomplete,
-  Box,
-  Button,
-  Divider,
-  TextField,
-  useTheme,
-} from "@mui/material"
+import { Autocomplete, Box, Button, Divider, TextField } from "@mui/material"
 import Header from "@/components/Header"
 import {
   useDeleteMobileGroupMutation,
@@ -19,7 +12,7 @@ import {
 import { RootState } from "@/store/store"
 import { resetMobileGroup } from "./groupsSlice"
 import { Typography } from "@mui/material"
-import { SnackbarContext } from '../../providers/SnackbarProvider'
+import { SnackbarContext } from "../../providers/SnackbarProvider"
 
 interface FormValues {
   mobileGroupName: string
@@ -44,21 +37,21 @@ interface MobileValues {
 }
 
 const initialMobileValues: MobileValues = {
-  measurementInterval: '',
-  reportInterval: '',
-  refMillivolts: '',
-  weMillivolts: '',
-  filterLength: '',
-  checkParametersInterval: '',
+  measurementInterval: "",
+  reportInterval: "",
+  refMillivolts: "",
+  weMillivolts: "",
+  filterLength: "",
+  checkParametersInterval: "",
 }
 
 const EditMobileGroup: React.FC = () => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
-  const theme = useTheme()
   const { openSnackbar } = useContext(SnackbarContext)
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
-  const [formMobileValues, setFormMobileValues] = useState<MobileValues>(initialMobileValues)
+  const [formMobileValues, setFormMobileValues] =
+    useState<MobileValues>(initialMobileValues)
   const [isMobileSubmitting, setIsMobileSubmitting] = useState(false)
   const { data, isFetching, isLoading } = useGetMobilesQuery({})
   const { groupId } = useParams<Record<string, string>>()
@@ -83,19 +76,20 @@ const EditMobileGroup: React.FC = () => {
       isSuccess: isDeleteSuccess,
     },
   ] = useDeleteMobileGroupMutation()
-  const [
-    editMobiles,
-  ] = useEditMobilesMutation()
-
+  const [editMobiles] = useEditMobilesMutation()
 
   // Fill the attributes form with the common values of the selected mobiles
   useEffect(() => {
     if (formValues.mobileNames.length > 0 && data && data.mobileDevices) {
       // Get the mobile from the selected mobile names
-      const mobiles = formValues.mobileNames.map(mobileName => {
-        const device = data.mobileDevices.find((device: any) => device.mobileName === mobileName)
-        return device ? device : null
-      }).filter(device => device !== null)
+      const mobiles = formValues.mobileNames
+        .map((mobileName) => {
+          const device = data.mobileDevices.find(
+            (device: any) => device.mobileName === mobileName,
+          )
+          return device ? device : null
+        })
+        .filter((device) => device !== null)
 
       // Get the common values from the first mobile
       const commonValue: MobileValues = {
@@ -109,32 +103,32 @@ const EditMobileGroup: React.FC = () => {
 
       // Check if all the mobiles have the same values, instead i put empty string
       for (let i = 1; i < mobiles.length; i++) {
-        const mobile = mobiles[i];
+        const mobile = mobiles[i]
         if (commonValue.measurementInterval !== mobile.measurementInterval) {
-          commonValue.measurementInterval = ''
+          commonValue.measurementInterval = ""
         }
         if (commonValue.reportInterval !== mobile.reportInterval) {
-          commonValue.reportInterval = ''
+          commonValue.reportInterval = ""
         }
         if (commonValue.refMillivolts !== mobile.refMillivolts) {
-          commonValue.refMillivolts = ''
+          commonValue.refMillivolts = ""
         }
         if (commonValue.weMillivolts !== mobile.weMillivolts) {
-          commonValue.weMillivolts = ''
+          commonValue.weMillivolts = ""
         }
         if (commonValue.filterLength !== mobile.filterLength) {
-          commonValue.filterLength = ''
+          commonValue.filterLength = ""
         }
-        if (commonValue.checkParametersInterval !== mobile.checkParametersInterval) {
-          commonValue.checkParametersInterval = ''
+        if (
+          commonValue.checkParametersInterval !== mobile.checkParametersInterval
+        ) {
+          commonValue.checkParametersInterval = ""
         }
       }
 
       setFormMobileValues(commonValue)
-
     }
   }, [data, formValues.mobileNames])
-
 
   useEffect(() => {
     const savedFormValues = localStorage.getItem("mobileGroupValues_" + groupId)
@@ -142,7 +136,11 @@ const EditMobileGroup: React.FC = () => {
     const setDefaultValues = () => {
       localStorage.setItem(
         "mobileGroupValues_" + groupId,
-        JSON.stringify({ mobileGroupName, mobileGroupDescription, mobileNames }),
+        JSON.stringify({
+          mobileGroupName,
+          mobileGroupDescription,
+          mobileNames,
+        }),
       )
       setFormValues({ mobileGroupName, mobileGroupDescription, mobileNames })
     }
@@ -187,7 +185,7 @@ const EditMobileGroup: React.FC = () => {
     formMobileValues.weMillivolts,
     formMobileValues.filterLength,
     formMobileValues.checkParametersInterval,
-  ].some((value) => value !== undefined && value !== null && value !== '')
+  ].some((value) => value !== undefined && value !== null && value !== "")
 
   const handleCancel = () => {
     setTimeout(() => {
@@ -216,12 +214,12 @@ const EditMobileGroup: React.FC = () => {
     }
   }
 
-  const handleMutationSuccess = () => {
+  const handleMutationSuccess = React.useCallback(() => {
     setTimeout(() => {
       dispatch(resetMobileGroup())
       navigate("/mobile-groups")
     }, 0)
-  }
+  }, [dispatch, navigate])
 
   const handleDelete = async () => {
     try {
@@ -235,37 +233,56 @@ const EditMobileGroup: React.FC = () => {
 
   useEffect(() => {
     if (isEditingGroup || isDeletingGroup) {
-      openSnackbar('loading...', 'warning')
+      openSnackbar("loading...", "warning")
     } else if (isEditError || isDeleteError) {
       const errorMessageString = isEditError
         ? JSON.stringify(editError)
         : JSON.stringify(deleteError)
       const errorMessageParsed = JSON.parse(errorMessageString)
       const errorMessage = JSON.stringify(errorMessageParsed.data.message)
-      openSnackbar(errorMessage, 'error')
+      openSnackbar(errorMessage, "error")
     } else if (isEditSuccess) {
-      openSnackbar('Mobile Group updated successfully', 'success')
+      openSnackbar("Mobile Group updated successfully", "success")
       handleMutationSuccess()
     } else if (isDeleteSuccess) {
-      openSnackbar('Mobile Group deleted successfully', 'success')
+      openSnackbar("Mobile Group deleted successfully", "success")
       handleMutationSuccess()
     }
-  }, [isEditingGroup, isDeletingGroup, isEditError, isDeleteError, deleteError, editError, isEditSuccess, isDeleteSuccess, openSnackbar, handleMutationSuccess])
+  }, [
+    isEditingGroup,
+    isDeletingGroup,
+    isEditError,
+    isDeleteError,
+    deleteError,
+    editError,
+    isEditSuccess,
+    isDeleteSuccess,
+    openSnackbar,
+    handleMutationSuccess,
+  ])
 
   const handleEditMobilesResponse = (response: any, mobiles: any) => {
     if (response?.error?.data) {
-      const errorMessage = response.error.data.errors ? response.error.data.errors.join(', ') : response.error.data.message
-      openSnackbar(errorMessage, 'error')
+      const errorMessage = response.error.data.errors
+        ? response.error.data.errors.join(", ")
+        : response.error.data.message
+      openSnackbar(errorMessage, "error")
     } else {
       if (response?.data?.mobiles?.updatedMobileIds) {
         const updatedMobileIds = response.data.mobiles.updatedMobileIds
         const failedMobileIds = response.data.mobiles.failedMobileIds
-        const allMobilesUpdated = mobiles.every((mobileId: any) => updatedMobileIds.includes(mobileId))
-        const message = allMobilesUpdated ? "All mobiles updated successfully" : `The following mobiles were not updated: ${failedMobileIds.join(', ')}`
+        const allMobilesUpdated = mobiles.every((mobileId: any) =>
+          updatedMobileIds.includes(mobileId),
+        )
+        const message = allMobilesUpdated
+          ? "All mobiles updated successfully"
+          : `The following mobiles were not updated: ${failedMobileIds.join(
+              ", ",
+            )}`
         setFormMobileValues(initialMobileValues)
-        openSnackbar(message, allMobilesUpdated ? 'success' : 'warning')
+        openSnackbar(message, allMobilesUpdated ? "success" : "warning")
       } else {
-        openSnackbar("Failed to edit mobiles", 'error')
+        openSnackbar("Failed to edit mobiles", "error")
       }
     }
   }
@@ -275,16 +292,27 @@ const EditMobileGroup: React.FC = () => {
     setIsMobileSubmitting(true)
     if (canSaveMobile) {
       try {
-        const mobiles = formValues.mobileNames.map(mobileName => {
-          const device = data.mobileDevices.find((device: any) => device.mobileName === mobileName)
-          return device ? device._id : null
-        }).filter(id => id !== null)
+        const mobiles = formValues.mobileNames
+          .map((mobileName) => {
+            const device = data.mobileDevices.find(
+              (device: any) => device.mobileName === mobileName,
+            )
+            return device ? device._id : null
+          })
+          .filter((id) => id !== null)
 
-        const nonEmptyFormMobileValues = Object.fromEntries(Object.entries(formMobileValues).filter(([key, value]) => value !== ''))
-        const response = await editMobiles({ mobileIds: mobiles, ...nonEmptyFormMobileValues })
+        const nonEmptyFormMobileValues = Object.fromEntries(
+          Object.entries(formMobileValues).filter(
+            ([key, value]) => value !== "",
+          ),
+        )
+        const response = await editMobiles({
+          mobileIds: mobiles,
+          ...nonEmptyFormMobileValues,
+        })
         handleEditMobilesResponse(response, mobiles)
       } catch (error: any) {
-        openSnackbar("Failed to edit mobile: " + error.message, 'error')
+        openSnackbar("Failed to edit mobile: " + error.message, "error")
       } finally {
         setIsMobileSubmitting(false)
       }
@@ -293,8 +321,8 @@ const EditMobileGroup: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    if (!isNaN(Number(value)) || value === '') {
-      setFormMobileValues(prevState => ({
+    if (!isNaN(Number(value)) || value === "") {
+      setFormMobileValues((prevState) => ({
         ...prevState,
         [name]: value,
       }))
@@ -345,7 +373,12 @@ const EditMobileGroup: React.FC = () => {
               }))
             }}
             renderInput={(params) => (
-              <TextField sx={{ mt: 2 }} {...params} label={"Mobile Names"} fullWidth />
+              <TextField
+                sx={{ mt: 2 }}
+                {...params}
+                label={"Mobile Names"}
+                fullWidth
+              />
             )}
           />
           {content}
@@ -436,9 +469,13 @@ const EditMobileGroup: React.FC = () => {
 
           <Box mt={2} display="flex" justifyContent="space-between">
             <Box display="flex" justifyContent="flex-start" gap={2}>
-              <Button variant="outlined" color="secondary" onClick={() => {
-                setFormMobileValues(initialMobileValues)
-              }}>
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={() => {
+                  setFormMobileValues(initialMobileValues)
+                }}
+              >
                 Cancel
               </Button>
               <Button

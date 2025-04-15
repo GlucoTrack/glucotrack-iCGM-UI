@@ -4,7 +4,7 @@ import Header from "@/components/Header"
 import MeasurementForm from "@/components/measurements/MeasurementForm"
 import { useAppSelector } from "@/hooks/useStore"
 import MeasurementChart from "@/components/measurements/MeasurementChart"
-import { useGetRawUserMeasurementsByUserIdsQuery, useGetUsersQuery } from "@/features/api/apiSlice"
+import { useGetRawUserMeasurementsByUserIdsQuery, useGetUserGroupsQuery, useGetUsersQuery } from "@/features/api/apiSlice"
 
 const fields = [
   { label: "Current", field: "weCurrent" },
@@ -32,6 +32,8 @@ const RawUserMeasurements: React.FC = () => {
 
   const userQuery = useGetUsersQuery({})
 
+  const groupQuery = useGetUserGroupsQuery({});
+
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header
@@ -40,11 +42,15 @@ const RawUserMeasurements: React.FC = () => {
       />
       <MeasurementForm
         query={userQuery}
+        groupQuery={groupQuery}
         label={"Users"}
-        pageKey={"user"}        
+        pageKey={"user"}
+        groupsField={"userGroups"}
+        groupNameField={"groupName"}        
         devicesField={"users"}
         deviceNameField={"userId"}
         deviceNameLabelField={"email"}
+        deviceNamesField={"userIds"}
       />
       <MeasurementChart
         query={query}
