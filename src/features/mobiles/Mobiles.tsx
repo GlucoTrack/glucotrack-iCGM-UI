@@ -46,7 +46,7 @@ const Mobiles = () => {
         field: "lastSeen",
         headerName: "Last seen",
         flex: 1,
-        valueFormatter: (params) => {
+        valueFormatter: (params: { value: string }) => {
           if (!params.value) return "Never"
           return new Date(params.value).toLocaleString()
         },
