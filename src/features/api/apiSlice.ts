@@ -1,9 +1,33 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
+import { RootState } from "@/store/store"
 
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
     baseUrl: import.meta.env.VITE_API_BASE_URL,
+    prepareHeaders: (headers, { getState, endpoint }) => {
+      const token = (getState() as RootState)?.auth?.token
+
+      const endpointsWithAuth = new Set([
+        "getUsers",
+        "getUser",
+        "editUser",
+        "editUsers",
+        "deleteUser",
+        "addUser",
+        "getRawUserMeasurementsByUserIds",
+        "getUserGroups",
+        "addUserGroup",
+        "editUserGroup",
+        "deleteUserGroup",
+        "addUserGroup",
+      ])
+
+      if (endpointsWithAuth.has(endpoint) && token) {
+        headers.set("Authorization", `Bearer ${token}`)
+      }
+      return headers
+    },
   }),
   tagTypes: [
     "Devices",
@@ -13,6 +37,8 @@ export const apiSlice = createApi({
     "AveragesAndStds",
     "MobileGroups",
     "Firmwares",
+    "Users",
+    "UserGroups",
   ],
   endpoints: (builder) => ({
     //TODO maybe code split per feature
@@ -174,6 +200,15 @@ export const apiSlice = createApi({
       },
       providesTags: ["Measurements"],
     }),
+    getRawUserMeasurementsByUserIds: builder.query({
+      query: (args) => {
+        const { userIds, startTime, endTime } = args
+        return {
+          url: `measurements/user/raw/${userIds}?startTime=${startTime}&endTime=${endTime}`,
+        }
+      },
+      providesTags: ["Measurements"],
+    }),
     getAnimalMeasurementsBySensorNames: builder.query({
       query: (args) => {
         const { deviceNames, startTime, endTime } = args
@@ -254,6 +289,79 @@ export const apiSlice = createApi({
       query: () => "firmware/read",
       providesTags: ["Firmwares"],
     }),
+    //*USERS
+    getUsers: builder.query({
+      query: () => "user",
+      providesTags: ["Users"],
+    }),
+    getUser: builder.query({
+      query: (id) => ({
+        url: `user/${id}`,
+      }),
+      providesTags: ["Users"],
+    }),
+    editUser: builder.mutation({
+      query: ({ id, ...userData }) => ({
+        url: `user/${id}`,
+        method: "PATCH",
+        body: userData,
+      }),
+      invalidatesTags: ["Users"],
+    }),
+    editUsers: builder.mutation({
+      query: ({ userIds, ...userData }) => ({
+        url: `user/multiple/${userIds}`,
+        method: "PATCH",
+        body: userData,
+      }),
+      invalidatesTags: (result, error, arg) => [
+        { type: "Users", id: arg },
+        "Users",
+      ],
+    }),
+    deleteUser: builder.mutation({
+      query: (id) => ({
+        url: `user/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Users"],
+    }),
+    addUser: builder.mutation({
+      query: (userData) => ({
+        url: "user",
+        method: "POST",
+        body: userData,
+      }),
+      invalidatesTags: ["Users"],
+    }),
+    //*USER GROUPS
+    addUserGroup: builder.mutation({
+      query: (groupData) => ({
+        url: "userGroups",
+        method: "POST",
+        body: groupData,
+      }),
+      invalidatesTags: ["UserGroups"],
+    }),
+    getUserGroups: builder.query({
+      query: () => "userGroups",
+      providesTags: ["UserGroups"],
+    }),
+    editUserGroup: builder.mutation({
+      query: ({ groupId, ...groupData }) => ({
+        url: `userGroups/${groupId}`,
+        method: "PATCH",
+        body: groupData,
+      }),
+      invalidatesTags: ["UserGroups"],
+    }),
+    deleteUserGroup: builder.mutation({
+      query: (groupId) => ({
+        url: `userGroups/${groupId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["UserGroups"],
+    }),
   }),
 })
 
@@ -277,6 +385,7 @@ export const {
   useGetMeasurementsByDeviceNamesQuery,
   useGetAnimalMeasurementsByMobileNamesQuery,
   useGetRawMeasurementsByMobileNamesQuery,
+  useGetRawUserMeasurementsByUserIdsQuery,
   useGetAnimalMeasurementsBySensorNamesQuery,
   useGetAveragesAndStdsQuery,
   useAddMobileGroupMutation,
@@ -288,4 +397,14 @@ export const {
   useGetFirmwareQuery,
   useEditFirmwareMutation,
   useDeleteFirmwareMutation,
+  useGetUsersQuery,
+  useGetUserQuery,
+  useEditUserMutation,
+  useEditUsersMutation,
+  useDeleteUserMutation,
+  useAddUserMutation,
+  useGetUserGroupsQuery,
+  useEditUserGroupMutation,
+  useDeleteUserGroupMutation,
+  useAddUserGroupMutation,
 } = apiSlice

@@ -21,9 +21,9 @@ import {
   HomeOutlined,
   MobileFriendlyOutlined,
   TimelineOutlined,
-  TipsAndUpdatesOutlined,
 } from "@mui/icons-material"
 import FlexBetweenCenter from "@/components/FlexBetweenCenter"
+import { useUser, useAuth, useOrganizationList } from "@clerk/clerk-react"
 
 const navItems = [
   {
@@ -80,23 +80,29 @@ const navItems = [
     icon: <DataSaverOn />,
     path: "firmwares",
   },
-
-  // {
-  //   text: "Divider",
-  //   icon: null,
-  // },
-  // {
-  //   text: "Users",
-  //   icon: <GroupOutlined />,
-  // },
-  // {
-  //   text: "Divider",
-  //   icon: null,
-  // },
-  // {
-  //   text: "New",
-  //   icon: <TipsAndUpdatesOutlined />,
-  // },
+  {
+    text: "Divider",
+    icon: null,
+    requireRole: ["org:admin"],
+  },
+  {
+    text: "Users",
+    icon: <GroupOutlined />,
+    path: "users",
+    requireRole: ["org:admin"],
+  },
+  {
+    text: "User Groups",
+    icon: <GroupWorkOutlined />,
+    path: "user-groups",
+    requireRole: ["org:admin"],
+  },
+  {
+    text: "Raw User Measurements",
+    icon: <TimelineOutlined />,
+    path: "raw-user-measurements",
+    requireRole: ["org:admin"],
+  },
 ]
 
 interface SidebarProps {
@@ -116,6 +122,25 @@ const Sidebar: React.FC<SidebarProps> = ({
   const theme = useTheme()
   const { pathname } = useLocation()
   const [active, setActive] = useState("")
+  const { isSignedIn } = useUser()
+  const { orgRole } = useAuth()
+  const {
+    userMemberships,
+    setActive: setActiveOrg,
+    isLoaded: isOrgListLoaded,
+  } = useOrganizationList({
+    userMemberships: true,
+  })
+
+  useEffect(() => {
+    if (!isOrgListLoaded || !isSignedIn) return
+
+    if (!orgRole && userMemberships.data.length > 0) {
+      // If there is no active role, I set the first organization as active
+      // TODO: set the id in the .env
+      setActiveOrg({ organization: userMemberships.data[0].organization.id })
+    }
+  }, [isOrgListLoaded, userMemberships, setActiveOrg, orgRole, isSignedIn])
 
   useEffect(() => {
     setActive(pathname.substring(1))
@@ -158,7 +183,12 @@ const Sidebar: React.FC<SidebarProps> = ({
             <Divider />
 
             <List>
-              {navItems.map(({ text, icon, path }, index) => {
+              {navItems.map(({ text, icon, path, requireRole }, index) => {
+                if (requireRole && requireRole.length > 0) {
+                  if (!isSignedIn || !requireRole.includes(orgRole as string))
+                    return null
+                }
+
                 if (!icon) {
                   return (
                     <Divider
