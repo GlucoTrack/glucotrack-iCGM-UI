@@ -3,6 +3,8 @@ import navbarReducer from "@/features/navbar/navbarSlice"
 import groupsReducer from "@/features/groups/groupsSlice"
 import mobileGroupsReducer from "@/features/mobileGroups/groupsSlice"
 import measurementsReducer from "@/components/measurements/measurementsSlice"
+import userGroupsReducer from "@/features/userGroups/groupsSlice"
+import authReducer from "@/features/auth/authSlice"
 import { apiSlice } from "@/features/api/apiSlice"
 
 export const store = configureStore({
@@ -10,7 +12,9 @@ export const store = configureStore({
     navbar: navbarReducer,
     groups: groupsReducer,
     mobileGroups: mobileGroupsReducer,
-    measurements: measurementsReducer,
+    userGroups: userGroupsReducer,
+    measurements: measurementsReducer,    
+    auth: authReducer,
     [apiSlice.reducerPath]: apiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
