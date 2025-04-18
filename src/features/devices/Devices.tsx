@@ -42,6 +42,15 @@ const Devices = () => {
     const columns = [
       { field: "_id", headerName: "ID", flex: 1 },
       { field: "deviceName", headerName: "Name", flex: 0.5 },
+      {
+        field: "lastSeen",
+        headerName: "Last seen",
+        flex: 1,
+        valueFormatter: (params) => {
+          if (!params.value) return "Never"
+          return new Date(params.value).toLocaleString()
+        },
+      },
       { field: "sessionStartTime", headerName: "Start", flex: 1 },
       { field: "sessionEndTime", headerName: "End", flex: 1 },
       {
