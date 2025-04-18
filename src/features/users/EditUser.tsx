@@ -1,85 +1,89 @@
 import Header from "@/components/Header"
-import { Box, Button, TextField, useTheme } from "@mui/material"
+import {
+  Box,
+  Button,
+  TextField,
+  useTheme,
+  Checkbox,
+  FormControlLabel,
+} from "@mui/material"
 import React, { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import {
-  useGetMobileQuery,
-  useEditMobileMutation,
-  useDeleteMobileMutation,
+  useGetUserQuery,
+  useEditUserMutation,
+  useDeleteUserMutation,
 } from "@/features/api/apiSlice"
 
 interface FormValues {
-  mobileName: string
   baseUri: string
-  sensorId: string
-  sensorName: string
   measurementInterval: number
   reportInterval: number
   refMillivolts: number
   weMillivolts: number
   filterLength: number
   checkParametersInterval: number
+  blinded: boolean
+  sensorId?: string
   comment?: string
 }
 
 const initialValues: FormValues = {
-  mobileName: "XXXXXX",
   baseUri: "https://stg-icgm.herokuapp.com/api/v1",
-  sensorId: "XX:XX:XX:XX:XX",
-  sensorName: "XXXXXX",
   measurementInterval: 30,
   reportInterval: 600,
   refMillivolts: 600,
   weMillivolts: 1200,
   filterLength: 10,
   checkParametersInterval: 60,
-  comment: " ",
+  comment: "test",
+  blinded: false,
 }
 
-const EditMobile: React.FC = () => {
+const EditUser: React.FC = () => {
   const navigate = useNavigate()
   const theme = useTheme()
   const [formValues, setFormValues] = useState<FormValues>(initialValues)
+  const [userId, setUserId] = useState<string | null>(null)
+  const [email, setEmail] = useState<string | null>(null)
 
-  const { mobileId } = useParams<Record<string, string>>()
+  const { id } = useParams<Record<string, string>>()
 
   const {
-    data: getMobileData,
-    // status: getMobileStatus,
-    isFetching: getMobileIsFetching,
-    isLoading: getMobileIsLoading,
-    isSuccess: getMobileIsSuccess,
-    isError: getMobileIsError,
-    error: getMobileError,
-  } = useGetMobileQuery(mobileId)
+    data: getUserData,
+    // status: getUserStatus,
+    isFetching: getUserIsFetching,
+    isLoading: getUserIsLoading,
+    isSuccess: getUserIsSuccess,
+    isError: getUserIsError,
+    error: getUserError,
+  } = useGetUserQuery(id)
 
   const [
-    deleteMobile,
+    deleteUser,
     {
-      isLoading: isDeletingMobile,
+      isLoading: isDeletingUser,
       isError: isDeleteError,
       error: deleteError,
       isSuccess: isDeleteSuccess,
     },
-  ] = useDeleteMobileMutation()
+  ] = useDeleteUserMutation()
 
   const [
-    editMobile,
+    editUser,
     {
-      isLoading: isEditingMobile,
+      isLoading: isEditingUser,
       isError: isEditError,
       error: editError,
       isSuccess: isEditSuccess,
     },
-  ] = useEditMobileMutation()
+  ] = useEditUserMutation()
 
   useEffect(() => {
-    if (getMobileData) {
+    if (getUserData) {
       const {
-        mobileName,
         baseUri,
         sensorId,
-        sensorName,
         measurementInterval,
         reportInterval,
         refMillivolts,
@@ -87,13 +91,17 @@ const EditMobile: React.FC = () => {
         filterLength,
         checkParametersInterval,
         comment,
-      } = getMobileData
+        blinded,
+        userId,
+        email,
+      } = getUserData
+
+      setUserId(userId)
+      setEmail(email)
 
       setFormValues({
-        mobileName,
         baseUri,
         sensorId,
-        sensorName,
         measurementInterval,
         reportInterval,
         refMillivolts,
@@ -101,46 +109,43 @@ const EditMobile: React.FC = () => {
         filterLength,
         checkParametersInterval,
         comment,
+        blinded,
       })
     }
-  }, [getMobileData])
+  }, [getUserData])
 
-  let getMobileContent: JSX.Element | null = null
-  if (getMobileIsFetching) {
-    getMobileContent = <h3>Fetching...</h3>
-  } else if (getMobileIsLoading) {
-    getMobileContent = <h3>Loading...</h3>
-  } else if (getMobileIsError) {
-    console.log("getMobileError:", getMobileError)
+  let getUserContent: JSX.Element | null = null
+  if (getUserIsFetching) {
+    getUserContent = <h3>Fetching...</h3>
+  } else if (getUserIsLoading) {
+    getUserContent = <h3>Loading...</h3>
+  } else if (getUserIsError) {
+    console.log("getUserError:", getUserError)
 
-    const errorMessageString = JSON.stringify(getMobileError)
+    const errorMessageString = JSON.stringify(getUserError)
     const errorMessageParsed = JSON.parse(errorMessageString)
-    getMobileContent = (
+    getUserContent = (
       <p style={{ color: theme.palette.error.main }}>
         {errorMessageParsed.data.message}
       </p>
     )
-  } else if (getMobileIsSuccess && getMobileData) {
-    getMobileContent = null
+  } else if (getUserIsSuccess && getUserData) {
+    getUserContent = null
   }
 
   const canSave =
     [
-      formValues.mobileName,
       formValues.baseUri,
-      formValues.sensorId,
-      formValues.sensorName,
       formValues.measurementInterval,
       formValues.reportInterval,
       formValues.refMillivolts,
       formValues.weMillivolts,
       formValues.filterLength,
       formValues.checkParametersInterval,
-      formValues.comment,
     ].every((value) => value !== undefined && value !== null && value !== "") &&
-    !getMobileIsLoading &&
-    !isDeletingMobile &&
-    !isEditingMobile
+    !getUserIsLoading &&
+    !isDeletingUser &&
+    !isEditingUser
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -151,14 +156,14 @@ const EditMobile: React.FC = () => {
   }
 
   const handleCancel = () => {
-    navigate("/mobiles")
+    navigate("/users")
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (canSave) {
       try {
-        await editMobile({ mobileId, ...formValues })
+        await editUser({ id, ...formValues })
       } catch (error: any) {
         console.error(error)
       }
@@ -167,20 +172,20 @@ const EditMobile: React.FC = () => {
 
   const handleMutationSuccess = () => {
     setTimeout(() => {
-      navigate("/mobiles")
+      navigate("/users")
     }, 0)
   }
 
   const handleDelete = async () => {
     try {
-      await deleteMobile(mobileId)
+      await deleteUser(id)
     } catch (error: any) {
       console.error(error)
     }
   }
 
   let content: JSX.Element | null = null
-  if (isEditingMobile || isDeletingMobile) {
+  if (isEditingUser || isDeletingUser) {
     content = <h3>Loading...</h3>
   } else if (isEditError || isDeleteError) {
     const errorMessageString = isEditError
@@ -199,22 +204,33 @@ const EditMobile: React.FC = () => {
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header
-        title="Edit a mobile"
-        subtitle="(complete all fields to edit a mobile)"
+        title="Edit a user"
+        subtitle="(complete all fields to edit a user)"
       />
-      {getMobileContent}
+      {getUserContent}
       <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">
         <form onSubmit={handleSubmit}>
           <TextField
-            name="mobileName"
-            label="Mobile Name(s)"
+            name="userId"
+            label="User ID"
             type="text"
-            value={formValues.mobileName}
-            onChange={handleChange}
-            required
+            value={userId}            
             fullWidth
             margin="normal"
+            disabled
+            InputLabelProps={{ shrink: true }}
           />
+          <TextField
+            name="email"
+            label="Email"
+            type="text"
+            value={email}            
+            fullWidth
+            margin="normal"
+            disabled
+            InputLabelProps={{ shrink: true }}
+          />
+
           <TextField
             name="baseUri"
             label="Base URI"
@@ -231,17 +247,6 @@ const EditMobile: React.FC = () => {
             type="text"
             value={formValues.sensorId}
             onChange={handleChange}
-            required
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            name="sensorName"
-            label="Sensor Name"
-            type="text"
-            value={formValues.sensorName}
-            onChange={handleChange}
-            required
             fullWidth
             margin="normal"
           />
@@ -314,6 +319,20 @@ const EditMobile: React.FC = () => {
             fullWidth
             margin="normal"
           />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={formValues.blinded || false}
+                onChange={(event) => {
+                  setFormValues((prevValues) => ({
+                    ...prevValues,
+                    blinded: event.target.checked,
+                  }))
+                }}
+              />
+            }
+            label="Blinded"
+          />
           {content}
 
           <Box mt={2} display="flex" justifyContent="space-between">
@@ -345,4 +364,4 @@ const EditMobile: React.FC = () => {
   )
 }
 
-export default EditMobile
+export default EditUser

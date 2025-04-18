@@ -8,7 +8,6 @@ import {
   Checkbox,
   FormControlLabel,
   TextField,
-  useTheme,
   IconButton,
 } from "@mui/material"
 import {
@@ -28,15 +27,15 @@ const MeasurementForm = ({
   label,
   pageKey,
   query,
-  groupQuery,
+  groupQuery = {},
   groupsField = "groups",
   devicesField = "devices",
   deviceNameField = "deviceName",
+  deviceNameLabelField = "deviceName",
   groupNameField = "groupName",
   deviceNamesField = "deviceNames",
 }: any) => {
   const dispatch = useDispatch()
-  const theme = useTheme()
   const { openSnackbar, closeSnackbar } = useContext(SnackbarContext)
   const [localStorageKey, setLocalStorageKey] = useState(
     JSON.parse(localStorage.getItem("filters_" + pageKey) || "{}"),
@@ -77,6 +76,10 @@ const MeasurementForm = ({
   )
   const [filterApplied, setFilterApplied] = useState(selectedFilter !== null)
 
+  const [currentSelectedOptions, setCurrentSelectedOptions] = useState<any[]>(
+    [],
+  )
+
   const {
     data: deviceData,
     // status: deviceStatus,
@@ -98,17 +101,28 @@ const MeasurementForm = ({
   } = groupQuery
 
   let deviceContent: JSX.Element | null = null
-  let deviceNames: string[] = []
+  const deviceOptions = React.useMemo(() => {
+    if (deviceIsSuccess) {
+      return deviceData[devicesField].map((device: any) => ({
+        label: device[deviceNameLabelField],
+        id: device[deviceNameField],
+      }))
+    }
+    return []
+  }, [
+    deviceIsSuccess,
+    deviceData,
+    devicesField,
+    deviceNameLabelField,
+    deviceNameField,
+  ])
+
   if (deviceIsFetching) {
     deviceContent = <h3>Fetching devices...</h3>
   } else if (deviceIsLoading) {
     deviceContent = <h3>Loading devices...</h3>
   } else if (deviceIsError) {
     deviceContent = <p>{JSON.stringify(deviceError)}</p>
-  } else if (deviceIsSuccess) {
-    deviceNames = deviceData[devicesField].map((device: any) => {
-      return device[deviceNameField]
-    })
   }
 
   let groupContent: JSX.Element | null = null
@@ -195,6 +209,14 @@ const MeasurementForm = ({
       )*/
     }
   }, [formValues, pageKey, localStorageKey])
+
+  useEffect(() => {
+    setCurrentSelectedOptions(
+      deviceOptions.filter((option: any) =>
+        formValues.deviceNames?.includes(option.id),
+      ),
+    )
+  }, [formValues.deviceNames, setCurrentSelectedOptions, deviceOptions])
 
   const calcCurrentTimeInterval = (): number => {
     if (formValues.endTime && formValues.startTime) {
@@ -308,6 +330,9 @@ const MeasurementForm = ({
       const groupObject = groupData[groupsField].find(
         (group: any) => group[groupNameField] === groupName,
       )
+      if (!deviceNamesField) {
+        throw new Error("deviceNamesField is not defined")
+      }
       if (groupObject) {
         deviceNamesFromGroup = groupObject[deviceNamesField]
       } else {
@@ -467,53 +492,60 @@ const MeasurementForm = ({
       <form onSubmit={handleSubmit}>
         <Grid container spacing={4} alignItems={"start"}>
           <Grid container xs={8} spacing={2}>
-            <Grid xs={5}>
+            <Grid xs={groupData ? 5 : 12}>
               <Autocomplete
                 multiple
                 loading={deviceIsLoading || deviceIsFetching}
-                options={deviceNames ? deviceNames : []}
-                value={formValues.deviceNames ?? []}
+                options={deviceOptions ? deviceOptions : []}
+                value={currentSelectedOptions}
+                isOptionEqualToValue={(option: any, newValue: any) => {
+                  return option.id === newValue.id
+                }}
                 onChange={(event, newValue) => {
-                  handleInputChange("deviceNames", newValue)
+                  const newDeviceNames = newValue.map(
+                    (option: any) => option.id,
+                  )
+                  handleInputChange("deviceNames", newDeviceNames)
                 }}
                 renderInput={(params) => (
                   <TextField {...params} label={label} fullWidth />
                 )}
               />
             </Grid>
-            <Grid xs={2}>
-              <Box
-                sx={{
-                  display: "flex",
-                  height: 1,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                OR
-              </Box>
-            </Grid>
-            <Grid xs={5}>
-              <Autocomplete
-                loading={groupIsLoading || groupIsFetching}
-                options={groupName ? groupName : []}
-                value={
-                  formValues.groupName === "" ? null : formValues.groupName
-                }
-                isOptionEqualToValue={(option, newValue) => {
-                  return option.id === newValue.id
-                }}
-                onChange={(event, newValue) => {
-                  handleInputChange(
-                    "groupName",
-                    newValue !== null ? newValue : "",
-                  )
-                }}
-                renderInput={(params) => (
-                  <TextField {...params} label="Group Name" fullWidth />
-                )}
-              />
-            </Grid>
+            {groupData && (
+              <>
+                <Grid xs={2}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      height: 1,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    OR
+                  </Box>
+                </Grid>
+                <Grid xs={5}>
+                  <Autocomplete
+                    loading={groupIsLoading || groupIsFetching}
+                    options={groupName ? groupName : []}
+                    value={
+                      formValues.groupName === "" ? null : formValues.groupName
+                    }
+                    onChange={(event, newValue: any) => {
+                      handleInputChange(
+                        "groupName",
+                        newValue !== null ? newValue : "",
+                      )
+                    }}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Group Name" fullWidth />
+                    )}
+                  />
+                </Grid>
+              </>
+            )}
 
             <Grid xs={1} alignContent={"center"}>
               <IconButton onClick={handleBack}>

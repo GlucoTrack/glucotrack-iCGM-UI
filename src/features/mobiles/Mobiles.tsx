@@ -42,6 +42,15 @@ const Mobiles = () => {
     const columns = [
       // { field: "_id", headerName: "ID", flex: 1 },
       { field: "mobileName", headerName: "Name", flex: 0.7 },
+      {
+        field: "lastSeen",
+        headerName: "Last seen",
+        flex: 1,
+        valueFormatter: (params: { value: string }) => {
+          if (!params.value) return "Never"
+          return new Date(params.value).toLocaleString()
+        },
+      },
       // { field: "baseUri", headerName: "URI", flex: 1 },
       { field: "sensorName", headerName: "sName", flex: 0.7 },
       { field: "sensorId", headerName: "sID", flex: 1 },
