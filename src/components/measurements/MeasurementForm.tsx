@@ -31,7 +31,7 @@ const MeasurementForm = ({
   groupsField = "groups",
   devicesField = "devices",
   deviceNameField = "deviceName",
-  deviceNameLabelField = "deviceName",
+  deviceNameLabelField,
   groupNameField = "groupName",
   deviceNamesField = "deviceNames",
 }: any) => {
@@ -104,7 +104,7 @@ const MeasurementForm = ({
   const deviceOptions = React.useMemo(() => {
     if (deviceIsSuccess) {
       return deviceData[devicesField].map((device: any) => ({
-        label: device[deviceNameLabelField],
+        label: device[deviceNameLabelField ? deviceNameLabelField : deviceNameField],
         id: device[deviceNameField],
       }))
     }
