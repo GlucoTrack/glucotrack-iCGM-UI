@@ -96,25 +96,25 @@ export const apiSlice = createApi({
     //*MOBILES
     addMobile: builder.mutation({
       query: (mobileData) => ({
-        url: "mobile/create",
+        url: "mobile",
         method: "POST",
         body: mobileData,
       }),
       invalidatesTags: ["Mobiles"],
     }),
     getMobiles: builder.query({
-      query: () => "mobile/read",
+      query: () => "mobile",
       providesTags: ["Mobiles"],
     }),
     getMobile: builder.query({
       query: (mobileId) => ({
-        url: `mobile/readByMobileId/${mobileId}`,
+        url: `mobile/${mobileId}`,
       }),
       providesTags: ["Mobiles"],
     }),
     editMobile: builder.mutation({
       query: ({ mobileId, ...mobileData }) => ({
-        url: `mobile/updateByMobileId/${mobileId}`,
+        url: `mobile/${mobileId}`,
         method: "PATCH",
         body: mobileData,
       }),
@@ -125,7 +125,7 @@ export const apiSlice = createApi({
     }),
     editMobiles: builder.mutation({
       query: ({ mobileIds, ...mobileData }) => ({
-        url: `mobile/updateMobileIds/${mobileIds}`,
+        url: `mobile/by-ids/${mobileIds}`,
         method: "PATCH",
         body: mobileData,
       }),
@@ -136,7 +136,7 @@ export const apiSlice = createApi({
     }),
     deleteMobile: builder.mutation({
       query: (mobileId) => ({
-        url: `mobile/deleteByMobileId/${mobileId}`,
+        url: `mobile/${mobileId}`,
         method: "DELETE",
       }),
       invalidatesTags: (result, error, arg) => [
@@ -230,19 +230,19 @@ export const apiSlice = createApi({
     //*MOBILE GROUPS
     addMobileGroup: builder.mutation({
       query: (groupData) => ({
-        url: "mobileGroups",
+        url: "mobile-groups",
         method: "POST",
         body: groupData,
       }),
       invalidatesTags: ["MobileGroups"],
     }),
     getMobileGroups: builder.query({
-      query: () => "mobileGroups",
+      query: () => "mobile-groups",
       providesTags: ["MobileGroups"],
     }),
     editMobileGroup: builder.mutation({
       query: ({ groupId, ...groupData }) => ({
-        url: `mobileGroups/${groupId}`,
+        url: `mobile-groups/${groupId}`,
         method: "PATCH",
         body: groupData,
       }),
@@ -250,7 +250,7 @@ export const apiSlice = createApi({
     }),
     deleteMobileGroup: builder.mutation({
       query: (groupId) => ({
-        url: `mobileGroups/${groupId}`,
+        url: `mobile-groups/${groupId}`,
         method: "DELETE",
       }),
       invalidatesTags: ["MobileGroups"],
