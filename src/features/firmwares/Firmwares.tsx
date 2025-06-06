@@ -7,6 +7,7 @@ import {
   GridSortModel,
   GridToolbar,
 } from "@mui/x-data-grid"
+import DownloadIcon from "@mui/icons-material/Download"
 
 import Header from "@/components/Header"
 import HeaderAction from "@/components/HeaderAction"
@@ -42,7 +43,24 @@ const Firmwares = () => {
     const columns = [
       { field: "name", headerName: "Name", flex: 0.7 },
       { field: "version", headerName: "Version", flex: 0.7 },
-      { field: "url", headerName: "url", flex: 1 },      
+      {
+        field: "download",
+        headerName: "Download",
+        flex: 0.7,
+        renderCell: (params: any) => (
+          <a
+            href={params.row.url}
+            rel="noopener noreferrer"
+            download
+            onClick={(e) => {
+              e.stopPropagation()
+            }}
+          >
+            <DownloadIcon />
+          </a>
+        ),
+      },
+      { field: "url", headerName: "url", flex: 1 },
     ]
     content = (
       <Box flexGrow={1} overflow="auto" width="100%">
