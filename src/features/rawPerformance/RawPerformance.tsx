@@ -3,7 +3,11 @@ import { Box } from "@mui/material"
 import Header from "@/components/Header"
 import MeasurementForm from "@/components/measurements/MeasurementForm"
 import { useAppSelector } from "@/hooks/useStore"
-import { useGetRawMeasurementsByMobileNamesQuery, useGetMobileGroupsQuery, useGetMobilesQuery } from "@/features/api/apiSlice"
+import {
+  useGetRawMeasurementsByMobileNamesQuery,
+  useGetMobileGroupsQuery,
+  useGetMobilesQuery,
+} from "@/features/api/apiSlice"
 import PerformanceChart from "@/components/measurements/PerformanceChart"
 
 const RawMeasurements: React.FC = () => {
@@ -24,14 +28,14 @@ const RawMeasurements: React.FC = () => {
 
   const mobileQuery = useGetMobilesQuery({})
 
-  const groupQuery = useGetMobileGroupsQuery({});
+  const groupQuery = useGetMobileGroupsQuery({})
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header
-        title="Raw Measurements"
-        // subtitle={`Queried measurements: ${status}`}
-        subtitle={`Fill out your criteria and hit submit to see measurements`}
+        title="Raw Performance"
+        // subtitle={`Queried performance: ${status}`}
+        subtitle={`Fill out your criteria and hit submit to see performance`}
       />
       <MeasurementForm
         query={mobileQuery}
