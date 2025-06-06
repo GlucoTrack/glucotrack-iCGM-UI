@@ -11,7 +11,8 @@ const fields = [
   { label: "Voltage", field: "ceVoltage" },
   { label: "we_reVoltage", field: "we_reVoltage" },
   { label: "Gain", field: "gain" },
-  { label: "Battery", field: "battery" }
+  { label: "Battery", field: "battery" },
+  { label: "RSSI", field: "rssi" },
 ]
 
 const RawUserMeasurements: React.FC = () => {
