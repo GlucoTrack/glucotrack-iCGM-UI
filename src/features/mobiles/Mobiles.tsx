@@ -1,6 +1,7 @@
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Box } from "@mui/material"
+import { formatDistanceToNow } from "date-fns"
 import {
   DataGrid,
   GridCellParams,
@@ -48,7 +49,8 @@ const Mobiles = () => {
         flex: 1,
         valueFormatter: (params: { value: string }) => {
           if (!params.value) return "Never"
-          return new Date(params.value).toLocaleString()
+          const date = new Date(params.value)
+          return `${formatDistanceToNow(date, { addSuffix: true })}`
         },
       },
       // { field: "baseUri", headerName: "URI", flex: 1 },

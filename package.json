@@ -1,7 +1,7 @@
 {
   "name": "glucotrack-ui",
   "private": true,
-  "version": "3.0.1",
+  "version": "3.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -24,6 +24,7 @@
     "@reduxjs/toolkit": "^1.8.1",
     "@vitejs/plugin-react": "^4.3.4",
     "chroma-js": "^2.1.0",
+    "date-fns": "^4.1.0",
     "dayjs": "^1.11.10",
     "distinct-colors": "^3.0.0",
     "highcharts": "^11.4.0",

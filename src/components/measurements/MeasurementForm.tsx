@@ -31,9 +31,10 @@ const MeasurementForm = ({
   groupsField = "groups",
   devicesField = "devices",
   deviceNameField = "deviceName",
-  deviceNameLabelField = "deviceName",
+  deviceNameLabelField,
   groupNameField = "groupName",
   deviceNamesField = "deviceNames",
+  disableRealtime = false,
 }: any) => {
   const dispatch = useDispatch()
   const { openSnackbar, closeSnackbar } = useContext(SnackbarContext)
@@ -104,7 +105,8 @@ const MeasurementForm = ({
   const deviceOptions = React.useMemo(() => {
     if (deviceIsSuccess) {
       return deviceData[devicesField].map((device: any) => ({
-        label: device[deviceNameLabelField],
+        label:
+          device[deviceNameLabelField ? deviceNameLabelField : deviceNameField],
         id: device[deviceNameField],
       }))
     }
@@ -650,21 +652,30 @@ const MeasurementForm = ({
                 </Button>
               </Grid>
             </Grid>
+
             <Grid>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={formValues.realtime || false}
-                    onChange={(event) => {
-                      handleInputChange("realtime", event.target.checked)
-                    }}
-                  />
-                }
-                label="Realtime"
-              />
+              {!disableRealtime && (
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formValues.realtime || false}
+                      onChange={(event) => {
+                        handleInputChange("realtime", event.target.checked)
+                      }}
+                    />
+                  }
+                  label="Realtime"
+                />
+              )}
             </Grid>
+
             <Grid>
-              <Button type="submit" variant="contained" color="primary">
+              <Button
+                sx={{ marginTop: disableRealtime ? 2 : 0 }}
+                type="submit"
+                variant="contained"
+                color="primary"
+              >
                 Submit
               </Button>
             </Grid>

@@ -21,6 +21,7 @@ import {
   HomeOutlined,
   MobileFriendlyOutlined,
   TimelineOutlined,
+  TroubleshootOutlined
 } from "@mui/icons-material"
 import FlexBetweenCenter from "@/components/FlexBetweenCenter"
 import { useUser, useAuth, useOrganizationList } from "@clerk/clerk-react"
@@ -70,6 +71,11 @@ const navItems = [
     text: "Raw Measurements",
     icon: <TimelineOutlined />,
     path: "raw-measurements",
+  },
+  {
+    text: "Raw Performance",
+    icon: <TroubleshootOutlined />,
+    path: "raw-performance",
   },
   {
     text: "Divider",
