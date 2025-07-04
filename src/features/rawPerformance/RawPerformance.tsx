@@ -3,17 +3,12 @@ import { Box } from "@mui/material"
 import Header from "@/components/Header"
 import MeasurementForm from "@/components/measurements/MeasurementForm"
 import { useAppSelector } from "@/hooks/useStore"
-import MeasurementChart from "@/components/measurements/MeasurementChart"
-import { useGetRawMeasurementsByMobileNamesQuery, useGetMobileGroupsQuery, useGetMobilesQuery } from "@/features/api/apiSlice"
-
-const fields = [
-  { label: "Current", field: "weCurrent" },
-  { label: "Voltage", field: "ceVoltage" },
-  { label: "we_reVoltage", field: "we_reVoltage" },
-  { label: "Gain", field: "gain" },
-  { label: "Battery", field: "battery" },
-  { label: "RSSI", field: "rssi" },
-]
+import {
+  useGetRawMeasurementsByMobileNamesQuery,
+  useGetMobileGroupsQuery,
+  useGetMobilesQuery,
+} from "@/features/api/apiSlice"
+import PerformanceChart from "@/components/measurements/PerformanceChart"
 
 const RawMeasurements: React.FC = () => {
   const mobileNames = useAppSelector((state) => state.measurements.deviceNames)
@@ -33,31 +28,30 @@ const RawMeasurements: React.FC = () => {
 
   const mobileQuery = useGetMobilesQuery({})
 
-  const groupQuery = useGetMobileGroupsQuery({});
+  const groupQuery = useGetMobileGroupsQuery({})
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header
-        title="Raw Measurements"
-        // subtitle={`Queried measurements: ${status}`}
-        subtitle={`Fill out your criteria and hit submit to see measurements`}
+        title="Raw Performance"
+        // subtitle={`Queried performance: ${status}`}
+        subtitle={`Fill out your criteria and hit submit to see performance`}
       />
       <MeasurementForm
         query={mobileQuery}
         groupQuery={groupQuery}
         label={"Mobile Names"}
-        pageKey={"mobile"}
+        pageKey={"raw_performance"}
         groupsField={"mobileGroups"}
         groupNameField={"mobileGroupName"}
         devicesField={"mobileDevices"}
         deviceNameField={"mobileName"}
         deviceNamesField={"mobileNames"}
+        disableRealtime={true}
       />
-      <MeasurementChart
+      <PerformanceChart
         query={query}
-        eventName={"new_raw_measurement__"}
-        pageKey={"mobile"}
-        fields={fields}
+        pageKey={"raw_performance"}
         dateField={"time"}
       />
     </Box>

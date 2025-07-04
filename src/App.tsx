@@ -21,6 +21,7 @@ import EditMobileGroup from "@/features/mobileGroups/EditMobileGroup"
 import AddMobileGroup from "@/features/mobileGroups/AddMobileGroup"
 import AnimalMeasurements from "@/features/animalMeasurements/AnimalMeasurements"
 import RawMeasurements from "@/features/rawMeasurements/RawMeasurements"
+import RawPerformance from "@/features/rawPerformance/RawPerformance"
 import RawUserMeasurements from "@/features/rawUserMeasurements/RawUserMeasurements"
 import Users from "@/features/users/Users"
 import New from "@/features/new/New"
@@ -91,6 +92,10 @@ function App() {
                   <Route
                     path="/raw-measurements"
                     element={<RawMeasurements />}
+                  />
+                  <Route
+                    path="/raw-performance"
+                    element={<RawPerformance />}
                   />
                   <Route path="/mobile-groups" element={<MobileGroups />} />
                   <Route
