@@ -61,7 +61,7 @@ const Groups: React.FC = () => {
       <Box height={"75vh"}>
         <DataGrid<Group>
           slots={{ toolbar: GridToolbar }}          
-          rows={data.groups}
+          rows={data}
           getRowId={(row) => row._id}
           columns={columns}
           onCellClick={handleCellClick}

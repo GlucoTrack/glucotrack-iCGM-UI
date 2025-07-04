@@ -143,13 +143,11 @@ const AddDevice: React.FC = () => {
           <TextField
             name="macAddress"
             label="MAC Address"
-            type="password"
             value={formValues.macAddress}
             onChange={handleChange}
             required
             fullWidth
-            margin="normal"
-            disabled
+            margin="normal"            
           />
           <TextField
             name="password"

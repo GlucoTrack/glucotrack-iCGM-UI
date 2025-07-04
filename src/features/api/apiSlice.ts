@@ -45,25 +45,25 @@ export const apiSlice = createApi({
     //*DEVICES
     addDevice: builder.mutation({
       query: (deviceData) => ({
-        url: "device/create",
+        url: "device",
         method: "POST",
         body: deviceData,
       }),
       invalidatesTags: ["Devices"],
     }),
     getDevices: builder.query({
-      query: () => "device/read",
+      query: () => "device",
       providesTags: ["Devices"],
     }),
     getDevice: builder.query({
       query: (deviceId) => ({
-        url: `device/read/${deviceId}`,
+        url: `device/${deviceId}`,
       }),
       providesTags: ["Devices"],
     }),
     editDevice: builder.mutation({
       query: ({ deviceId, ...deviceData }) => ({
-        url: `device/updateDeviceId/${deviceId}`,
+        url: `device/${deviceId}`,
         method: "PATCH",
         body: deviceData,
       }),
@@ -74,7 +74,7 @@ export const apiSlice = createApi({
     }),
     editDevices: builder.mutation({
       query: ({ deviceIds, ...deviceData }) => ({
-        url: `device/updateDeviceIds/${deviceIds}`,
+        url: `device/by-ids/${deviceIds}`,
         method: "PATCH",
         body: deviceData,
       }),
@@ -85,7 +85,7 @@ export const apiSlice = createApi({
     }),
     deleteDevice: builder.mutation({
       query: (deviceId) => ({
-        url: `device/delete/${deviceId}`,
+        url: `device/${deviceId}`,
         method: "DELETE",
       }),
       invalidatesTags: (result, error, arg) => [
