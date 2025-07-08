@@ -118,10 +118,10 @@ const PerformanceChart = ({ query, pageKey, dateField = "date" }: any) => {
   })
 
   useEffect(() => {
-    if (data?.measurements) {
-      setMeasurements(data.measurements)
+    if (data) {
+      setMeasurements(data)
     }
-  }, [data?.measurements])
+  }, [data])
 
   useEffect(() => {
     const lightChartColor = "#000000"
@@ -143,7 +143,7 @@ const PerformanceChart = ({ query, pageKey, dateField = "date" }: any) => {
     let colors = generateLineColors(measurements.length, isDarkMode)
     let series: any = []
     let index = 0
-    console.log("measurements", measurements)
+    
     for (const measurement of measurements) {
       let data = []
 

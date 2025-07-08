@@ -186,7 +186,7 @@ export const apiSlice = createApi({
       query: (args) => {
         const { deviceNames, startTime, endTime } = args
         return {
-          url: `measurements/readAnimalMobileNames/${deviceNames}?startTime=${startTime}&endTime=${endTime}`,
+          url: `measurements/animal/devices/${deviceNames}?startTime=${startTime}&endTime=${endTime}`,
         }
       },
       providesTags: ["Measurements"],
@@ -195,7 +195,7 @@ export const apiSlice = createApi({
       query: (args) => {
         const { deviceNames, startTime, endTime } = args
         return {
-          url: `measurements/raw/${deviceNames}?startTime=${startTime}&endTime=${endTime}`,
+          url: `measurements/raw/mobile/${deviceNames}?startTime=${startTime}&endTime=${endTime}`,
         }
       },
       providesTags: ["Measurements"],
@@ -204,7 +204,7 @@ export const apiSlice = createApi({
       query: (args) => {
         const { userIds, startTime, endTime } = args
         return {
-          url: `measurements/user/raw/${userIds}?startTime=${startTime}&endTime=${endTime}`,
+          url: `measurements/raw/users/${userIds}?startTime=${startTime}&endTime=${endTime}`,
         }
       },
       providesTags: ["Measurements"],
@@ -213,7 +213,7 @@ export const apiSlice = createApi({
       query: (args) => {
         const { deviceNames, startTime, endTime } = args
         return {
-          url: `measurements/readAnimalSensorNames/${deviceNames}?startTime=${startTime}&endTime=${endTime}`,
+          url: `measurements/animals/sensors/${deviceNames}?startTime=${startTime}&endTime=${endTime}`,
         }
       },
       providesTags: ["Measurements"],
