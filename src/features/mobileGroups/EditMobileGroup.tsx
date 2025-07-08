@@ -80,11 +80,11 @@ const EditMobileGroup: React.FC = () => {
 
   // Fill the attributes form with the common values of the selected mobiles
   useEffect(() => {
-    if (formValues.mobileNames.length > 0 && data && data.mobileDevices) {
+    if (formValues.mobileNames.length > 0 && data) {
       // Get the mobile from the selected mobile names
       const mobiles = formValues.mobileNames
         .map((mobileName) => {
-          const device = data.mobileDevices.find(
+          const device = data.find(
             (device: any) => device.mobileName === mobileName,
           )
           return device ? device : null
@@ -268,9 +268,9 @@ const EditMobileGroup: React.FC = () => {
         : response.error.data.message
       openSnackbar(errorMessage, "error")
     } else {
-      if (response?.data?.mobiles?.updatedMobileIds) {
-        const updatedMobileIds = response.data.mobiles.updatedMobileIds
-        const failedMobileIds = response.data.mobiles.failedMobileIds
+      if (response?.data?.updatedMobileIds) {
+        const updatedMobileIds = response.data.updatedMobileIds
+        const failedMobileIds = response.data.failedMobileIds
         const allMobilesUpdated = mobiles.every((mobileId: any) =>
           updatedMobileIds.includes(mobileId),
         )
@@ -294,7 +294,7 @@ const EditMobileGroup: React.FC = () => {
       try {
         const mobiles = formValues.mobileNames
           .map((mobileName) => {
-            const device = data.mobileDevices.find(
+            const device = data.find(
               (device: any) => device.mobileName === mobileName,
             )
             return device ? device._id : null
@@ -303,7 +303,7 @@ const EditMobileGroup: React.FC = () => {
 
         const nonEmptyFormMobileValues = Object.fromEntries(
           Object.entries(formMobileValues).filter(
-            ([key, value]) => value !== "",
+            ([_key, value]) => value !== "",
           ),
         )
         const response = await editMobiles({
@@ -360,11 +360,7 @@ const EditMobileGroup: React.FC = () => {
           <Autocomplete
             multiple
             loading={isFetching || isLoading}
-            options={
-              data && data.mobileDevices
-                ? data.mobileDevices.map((mobile: any) => mobile.mobileName)
-                : []
-            }
+            options={data ? data.map((mobile: any) => mobile.mobileName) : []}
             value={formValues.mobileNames ?? []}
             onChange={(_event, newValue) => {
               setFormValues((prevValues) => ({

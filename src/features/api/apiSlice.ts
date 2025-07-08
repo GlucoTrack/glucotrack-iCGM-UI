@@ -177,7 +177,7 @@ export const apiSlice = createApi({
       query: (args) => {
         const { deviceNames, startTime, endTime } = args
         return {
-          url: `measurements/readDeviceNames/${deviceNames}?startTime=${startTime}&endTime=${endTime}`,
+          url: `measurements/devices/${deviceNames}?startTime=${startTime}&endTime=${endTime}`,
         }
       },
       providesTags: ["Measurements"],
@@ -266,7 +266,7 @@ export const apiSlice = createApi({
     }),
     getFirmware: builder.query({
       query: (firmwareId) => ({
-        url: `firmware/read/${firmwareId}`,
+        url: `firmware/${firmwareId}`,
       }),
       providesTags: ["Firmwares"],
     }),
@@ -286,7 +286,7 @@ export const apiSlice = createApi({
       invalidatesTags: ["Firmwares"],
     }),
     getFirmwares: builder.query({
-      query: () => "firmware/read",
+      query: () => "firmware",
       providesTags: ["Firmwares"],
     }),
     //*USERS
@@ -337,19 +337,19 @@ export const apiSlice = createApi({
     //*USER GROUPS
     addUserGroup: builder.mutation({
       query: (groupData) => ({
-        url: "userGroups",
+        url: "user-groups",
         method: "POST",
         body: groupData,
       }),
       invalidatesTags: ["UserGroups"],
     }),
     getUserGroups: builder.query({
-      query: () => "userGroups",
+      query: () => "user-groups",
       providesTags: ["UserGroups"],
     }),
     editUserGroup: builder.mutation({
       query: ({ groupId, ...groupData }) => ({
-        url: `userGroups/${groupId}`,
+        url: `user-groups/${groupId}`,
         method: "PATCH",
         body: groupData,
       }),
@@ -357,7 +357,7 @@ export const apiSlice = createApi({
     }),
     deleteUserGroup: builder.mutation({
       query: (groupId) => ({
-        url: `userGroups/${groupId}`,
+        url: `user-groups/${groupId}`,
         method: "DELETE",
       }),
       invalidatesTags: ["UserGroups"],

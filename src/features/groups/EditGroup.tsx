@@ -311,7 +311,7 @@ const EditGroup: React.FC = () => {
 
         const nonEmptyFormDeviceValues = Object.fromEntries(
           Object.entries(formDeviceValues).filter(
-            ([key, value]) => value !== "",
+            ([_key, value]) => value !== "",
           ),
         )
         const response = await editDevices({

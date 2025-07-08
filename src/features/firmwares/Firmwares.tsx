@@ -66,7 +66,7 @@ const Firmwares = () => {
       <Box flexGrow={1} overflow="auto" width="100%">
         <DataGrid<Firmware>
           slots={{ toolbar: GridToolbar }}
-          rows={data.firmwares}
+          rows={data}
           getRowId={(row) => row._id}
           columns={columns}
           onCellClick={handleCellClick}

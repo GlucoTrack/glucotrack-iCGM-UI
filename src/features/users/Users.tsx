@@ -71,7 +71,7 @@ const Users = () => {
       <Box flexGrow={1} overflow="auto" width="100%">
         <DataGrid<User>
           slots={{ toolbar: GridToolbar }}
-          rows={data.users}
+          rows={data}
           getRowId={(row) => row._id}
           columns={columns}
           onCellClick={handleCellClick}

@@ -28,8 +28,6 @@ const MeasurementForm = ({
   pageKey,
   query,
   groupQuery = {},
-  groupsField = "groups",
-  devicesField = "devices",
   deviceNameField = "deviceName",
   deviceNameLabelField,
   groupNameField = "groupName",
@@ -104,7 +102,7 @@ const MeasurementForm = ({
   let deviceContent: JSX.Element | null = null
   const deviceOptions = React.useMemo(() => {
     if (deviceIsSuccess) {
-      return deviceData[devicesField].map((device: any) => ({
+      return deviceData.map((device: any) => ({
         label:
           device[deviceNameLabelField ? deviceNameLabelField : deviceNameField],
         id: device[deviceNameField],
@@ -114,7 +112,6 @@ const MeasurementForm = ({
   }, [
     deviceIsSuccess,
     deviceData,
-    devicesField,
     deviceNameLabelField,
     deviceNameField,
   ])
@@ -136,7 +133,7 @@ const MeasurementForm = ({
   } else if (groupIsError) {
     groupContent = <p>{JSON.stringify(groupError)}</p>
   } else if (groupIsSuccess) {
-    groupName = groupData[groupsField].map((group: any) => {
+    groupName = groupData.map((group: any) => {
       return group[groupNameField]
     })
   }
@@ -329,7 +326,7 @@ const MeasurementForm = ({
     }
 
     if (groupName && groupData) {
-      const groupObject = groupData[groupsField].find(
+      const groupObject = groupData.find(
         (group: any) => group[groupNameField] === groupName,
       )
       if (!deviceNamesField) {
