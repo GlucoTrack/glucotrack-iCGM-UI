@@ -148,12 +148,12 @@ const MeasurementChart = ({ query, pageKey, eventName, fields, dateField = 'date
   })
 
   useEffect(() => {
-    if (data?.measurements) {
-      setMeasurements(data.measurements)
+    if (data) {
+      setMeasurements(data)
       setStartZoomArea(null)
       setEndZoomArea(null)
     }
-  }, [data?.measurements])
+  }, [data])
 
   useEffect(() => {
     let validField = fields.find((field: any) => field.field === chartSettings.yAxisValue)
