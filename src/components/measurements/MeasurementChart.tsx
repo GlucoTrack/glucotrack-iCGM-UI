@@ -24,7 +24,13 @@ dayjs.extend(utc)
 
 Boost(Highcharts)
 
-const MeasurementChart = ({ query, pageKey, eventName, fields, dateField = 'date' }: any) => {
+const MeasurementChart = ({
+  query,
+  pageKey,
+  eventName,
+  fields,
+  dateField = "date",
+}: any) => {
   const theme = useTheme()
   const isDarkMode = theme.palette.mode === "dark"
   const startTime = useAppSelector((state) => state.measurements.startTime)
@@ -156,7 +162,9 @@ const MeasurementChart = ({ query, pageKey, eventName, fields, dateField = 'date
   }, [data])
 
   useEffect(() => {
-    let validField = fields.find((field: any) => field.field === chartSettings.yAxisValue)
+    let validField = fields.find(
+      (field: any) => field.field === chartSettings.yAxisValue,
+    )
     if (!validField) {
       setChartSettings((prevSettings) => {
         return {
@@ -191,7 +199,10 @@ const MeasurementChart = ({ query, pageKey, eventName, fields, dateField = 'date
       let data = []
 
       for (const d of measurement.data) {
-        data.push([new Date(d[dateField]).getTime(), d[chartSettings.yAxisValue]])
+        data.push([
+          new Date(d[dateField]).getTime(),
+          d[chartSettings.yAxisValue],
+        ])
       }
       series.push({
         name: measurement.name,
@@ -273,25 +284,30 @@ const MeasurementChart = ({ query, pageKey, eventName, fields, dateField = 'date
   }
 
   useEffect(() => {
-    const updateChartSettings = (key: 'xAxisFormat' | 'yAxisValue') => {
+    const updateChartSettings = (key: "xAxisFormat" | "yAxisValue") => {
       if (chartSettings[key]) {
         setLocalStorageKey((prevKey: any) => {
           const newChartSettings = {
             ...prevKey,
             [key]: chartSettings[key],
-          };
+          }
           localStorage.setItem(
             `chart_settings_${pageKey}`,
             JSON.stringify(newChartSettings),
-          );
-          return newChartSettings;
-        });
+          )
+          return newChartSettings
+        })
       }
-    };
+    }
 
-    updateChartSettings('xAxisFormat');
-    updateChartSettings('yAxisValue');
-  }, [chartSettings.xAxisFormat, chartSettings.yAxisValue, pageKey, chartSettings]);
+    updateChartSettings("xAxisFormat")
+    updateChartSettings("yAxisValue")
+  }, [
+    chartSettings.xAxisFormat,
+    chartSettings.yAxisValue,
+    pageKey,
+    chartSettings,
+  ])
 
   // Handle new measurements events
   useEffect(() => {
@@ -300,9 +316,7 @@ const MeasurementChart = ({ query, pageKey, eventName, fields, dateField = 'date
         for (const deviceName of deviceNames) {
           socket.on(eventName + deviceName, (data: any) => {
             let date = new Date(data.date)
-            if (
-              date >= dayjs(startTime).utc().toDate()
-            ) {
+            if (date >= dayjs(startTime).utc().toDate()) {
               setMeasurements((oldMeasurements: any) => {
                 let newMeasurements = []
                 for (let measurement of oldMeasurements) {
@@ -368,7 +382,9 @@ const MeasurementChart = ({ query, pageKey, eventName, fields, dateField = 'date
                   <MenuItem value="HH:mm:ss">HH:mm:ss</MenuItem>
                   <MenuItem value="DD HH:mm:ss">DD HH:mm:ss</MenuItem>
                   <MenuItem value="MM-DD HH:mm:ss">MM-DD HH:mm:ss</MenuItem>
-                  <MenuItem value="YY-MM-DD HH:mm:ss">YY-MM-DD HH:mm:ss</MenuItem>
+                  <MenuItem value="YY-MM-DD HH:mm:ss">
+                    YY-MM-DD HH:mm:ss
+                  </MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -386,23 +402,37 @@ const MeasurementChart = ({ query, pageKey, eventName, fields, dateField = 'date
                   }}
                 >
                   {fields.map((field: any) => (
-                    <MenuItem value={field.field} key={field.field}>{field.label}</MenuItem>
+                    <MenuItem value={field.field} key={field.field}>
+                      {field.label}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </Grid>
             {realtime && (
               <Grid xs={4}>
-                <Box style={{ animation: 'blink 2s linear infinite', userSelect: "none", marginTop: 16, marginLeft: 10 }}>
-                  <Typography variant="body1" color={"#ffeb3b"}>Realtime</Typography>
+                <Box
+                  style={{
+                    animation: "blink 2s linear infinite",
+                    userSelect: "none",
+                    marginTop: 16,
+                    marginLeft: 10,
+                  }}
+                >
+                  <Typography variant="body1" color={"#ffeb3b"}>
+                    Realtime
+                  </Typography>
                 </Box>
               </Grid>
             )}
-
           </Grid>
         </Box>
         <Box>
-          <MeasurementGrid measurements={filteredMeasurements} fields={fields} dateField={dateField} />
+          <MeasurementGrid
+            measurements={filteredMeasurements}
+            fields={fields}
+            dateField={dateField}
+          />
         </Box>
       </>
     )

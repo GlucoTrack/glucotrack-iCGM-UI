@@ -39,6 +39,7 @@ export const apiSlice = createApi({
     "Firmwares",
     "Users",
     "UserGroups",
+    "GlucoseValues",
   ],
   endpoints: (builder) => ({
     //TODO maybe code split per feature
@@ -227,6 +228,16 @@ export const apiSlice = createApi({
       },
       providesTags: ["AveragesAndStds"],
     }),
+    // GLUCOSE VALUES
+    getGlucoseValuesByMobileNames: builder.query({
+      query: (args) => {
+        const { deviceNames, startTime, endTime } = args
+        return {
+          url: `glucose/by-mobile-names/${deviceNames}?startTime=${startTime}&endTime=${endTime}`,
+        }
+      },
+      providesTags: ["GlucoseValues"],
+    }),
     //*MOBILE GROUPS
     addMobileGroup: builder.mutation({
       query: (groupData) => ({
@@ -387,6 +398,7 @@ export const {
   useGetRawMeasurementsByMobileNamesQuery,
   useGetRawUserMeasurementsByUserIdsQuery,
   useGetAnimalMeasurementsBySensorNamesQuery,
+  useGetGlucoseValuesByMobileNamesQuery,
   useGetAveragesAndStdsQuery,
   useAddMobileGroupMutation,
   useGetMobileGroupsQuery,
