@@ -96,7 +96,7 @@ const Devices = () => {
       <Box flexGrow={1} overflow="auto" width="50%" margin="auto">
         <DataGrid<Device>
           slots={{ toolbar: GridToolbar }}
-          rows={data.devices}
+          rows={data}
           getRowId={(row) => row._id}
           columns={columns}
           initialState={initialState}

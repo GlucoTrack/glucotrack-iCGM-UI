@@ -59,7 +59,7 @@ const UserGroups: React.FC = () => {
       <Box height={"75vh"}>
         <DataGrid<UserGroup>
           slots={{ toolbar: GridToolbar }}
-          rows={data.userGroups}
+          rows={data}
           getRowId={(row) => row._id}
           columns={columns}
           onCellClick={handleCellClick}

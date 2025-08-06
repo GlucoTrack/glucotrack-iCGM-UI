@@ -39,31 +39,32 @@ export const apiSlice = createApi({
     "Firmwares",
     "Users",
     "UserGroups",
+    "GlucoseValues",
   ],
   endpoints: (builder) => ({
     //TODO maybe code split per feature
     //*DEVICES
     addDevice: builder.mutation({
       query: (deviceData) => ({
-        url: "device/create",
+        url: "device",
         method: "POST",
         body: deviceData,
       }),
       invalidatesTags: ["Devices"],
     }),
     getDevices: builder.query({
-      query: () => "device/read",
+      query: () => "device",
       providesTags: ["Devices"],
     }),
     getDevice: builder.query({
       query: (deviceId) => ({
-        url: `device/read/${deviceId}`,
+        url: `device/${deviceId}`,
       }),
       providesTags: ["Devices"],
     }),
     editDevice: builder.mutation({
       query: ({ deviceId, ...deviceData }) => ({
-        url: `device/updateDeviceId/${deviceId}`,
+        url: `device/${deviceId}`,
         method: "PATCH",
         body: deviceData,
       }),
@@ -74,7 +75,7 @@ export const apiSlice = createApi({
     }),
     editDevices: builder.mutation({
       query: ({ deviceIds, ...deviceData }) => ({
-        url: `device/updateDeviceIds/${deviceIds}`,
+        url: `device/by-ids/${deviceIds}`,
         method: "PATCH",
         body: deviceData,
       }),
@@ -85,7 +86,7 @@ export const apiSlice = createApi({
     }),
     deleteDevice: builder.mutation({
       query: (deviceId) => ({
-        url: `device/delete/${deviceId}`,
+        url: `device/${deviceId}`,
         method: "DELETE",
       }),
       invalidatesTags: (result, error, arg) => [
@@ -96,25 +97,25 @@ export const apiSlice = createApi({
     //*MOBILES
     addMobile: builder.mutation({
       query: (mobileData) => ({
-        url: "mobile/create",
+        url: "mobile",
         method: "POST",
         body: mobileData,
       }),
       invalidatesTags: ["Mobiles"],
     }),
     getMobiles: builder.query({
-      query: () => "mobile/read",
+      query: () => "mobile",
       providesTags: ["Mobiles"],
     }),
     getMobile: builder.query({
       query: (mobileId) => ({
-        url: `mobile/readByMobileId/${mobileId}`,
+        url: `mobile/${mobileId}`,
       }),
       providesTags: ["Mobiles"],
     }),
     editMobile: builder.mutation({
       query: ({ mobileId, ...mobileData }) => ({
-        url: `mobile/updateByMobileId/${mobileId}`,
+        url: `mobile/${mobileId}`,
         method: "PATCH",
         body: mobileData,
       }),
@@ -125,7 +126,7 @@ export const apiSlice = createApi({
     }),
     editMobiles: builder.mutation({
       query: ({ mobileIds, ...mobileData }) => ({
-        url: `mobile/updateMobileIds/${mobileIds}`,
+        url: `mobile/by-ids/${mobileIds}`,
         method: "PATCH",
         body: mobileData,
       }),
@@ -136,7 +137,7 @@ export const apiSlice = createApi({
     }),
     deleteMobile: builder.mutation({
       query: (mobileId) => ({
-        url: `mobile/deleteByMobileId/${mobileId}`,
+        url: `mobile/${mobileId}`,
         method: "DELETE",
       }),
       invalidatesTags: (result, error, arg) => [
@@ -177,7 +178,7 @@ export const apiSlice = createApi({
       query: (args) => {
         const { deviceNames, startTime, endTime } = args
         return {
-          url: `measurements/readDeviceNames/${deviceNames}?startTime=${startTime}&endTime=${endTime}`,
+          url: `measurements/devices/${deviceNames}?startTime=${startTime}&endTime=${endTime}`,
         }
       },
       providesTags: ["Measurements"],
@@ -186,7 +187,7 @@ export const apiSlice = createApi({
       query: (args) => {
         const { deviceNames, startTime, endTime } = args
         return {
-          url: `measurements/readAnimalMobileNames/${deviceNames}?startTime=${startTime}&endTime=${endTime}`,
+          url: `measurements/animals/mobiles/${deviceNames}?startTime=${startTime}&endTime=${endTime}`,
         }
       },
       providesTags: ["Measurements"],
@@ -195,7 +196,7 @@ export const apiSlice = createApi({
       query: (args) => {
         const { deviceNames, startTime, endTime } = args
         return {
-          url: `measurements/raw/${deviceNames}?startTime=${startTime}&endTime=${endTime}`,
+          url: `measurements/raw/mobiles/${deviceNames}?startTime=${startTime}&endTime=${endTime}`,
         }
       },
       providesTags: ["Measurements"],
@@ -204,7 +205,7 @@ export const apiSlice = createApi({
       query: (args) => {
         const { userIds, startTime, endTime } = args
         return {
-          url: `measurements/user/raw/${userIds}?startTime=${startTime}&endTime=${endTime}`,
+          url: `measurements/raw/users/${userIds}?startTime=${startTime}&endTime=${endTime}`,
         }
       },
       providesTags: ["Measurements"],
@@ -213,7 +214,7 @@ export const apiSlice = createApi({
       query: (args) => {
         const { deviceNames, startTime, endTime } = args
         return {
-          url: `measurements/readAnimalSensorNames/${deviceNames}?startTime=${startTime}&endTime=${endTime}`,
+          url: `measurements/animals/sensors/${deviceNames}?startTime=${startTime}&endTime=${endTime}`,
         }
       },
       providesTags: ["Measurements"],
@@ -227,22 +228,32 @@ export const apiSlice = createApi({
       },
       providesTags: ["AveragesAndStds"],
     }),
+    // GLUCOSE VALUES
+    getGlucoseValuesByMobileNames: builder.query({
+      query: (args) => {
+        const { deviceNames, startTime, endTime } = args
+        return {
+          url: `glucose/by-mobile-names/${deviceNames}?startTime=${startTime}&endTime=${endTime}`,
+        }
+      },
+      providesTags: ["GlucoseValues"],
+    }),
     //*MOBILE GROUPS
     addMobileGroup: builder.mutation({
       query: (groupData) => ({
-        url: "mobileGroups",
+        url: "mobile-groups",
         method: "POST",
         body: groupData,
       }),
       invalidatesTags: ["MobileGroups"],
     }),
     getMobileGroups: builder.query({
-      query: () => "mobileGroups",
+      query: () => "mobile-groups",
       providesTags: ["MobileGroups"],
     }),
     editMobileGroup: builder.mutation({
       query: ({ groupId, ...groupData }) => ({
-        url: `mobileGroups/${groupId}`,
+        url: `mobile-groups/${groupId}`,
         method: "PATCH",
         body: groupData,
       }),
@@ -250,7 +261,7 @@ export const apiSlice = createApi({
     }),
     deleteMobileGroup: builder.mutation({
       query: (groupId) => ({
-        url: `mobileGroups/${groupId}`,
+        url: `mobile-groups/${groupId}`,
         method: "DELETE",
       }),
       invalidatesTags: ["MobileGroups"],
@@ -266,7 +277,7 @@ export const apiSlice = createApi({
     }),
     getFirmware: builder.query({
       query: (firmwareId) => ({
-        url: `firmware/read/${firmwareId}`,
+        url: `firmware/${firmwareId}`,
       }),
       providesTags: ["Firmwares"],
     }),
@@ -286,7 +297,7 @@ export const apiSlice = createApi({
       invalidatesTags: ["Firmwares"],
     }),
     getFirmwares: builder.query({
-      query: () => "firmware/read",
+      query: () => "firmware",
       providesTags: ["Firmwares"],
     }),
     //*USERS
@@ -337,19 +348,19 @@ export const apiSlice = createApi({
     //*USER GROUPS
     addUserGroup: builder.mutation({
       query: (groupData) => ({
-        url: "userGroups",
+        url: "user-groups",
         method: "POST",
         body: groupData,
       }),
       invalidatesTags: ["UserGroups"],
     }),
     getUserGroups: builder.query({
-      query: () => "userGroups",
+      query: () => "user-groups",
       providesTags: ["UserGroups"],
     }),
     editUserGroup: builder.mutation({
       query: ({ groupId, ...groupData }) => ({
-        url: `userGroups/${groupId}`,
+        url: `user-groups/${groupId}`,
         method: "PATCH",
         body: groupData,
       }),
@@ -357,7 +368,7 @@ export const apiSlice = createApi({
     }),
     deleteUserGroup: builder.mutation({
       query: (groupId) => ({
-        url: `userGroups/${groupId}`,
+        url: `user-groups/${groupId}`,
         method: "DELETE",
       }),
       invalidatesTags: ["UserGroups"],
@@ -387,6 +398,7 @@ export const {
   useGetRawMeasurementsByMobileNamesQuery,
   useGetRawUserMeasurementsByUserIdsQuery,
   useGetAnimalMeasurementsBySensorNamesQuery,
+  useGetGlucoseValuesByMobileNamesQuery,
   useGetAveragesAndStdsQuery,
   useAddMobileGroupMutation,
   useGetMobileGroupsQuery,
