@@ -61,7 +61,7 @@ const MobileGroups: React.FC = () => {
       <Box height={"75vh"}>
         <DataGrid<MobileGroup>
           slots={{ toolbar: GridToolbar }}          
-          rows={data.mobileGroups}
+          rows={data}
           getRowId={(row) => row._id}
           columns={columns}
           onCellClick={handleCellClick}

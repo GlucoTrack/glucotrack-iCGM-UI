@@ -39,6 +39,7 @@ import { ClerkProvider } from "@clerk/clerk-react"
 import { dark } from "@clerk/themes"
 import ProtectedRoute from "@/components/ProtectedRoute"
 import AuthAsync from "@/components/AuthAsync"
+import GlucoseValues from "./features/glucoseValues/GlucoseValues"
 
 import "./index.css"
 
@@ -93,10 +94,8 @@ function App() {
                     path="/raw-measurements"
                     element={<RawMeasurements />}
                   />
-                  <Route
-                    path="/raw-performance"
-                    element={<RawPerformance />}
-                  />
+                  <Route path="/raw-performance" element={<RawPerformance />} />
+                  <Route path="/glucose-values" element={<GlucoseValues />} />
                   <Route path="/mobile-groups" element={<MobileGroups />} />
                   <Route
                     path="/mobile-groups/add"

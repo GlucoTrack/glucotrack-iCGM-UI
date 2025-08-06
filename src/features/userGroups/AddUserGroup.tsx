@@ -47,7 +47,7 @@ const AddUserGroup: React.FC = () => {
         console.log(formValues.userIds)
         await addGroup({
           ...formValues,
-          userIds: formValues.userIds.map((user:any) => user.id).join(","),
+          userIds: formValues.userIds.map((user: any) => user.id).join(","),
         })
       } catch (error: any) {
         console.error(error)
@@ -121,8 +121,8 @@ const AddUserGroup: React.FC = () => {
             multiple
             loading={isFetching || isLoading}
             options={
-              data && data.users
-                ? data.users.map((user: any) => {
+              data
+                ? data.map((user: any) => {
                     return { label: user.email, id: user.userId }
                   })
                 : []

@@ -21,7 +21,8 @@ import {
   HomeOutlined,
   MobileFriendlyOutlined,
   TimelineOutlined,
-  TroubleshootOutlined
+  TroubleshootOutlined,
+  AutoGraph
 } from "@mui/icons-material"
 import FlexBetweenCenter from "@/components/FlexBetweenCenter"
 import { useUser, useAuth, useOrganizationList } from "@clerk/clerk-react"
@@ -76,6 +77,11 @@ const navItems = [
     text: "Raw Performance",
     icon: <TroubleshootOutlined />,
     path: "raw-performance",
+  },
+  {
+    text: "Glucose Values",
+    icon: <AutoGraph />,
+    path: "glucose-values",
   },
   {
     text: "Divider",

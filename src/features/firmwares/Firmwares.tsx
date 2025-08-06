@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Box } from "@mui/material"
+import { Box, IconButton } from "@mui/material"
 import {
   DataGrid,
   GridCellParams,
@@ -48,16 +48,21 @@ const Firmwares = () => {
         headerName: "Download",
         flex: 0.7,
         renderCell: (params: any) => (
-          <a
+          <IconButton
+            component="a"
             href={params.row.url}
-            rel="noopener noreferrer"
             download
+            target="_blank"
+            rel="noopener noreferrer"
+            color="primary"
+            size="small"
             onClick={(e) => {
               e.stopPropagation()
             }}
+            title="Scarica firmware"
           >
             <DownloadIcon />
-          </a>
+          </IconButton>
         ),
       },
       { field: "url", headerName: "url", flex: 1 },
@@ -66,7 +71,7 @@ const Firmwares = () => {
       <Box flexGrow={1} overflow="auto" width="100%">
         <DataGrid<Firmware>
           slots={{ toolbar: GridToolbar }}
-          rows={data.firmwares}
+          rows={data}
           getRowId={(row) => row._id}
           columns={columns}
           onCellClick={handleCellClick}

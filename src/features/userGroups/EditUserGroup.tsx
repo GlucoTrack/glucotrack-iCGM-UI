@@ -81,14 +81,14 @@ const EditUserGroup: React.FC = () => {
 
   // Fill the attributes form with the common values of the selected users
   useEffect(() => {
-    if (formValues.userIds.length > 0 && data && data.users) {
+    if (formValues.userIds.length > 0 && data) {
       // Get the user from the selected user names
       const users = formValues.userIds
         .map((usr: any) => {
           if (typeof usr === "string") {
-            return data.users.find((user: any) => user.userId === usr)
+            return data.find((user: any) => user.userId === usr)
           }
-          return data.users.find((user: any) => user.userId === usr.id)
+          return data.find((user: any) => user.userId === usr.id)
         })
         .filter((user) => user !== null)
 
@@ -284,9 +284,9 @@ const EditUserGroup: React.FC = () => {
         : response.error.data.message
       openSnackbar(errorMessage, "error")
     } else {
-      if (response?.data?.users?.updatedIds) {
-        const updatedUserIds = response.data.users.updatedIds
-        const failedUserIds = response.data.users.failedIds
+      if (response?.data?.updatedIds) {
+        const updatedUserIds = response.data.updatedIds
+        const failedUserIds = response.data.failedIds
         const allUsersUpdated = users.every((userId: any) =>
           updatedUserIds.includes(userId),
         )
@@ -308,7 +308,7 @@ const EditUserGroup: React.FC = () => {
       try {
         const users = currentOptions
           .map((userSelected: any) => {
-            const user = data.users.find(
+            const user = data.find(
               (user: any) => user.userId === userSelected.id,
             )
             return user ? user._id : null
@@ -316,7 +316,9 @@ const EditUserGroup: React.FC = () => {
           .filter((id) => id !== null)
 
         const nonEmptyFormUserValues = Object.fromEntries(
-          Object.entries(formUserValues).filter(([key, value]) => value !== ""),
+          Object.entries(formUserValues).filter(
+            ([_key, value]) => value !== "",
+          ),
         )
 
         const response = await editUsers({
@@ -377,8 +379,8 @@ const EditUserGroup: React.FC = () => {
               option.id === value.id
             }
             options={
-              data && data.users
-                ? data.users.map((user: any) => {
+              data
+                ? data.map((user: any) => {
                     return { label: user.email, id: user.userId }
                   })
                 : []

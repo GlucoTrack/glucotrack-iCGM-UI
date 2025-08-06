@@ -80,7 +80,7 @@ const Mobiles = () => {
       <Box flexGrow={1} overflow="auto" width="100%">
         <DataGrid<Mobile>
           slots={{ toolbar: GridToolbar }}
-          rows={data.mobileDevices}
+          rows={data}
           getRowId={(row) => row._id}
           columns={columns}
           onCellClick={handleCellClick}
