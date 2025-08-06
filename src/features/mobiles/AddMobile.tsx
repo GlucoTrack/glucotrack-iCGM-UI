@@ -15,6 +15,9 @@ interface FormValues {
   weMillivolts: number
   filterLength: number
   checkParametersInterval: number
+  gain?: number
+  slope?: number
+  bias?: number
   comment: string
 }
 
@@ -204,6 +207,33 @@ const AddMobile: React.FC = () => {
             value={formValues.checkParametersInterval}
             onChange={handleChange}
             required
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            name="gain"
+            label="Gain"
+            type="number"
+            value={formValues.gain}
+            onChange={handleChange}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            name="slope"
+            label="Slope"
+            type="number"
+            value={formValues.slope}
+            onChange={handleChange}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            name="bias"
+            label="Bias"
+            type="number"
+            value={formValues.bias}
+            onChange={handleChange}
             fullWidth
             margin="normal"
           />

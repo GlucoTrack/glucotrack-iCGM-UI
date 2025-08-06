@@ -34,6 +34,9 @@ interface MobileValues {
   weMillivolts: string
   filterLength: string
   checkParametersInterval: string
+  gain: string
+  slope: string
+  bias: string
 }
 
 const initialMobileValues: MobileValues = {
@@ -43,6 +46,9 @@ const initialMobileValues: MobileValues = {
   weMillivolts: "",
   filterLength: "",
   checkParametersInterval: "",
+  gain: "",
+  slope: "",
+  bias: "",
 }
 
 const EditMobileGroup: React.FC = () => {
@@ -99,6 +105,9 @@ const EditMobileGroup: React.FC = () => {
         weMillivolts: mobiles[0].weMillivolts,
         filterLength: mobiles[0].filterLength,
         checkParametersInterval: mobiles[0].checkParametersInterval,
+        gain: mobiles[0].gain,
+        slope: mobiles[0].slope,
+        bias: mobiles[0].bias,
       }
 
       // Check if all the mobiles have the same values, instead i put empty string
@@ -123,6 +132,15 @@ const EditMobileGroup: React.FC = () => {
           commonValue.checkParametersInterval !== mobile.checkParametersInterval
         ) {
           commonValue.checkParametersInterval = ""
+        }
+        if (commonValue.gain !== mobile.gain) {
+          commonValue.gain = ""
+        }
+        if (commonValue.slope !== mobile.slope) {
+          commonValue.slope = ""
+        }
+        if (commonValue.bias !== mobile.bias) {
+          commonValue.bias = ""
         }
       }
 
@@ -303,7 +321,7 @@ const EditMobileGroup: React.FC = () => {
 
         const nonEmptyFormMobileValues = Object.fromEntries(
           Object.entries(formMobileValues).filter(
-            ([key, value]) => value !== "",
+            ([_key, value]) => value !== "",
           ),
         )
         const response = await editMobiles({
@@ -462,6 +480,36 @@ const EditMobileGroup: React.FC = () => {
             name="checkParametersInterval"
             label="Check Parameters Interval"
             value={formMobileValues.checkParametersInterval}
+            onChange={handleInputChange}
+            margin="normal"
+            sx={{ mr: 2 }}
+          />
+          <TextField
+            id="gain"
+            name="gain"
+            label="Gain"
+            type="number"
+            value={formMobileValues.gain ?? ""}
+            onChange={handleInputChange}
+            margin="normal"
+            sx={{ mr: 2 }}
+          />
+          <TextField
+            id="slope"
+            name="slope"
+            label="Slope"
+            type="number"
+            value={formMobileValues.slope ?? ""}
+            onChange={handleInputChange}
+            margin="normal"
+            sx={{ mr: 2 }}
+          />
+          <TextField
+            id="bias"
+            name="bias"
+            label="Bias"
+            type="number"
+            value={formMobileValues.bias ?? ""}
             onChange={handleInputChange}
             margin="normal"
             sx={{ mr: 2 }}
