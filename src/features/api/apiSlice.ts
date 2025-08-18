@@ -269,7 +269,7 @@ export const apiSlice = createApi({
     //*FIRMWARES
     addFirmware: builder.mutation({
       query: (firmwareData) => ({
-        url: "firmware/create",
+        url: "firmware",
         method: "POST",
         body: firmwareData,
       }),
