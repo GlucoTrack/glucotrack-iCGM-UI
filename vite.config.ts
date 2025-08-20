@@ -1,7 +1,7 @@
 import { defineConfig } from "vitest/config"
 import react from "@vitejs/plugin-react"
 import path from "path"
-import pkg from "./package.json" assert { type: "json" }
+import pkg from "./package.json"
 
 // https://vitejs.dev/config/
 export default defineConfig({
