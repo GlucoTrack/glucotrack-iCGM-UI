@@ -16,7 +16,7 @@ import {
   ChevronRight,
   ChevronLeft,
 } from "@mui/icons-material"
-import Grid from "@mui/system/Unstable_Grid"
+import { Grid } from "@mui/material"
 import { setFilter } from "@/components/measurements/measurementsSlice"
 import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
@@ -109,12 +109,7 @@ const MeasurementForm = ({
       }))
     }
     return []
-  }, [
-    deviceIsSuccess,
-    deviceData,
-    deviceNameLabelField,
-    deviceNameField,
-  ])
+  }, [deviceIsSuccess, deviceData, deviceNameLabelField, deviceNameField])
 
   if (deviceIsFetching) {
     deviceContent = <h3>Fetching devices...</h3>
@@ -352,8 +347,8 @@ const MeasurementForm = ({
               deviceNamesFromGroup.length > 0
                 ? deviceNamesFromGroup
                 : deviceNames && deviceNames.length > 0
-                ? deviceNames
-                : [],
+                  ? deviceNames
+                  : [],
             groupName: groupName ? groupName : "",
             startTime: utcStartTime,
             endTime: utcEndTime,

@@ -7,18 +7,21 @@ import {
   Select,
   useTheme,
 } from "@mui/material"
-import chroma from "chroma-js"
-import Grid from "@mui/system/Unstable_Grid"
+import { Grid } from "@mui/material"
 import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
 import distinctColors from "distinct-colors"
 import Highcharts from "highcharts"
 import HighchartsReact from "highcharts-react-official"
-import Boost from "highcharts/modules/boost"
+import BoostModule from "highcharts/modules/boost"
 
 dayjs.extend(utc)
 
-Boost(Highcharts)
+const Boost = BoostModule as unknown as (hc: typeof Highcharts) => void
+
+if (typeof Boost === "function") {
+  Boost(Highcharts)
+}
 
 const PerformanceChart = ({ query, pageKey, dateField = "date" }: any) => {
   const theme = useTheme()
@@ -41,7 +44,7 @@ const PerformanceChart = ({ query, pageKey, dateField = "date" }: any) => {
       quality: 50,
       samples: 10000,
     })
-    return palette.map((color) => chroma(color).hex())
+    return palette.map((color) => color.hex())
   }
 
   const [measurements, setMeasurements] = useState<any>([])
@@ -143,7 +146,7 @@ const PerformanceChart = ({ query, pageKey, dateField = "date" }: any) => {
     let colors = generateLineColors(measurements.length, isDarkMode)
     let series: any = []
     let index = 0
-    
+
     for (const measurement of measurements) {
       let data = []
 
@@ -241,7 +244,7 @@ const PerformanceChart = ({ query, pageKey, dateField = "date" }: any) => {
     chartSettings,
   ])
 
-  let content: JSX.Element | null = null
+  let content: React.ReactElement | null = null
   if (isFetching) {
     content = <h3>Fetching...</h3>
   } else if (isLoading) {
