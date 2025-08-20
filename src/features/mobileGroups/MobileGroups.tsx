@@ -1,7 +1,7 @@
+import React, { JSX } from "react"
 import { useNavigate } from "react-router-dom"
 import { Box } from "@mui/material"
-import { DataGrid, GridCellParams, GridToolbar} from "@mui/x-data-grid"
-
+import { DataGrid, GridCellParams, GridToolbar } from "@mui/x-data-grid"
 
 import Header from "@/components/Header"
 import Action from "@/components/HeaderAction"
@@ -9,7 +9,6 @@ import { useGetMobileGroupsQuery } from "@/features/api/apiSlice"
 import { useDispatch } from "react-redux"
 import { setMobileGroup } from "@/features/mobileGroups/groupsSlice"
 import MobileGroup from "@/interfaces/MobileGroup"
-
 
 const MobileGroups: React.FC = () => {
   const dispatch = useDispatch()
@@ -40,7 +39,7 @@ const MobileGroups: React.FC = () => {
       }),
     )
     navigate(`${groupId}`)
-  }  
+  }
 
   let content: JSX.Element | null = null
 
@@ -60,7 +59,7 @@ const MobileGroups: React.FC = () => {
     content = (
       <Box height={"75vh"}>
         <DataGrid<MobileGroup>
-          slots={{ toolbar: GridToolbar }}          
+          slots={{ toolbar: GridToolbar }}
           rows={data}
           getRowId={(row) => row._id}
           columns={columns}
@@ -72,7 +71,10 @@ const MobileGroups: React.FC = () => {
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
-      <Header title="Mobile Groups" subtitle={`List of groups: ${getGroupStatus}`}>
+      <Header
+        title="Mobile Groups"
+        subtitle={`List of groups: ${getGroupStatus}`}
+      >
         <Action action="Add" url="add" />
       </Header>
       {content}
@@ -81,4 +83,3 @@ const MobileGroups: React.FC = () => {
 }
 
 export default MobileGroups
-

@@ -7,7 +7,7 @@ import {
   Checkbox,
   FormControlLabel,
 } from "@mui/material"
-import React, { useEffect, useState } from "react"
+import React, { JSX, useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import {
   useGetUserQuery,
@@ -214,7 +214,7 @@ const EditUser: React.FC = () => {
             name="userId"
             label="User ID"
             type="text"
-            value={userId}            
+            value={userId}
             fullWidth
             margin="normal"
             disabled
@@ -224,7 +224,7 @@ const EditUser: React.FC = () => {
             name="email"
             label="Email"
             type="text"
-            value={email}            
+            value={email}
             fullWidth
             margin="normal"
             disabled
