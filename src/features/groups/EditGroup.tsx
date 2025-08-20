@@ -1,7 +1,7 @@
 import React, { useCallback, useContext, useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
-import { Autocomplete, Box, Button, Divider, TextField } from "@mui/material"
+import { Autocomplete, Box, Button, Divider } from "@mui/material"
 import Header from "@/components/Header"
 import {
   useDeleteGroupMutation,
@@ -13,6 +13,7 @@ import { RootState } from "@/store/store"
 import { resetGroup } from "./groupsSlice"
 import { Typography } from "@mui/material"
 import { SnackbarContext } from "../../providers/SnackbarProvider"
+import TrimmedTextField from "@/components/TrimmedTextField"
 
 interface FormValues {
   groupName: string
@@ -345,7 +346,7 @@ const EditGroup: React.FC = () => {
       />
       <Box flexGrow={1} overflow="auto" width="100%">
         <form onSubmit={handleSubmit}>
-          <TextField
+          <TrimmedTextField
             id="groupName"
             name="groupName"
             label="Group Name"
@@ -355,7 +356,7 @@ const EditGroup: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          <TextField
+          <TrimmedTextField
             id="groupDescription"
             name="groupDescription"
             label="Group Description"
@@ -377,7 +378,7 @@ const EditGroup: React.FC = () => {
               }))
             }}
             renderInput={(params) => (
-              <TextField
+              <TrimmedTextField
                 sx={{ mt: 2 }}
                 {...params}
                 label={"Device Names"}
@@ -416,7 +417,7 @@ const EditGroup: React.FC = () => {
         </Typography>
 
         <form onSubmit={handleDevices}>
-          <TextField
+          <TrimmedTextField
             id="measurementInterval"
             name="measurementInterval"
             label="Measurement Interval"
@@ -425,7 +426,7 @@ const EditGroup: React.FC = () => {
             margin="normal"
             sx={{ mr: 2 }}
           />
-          <TextField
+          <TrimmedTextField
             id="transmitDelay"
             name="transmitDelay"
             label="Transmit Delay"
@@ -434,7 +435,7 @@ const EditGroup: React.FC = () => {
             margin="normal"
             sx={{ mr: 2 }}
           />
-          <TextField
+          <TrimmedTextField
             id="checkParametersInterval"
             name="checkParametersInterval"
             label="Check Parameters Interval"
@@ -443,7 +444,7 @@ const EditGroup: React.FC = () => {
             margin="normal"
             sx={{ mr: 2 }}
           />
-          <TextField
+          <TrimmedTextField
             id="pstatVoltage"
             name="pstatVoltage"
             label="Pstat Voltage"
@@ -452,7 +453,7 @@ const EditGroup: React.FC = () => {
             margin="normal"
             sx={{ mr: 2 }}
           />
-          <TextField
+          <TrimmedTextField
             id="pstatTIA"
             name="pstatTIA"
             label="Pstat TIA"
@@ -461,7 +462,7 @@ const EditGroup: React.FC = () => {
             margin="normal"
             sx={{ mr: 2 }}
           />
-          <TextField
+          <TrimmedTextField
             id="glm"
             name="glm"
             label="GLM"
@@ -470,7 +471,7 @@ const EditGroup: React.FC = () => {
             margin="normal"
             sx={{ mr: 2 }}
           />
-          <TextField
+          <TrimmedTextField
             id="enzyme"
             name="enzyme"
             label="Enzyme"
@@ -479,7 +480,7 @@ const EditGroup: React.FC = () => {
             margin="normal"
             sx={{ mr: 2 }}
           />
-          <TextField
+          <TrimmedTextField
             id="testStation"
             name="testStation"
             label="Test Station"

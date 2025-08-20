@@ -1,5 +1,5 @@
 import Header from "@/components/Header"
-import { Box, Button, Link, TextField, useTheme } from "@mui/material"
+import { Box, Button, Link, useTheme } from "@mui/material"
 import React, { useEffect, useState } from "react"
 import { MuiFileInput } from "mui-file-input"
 import { useNavigate, useParams } from "react-router-dom"
@@ -8,6 +8,7 @@ import {
   useEditFirmwareMutation,
   useDeleteFirmwareMutation,
 } from "@/features/api/apiSlice"
+import TrimmedTextField from "@/components/TrimmedTextField"
 
 interface FormValues {
   name: string
@@ -178,7 +179,7 @@ const EditFirmware: React.FC = () => {
       {getfirmwareContent}
       <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">
         <form onSubmit={handleSubmit}>
-          <TextField
+          <TrimmedTextField
             name="version"
             label="Version"
             type="text"

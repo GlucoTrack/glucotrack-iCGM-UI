@@ -1,10 +1,11 @@
 import React, { useState, useContext, useEffect, useCallback } from "react"
 import { useNavigate } from "react-router-dom"
-import { Box, Button, TextField, Autocomplete } from "@mui/material"
+import { Box, Button, Autocomplete } from "@mui/material"
 import { useGetMobilesQuery } from "@/features/api/apiSlice"
 import Header from "@/components/Header"
 import { useAddMobileGroupMutation } from "@/features/api/apiSlice"
 import { SnackbarContext } from "../../providers/SnackbarProvider"
+import TrimmedTextField from "@/components/TrimmedTextField"
 
 interface FormValues {
   mobileGroupName: string
@@ -96,7 +97,7 @@ const AddMobileGroup: React.FC = () => {
       />
       <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">
         <form onSubmit={handleSubmit}>
-          <TextField
+          <TrimmedTextField
             id="mobileGroupName"
             name="mobileGroupName"
             label="Group Name"
@@ -106,7 +107,7 @@ const AddMobileGroup: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          <TextField
+          <TrimmedTextField
             id="mobileGroupDescription"
             name="mobileGroupDescription"
             label="Group Description"
@@ -128,7 +129,7 @@ const AddMobileGroup: React.FC = () => {
               }))
             }}
             renderInput={(params) => (
-              <TextField {...params} label={"Mobile Names"} fullWidth />
+              <TrimmedTextField {...params} label={"Mobile Names"} fullWidth />
             )}
           />
           {content}
