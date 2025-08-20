@@ -1,9 +1,10 @@
 import Header from "@/components/Header"
-import { Box, Button, TextField, useTheme } from "@mui/material"
+import { Box, Button, useTheme } from "@mui/material"
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAddFirmwareMutation } from "../api/apiSlice"
 import { MuiFileInput } from "mui-file-input"
+import TrimmedTextField from "@/components/TrimmedTextField"
 
 interface FormValues {
   name: string
@@ -96,7 +97,7 @@ const AddFirmware: React.FC = () => {
       <Header title="Add a new firmware" subtitle="(fill in all fields)" />
       <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">
         <form onSubmit={handleSubmit}>
-          <TextField
+          <TrimmedTextField
             name="version"
             label="Version"
             type="text"

@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
-import { Autocomplete, Box, Button, Divider, TextField } from "@mui/material"
+import { Autocomplete, Box, Button, Divider } from "@mui/material"
 import Header from "@/components/Header"
 import {
   useDeleteMobileGroupMutation,
@@ -13,6 +13,7 @@ import { RootState } from "@/store/store"
 import { resetMobileGroup } from "./groupsSlice"
 import { Typography } from "@mui/material"
 import { SnackbarContext } from "../../providers/SnackbarProvider"
+import TrimmedTextField from "@/components/TrimmedTextField"
 
 interface FormValues {
   mobileGroupName: string
@@ -355,7 +356,7 @@ const EditMobileGroup: React.FC = () => {
       />
       <Box flexGrow={1} overflow="auto" width="100%">
         <form onSubmit={handleSubmit}>
-          <TextField
+          <TrimmedTextField
             id="mobileGroupName"
             name="mobileGroupName"
             label="Mobile Group Name"
@@ -365,7 +366,7 @@ const EditMobileGroup: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          <TextField
+          <TrimmedTextField
             id="mobileGroupDescription"
             name="mobileGroupDescription"
             label="Group Description"
@@ -387,7 +388,7 @@ const EditMobileGroup: React.FC = () => {
               }))
             }}
             renderInput={(params) => (
-              <TextField
+              <TrimmedTextField
                 sx={{ mt: 2 }}
                 {...params}
                 label={"Mobile Names"}
@@ -426,7 +427,7 @@ const EditMobileGroup: React.FC = () => {
         </Typography>
 
         <form onSubmit={handleMobiles}>
-          <TextField
+          <TrimmedTextField
             id="measurementInterval"
             name="measurementInterval"
             label="Measurement Interval"
@@ -435,7 +436,7 @@ const EditMobileGroup: React.FC = () => {
             margin="normal"
             sx={{ mr: 2 }}
           />
-          <TextField
+          <TrimmedTextField
             id="reportInterval"
             name="reportInterval"
             label="Report Interval"
@@ -444,7 +445,7 @@ const EditMobileGroup: React.FC = () => {
             margin="normal"
             sx={{ mr: 2 }}
           />
-          <TextField
+          <TrimmedTextField
             id="refMillivolts"
             name="refMillivolts"
             label="Ref Millivolts"
@@ -453,7 +454,7 @@ const EditMobileGroup: React.FC = () => {
             margin="normal"
             sx={{ mr: 2 }}
           />
-          <TextField
+          <TrimmedTextField
             id="weMillivolts"
             name="weMillivolts"
             label="We Millivolts"
@@ -462,7 +463,7 @@ const EditMobileGroup: React.FC = () => {
             margin="normal"
             sx={{ mr: 2 }}
           />
-          <TextField
+          <TrimmedTextField
             id="filterLength"
             name="filterLength"
             label="Filter Length"
@@ -471,7 +472,7 @@ const EditMobileGroup: React.FC = () => {
             margin="normal"
             sx={{ mr: 2 }}
           />
-          <TextField
+          <TrimmedTextField
             id="checkParametersInterval"
             name="checkParametersInterval"
             label="Check Parameters Interval"
@@ -480,7 +481,7 @@ const EditMobileGroup: React.FC = () => {
             margin="normal"
             sx={{ mr: 2 }}
           />
-          <TextField
+          <TrimmedTextField
             id="gain"
             name="gain"
             label="Gain"
@@ -490,7 +491,7 @@ const EditMobileGroup: React.FC = () => {
             margin="normal"
             sx={{ mr: 2 }}
           />
-          <TextField
+          <TrimmedTextField
             id="slope"
             name="slope"
             label="Slope"
@@ -500,7 +501,7 @@ const EditMobileGroup: React.FC = () => {
             margin="normal"
             sx={{ mr: 2 }}
           />
-          <TextField
+          <TrimmedTextField
             id="bias"
             name="bias"
             label="Bias"
