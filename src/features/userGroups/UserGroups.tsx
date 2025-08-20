@@ -1,3 +1,4 @@
+import React, { JSX } from "react"
 import { useNavigate } from "react-router-dom"
 import { Box } from "@mui/material"
 import { DataGrid, GridCellParams, GridToolbar } from "@mui/x-data-grid"
@@ -23,12 +24,7 @@ const UserGroups: React.FC = () => {
   } = useGetUserGroupsQuery({})
 
   const handleCellClick = (params: GridCellParams) => {
-    const {
-      _id: groupId,
-      groupName,
-      groupDescription,
-      userIds,
-    } = params.row
+    const { _id: groupId, groupName, groupDescription, userIds } = params.row
 
     dispatch(
       setUserGroup({

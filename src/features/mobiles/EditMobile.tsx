@@ -1,6 +1,6 @@
 import Header from "@/components/Header"
 import { Box, Button, useTheme } from "@mui/material"
-import React, { useEffect, useState } from "react"
+import React, { JSX, useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import {
   useGetMobileQuery,
@@ -36,8 +36,8 @@ const initialValues: FormValues = {
   refMillivolts: 600,
   weMillivolts: 1200,
   filterLength: 10,
-  checkParametersInterval: 60,  
-  comment: " "
+  checkParametersInterval: 60,
+  comment: " ",
 }
 
 const EditMobile: React.FC = () => {

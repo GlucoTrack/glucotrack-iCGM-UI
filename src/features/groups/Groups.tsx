@@ -1,7 +1,7 @@
+import React, { JSX } from "react"
 import { useNavigate } from "react-router-dom"
 import { Box } from "@mui/material"
-import { DataGrid, GridCellParams, GridToolbar} from "@mui/x-data-grid"
-
+import { DataGrid, GridCellParams, GridToolbar } from "@mui/x-data-grid"
 
 import Header from "@/components/Header"
 import Action from "@/components/HeaderAction"
@@ -9,7 +9,6 @@ import { useGetGroupsQuery } from "@/features/api/apiSlice"
 import { useDispatch } from "react-redux"
 import { setGroup } from "@/features/groups/groupsSlice"
 import Group from "@/interfaces/Group"
-
 
 const Groups: React.FC = () => {
   const dispatch = useDispatch()
@@ -40,7 +39,7 @@ const Groups: React.FC = () => {
       }),
     )
     navigate(`edit/${groupId}`)
-  }  
+  }
 
   let content: JSX.Element | null = null
 
@@ -60,7 +59,7 @@ const Groups: React.FC = () => {
     content = (
       <Box height={"75vh"}>
         <DataGrid<Group>
-          slots={{ toolbar: GridToolbar }}          
+          slots={{ toolbar: GridToolbar }}
           rows={data}
           getRowId={(row) => row._id}
           columns={columns}
@@ -81,4 +80,3 @@ const Groups: React.FC = () => {
 }
 
 export default Groups
-
