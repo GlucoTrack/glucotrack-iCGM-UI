@@ -1,8 +1,9 @@
 import Header from "@/components/Header"
-import { Box, Button, TextField, useTheme } from "@mui/material"
+import { Box, Button, useTheme } from "@mui/material"
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAddDeviceMutation } from "../api/apiSlice"
+import TrimmedTextField from "@/components/TrimmedTextField"
 
 interface FormValues {
   macAddress: string
@@ -131,7 +132,7 @@ const AddDevice: React.FC = () => {
       />
       <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">
         <form onSubmit={handleSubmit}>
-          <TextField
+          <TrimmedTextField
             name="deviceName"
             label="Device Name(s)"
             value={formValues.deviceName}
@@ -140,16 +141,16 @@ const AddDevice: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          <TextField
+          <TrimmedTextField
             name="macAddress"
             label="MAC Address"
             value={formValues.macAddress}
             onChange={handleChange}
             required
             fullWidth
-            margin="normal"            
+            margin="normal"
           />
-          <TextField
+          <TrimmedTextField
             name="password"
             label="Password"
             type="password"
@@ -160,7 +161,7 @@ const AddDevice: React.FC = () => {
             margin="normal"
             disabled
           />
-          <TextField
+          <TrimmedTextField
             name="baseUri"
             label="Base URI"
             value={formValues.baseUri}
@@ -170,7 +171,7 @@ const AddDevice: React.FC = () => {
             margin="normal"
             disabled
           />
-          <TextField
+          <TrimmedTextField
             name="jwtToken"
             label="JWT Token"
             type="password"
@@ -181,7 +182,7 @@ const AddDevice: React.FC = () => {
             margin="normal"
             disabled
           />
-          <TextField
+          <TrimmedTextField
             name="jwtRefreshToken"
             label="JWT Refresh Token"
             type="password"
@@ -192,7 +193,7 @@ const AddDevice: React.FC = () => {
             margin="normal"
             disabled
           />
-          <TextField
+          <TrimmedTextField
             name="rtc"
             label="RTC"
             type="datetime-local"
@@ -206,7 +207,7 @@ const AddDevice: React.FC = () => {
               shrink: true,
             }}
           />
-          <TextField
+          <TrimmedTextField
             name="measurementInterval"
             label="Measurement Interval"
             type="number"
@@ -216,7 +217,7 @@ const AddDevice: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          <TextField
+          <TrimmedTextField
             name="transmitDelay"
             label="Transmit Delay"
             type="number"
@@ -226,7 +227,7 @@ const AddDevice: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          <TextField
+          <TrimmedTextField
             name="checkParametersInterval"
             label="Check Parameters Interval"
             type="number"
@@ -236,7 +237,7 @@ const AddDevice: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          <TextField
+          <TrimmedTextField
             name="pstatVoltage"
             label="Pstat Voltage"
             type="number"
@@ -246,7 +247,7 @@ const AddDevice: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          <TextField
+          <TrimmedTextField
             name="pstatTIA"
             label="Pstat TIA"
             type="number"
@@ -256,7 +257,7 @@ const AddDevice: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          <TextField
+          <TrimmedTextField
             name="glm"
             label="GLM"
             type="number"
@@ -266,7 +267,7 @@ const AddDevice: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          <TextField
+          <TrimmedTextField
             name="coat"
             label="Coat"
             type="datetime-local"
@@ -279,7 +280,7 @@ const AddDevice: React.FC = () => {
               shrink: true,
             }}
           />
-          <TextField
+          <TrimmedTextField
             name="onTest"
             label="On Test"
             type="datetime-local"
@@ -292,7 +293,7 @@ const AddDevice: React.FC = () => {
               shrink: true,
             }}
           />
-          <TextField
+          <TrimmedTextField
             name="enzyme"
             label="Enzyme"
             type="number"
@@ -302,7 +303,7 @@ const AddDevice: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          <TextField
+          <TrimmedTextField
             name="testStation"
             label="Test Station"
             type="number"

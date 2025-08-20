@@ -1,5 +1,5 @@
 import Header from "@/components/Header"
-import { Box, Button, TextField, useTheme } from "@mui/material"
+import { Box, Button, useTheme } from "@mui/material"
 import React, { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import {
@@ -7,6 +7,7 @@ import {
   useEditDeviceMutation,
   useDeleteDeviceMutation,
 } from "@/features/api/apiSlice"
+import TrimmedTextField from "@/components/TrimmedTextField"
 
 interface FormValues {
   macAddress: string
@@ -253,7 +254,7 @@ const EditDevice: React.FC = () => {
       {getDeviceContent}
       <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">
         <form onSubmit={handleSubmit}>
-          <TextField
+          <TrimmedTextField
             name="deviceName"
             label="Device Name"
             value={formValues.deviceName}
@@ -265,7 +266,7 @@ const EditDevice: React.FC = () => {
               shrink: formValues.deviceName !== "",
             }}
           />
-          {/* <TextField
+          {/* <TrimmedTextField
             name="macAddress"
             label="MAC Address"
             type="password"
@@ -279,7 +280,7 @@ const EditDevice: React.FC = () => {
               shrink: formValues.macAddress !== "",
             }}
           />
-          <TextField
+          <TrimmedTextField
             name="password"
             label="Password"
             type="password"
@@ -293,7 +294,7 @@ const EditDevice: React.FC = () => {
               shrink: formValues.password !== "",
             }}
           /> */}
-          <TextField
+          <TrimmedTextField
             name="baseUri"
             label="Base URI"
             value={formValues.baseUri}
@@ -305,7 +306,7 @@ const EditDevice: React.FC = () => {
               shrink: formValues.baseUri !== "",
             }}
           />
-          {/* <TextField
+          {/* <TrimmedTextField
             name="jwtToken"
             label="JWT Token"
             type="password"
@@ -319,7 +320,7 @@ const EditDevice: React.FC = () => {
               shrink: formValues.jwtToken !== "",
             }}
           />
-          <TextField
+          <TrimmedTextField
             name="jwtRefreshToken"
             label="JWT Refresh Token"
             type="password"
@@ -333,7 +334,7 @@ const EditDevice: React.FC = () => {
               shrink: formValues.jwtRefreshToken !== "",
             }}
           />
-          <TextField
+          <TrimmedTextField
             name="rtc"
             label="RTC"
             type="datetime-local"
@@ -347,7 +348,7 @@ const EditDevice: React.FC = () => {
               shrink: formValues.rtc !== undefined && formValues.rtc !== null,
             }}
           /> */}
-          <TextField
+          <TrimmedTextField
             name="measurementInterval"
             label="Measurement Interval"
             type="number"
@@ -360,7 +361,7 @@ const EditDevice: React.FC = () => {
               shrink: Boolean(formValues.measurementInterval),
             }}
           />
-          <TextField
+          <TrimmedTextField
             name="transmitDelay"
             label="Transmit Delay"
             type="number"
@@ -375,7 +376,7 @@ const EditDevice: React.FC = () => {
                 formValues.transmitDelay !== null,
             }}
           />
-          <TextField
+          <TrimmedTextField
             name="checkParametersInterval"
             label="Check Parameters Interval"
             type="number"
@@ -390,7 +391,7 @@ const EditDevice: React.FC = () => {
                 formValues.checkParametersInterval !== null,
             }}
           />
-          <TextField
+          <TrimmedTextField
             name="pstatVoltage"
             label="Pstat Voltage"
             type="number"
@@ -405,7 +406,7 @@ const EditDevice: React.FC = () => {
                 formValues.pstatVoltage !== null,
             }}
           />
-          <TextField
+          <TrimmedTextField
             name="pstatTIA"
             label="Pstat TIA"
             type="number"
@@ -420,7 +421,7 @@ const EditDevice: React.FC = () => {
                 formValues.pstatTIA !== null,
             }}
           />
-          <TextField
+          <TrimmedTextField
             name="glm"
             label="GLM"
             type="number"
@@ -433,7 +434,7 @@ const EditDevice: React.FC = () => {
               shrink: formValues.glm !== undefined && formValues.glm !== null,
             }}
           />
-          <TextField
+          <TrimmedTextField
             name="enzyme"
             label="Enzyme"
             type="number"
@@ -447,7 +448,7 @@ const EditDevice: React.FC = () => {
                 formValues.enzyme !== undefined && formValues.enzyme !== null,
             }}
           />
-          <TextField
+          <TrimmedTextField
             name="testStation"
             label="Test Station"
             type="number"
@@ -462,7 +463,7 @@ const EditDevice: React.FC = () => {
                 formValues.testStation !== null,
             }}
           />
-          <TextField
+          <TrimmedTextField
             name="coat"
             label="Coat"
             type="datetime-local"
@@ -475,7 +476,7 @@ const EditDevice: React.FC = () => {
               shrink: formValues.coat !== undefined && formValues.coat !== null,
             }}
           />
-          <TextField
+          <TrimmedTextField
             name="onTest"
             label="On Test"
             type="datetime-local"
