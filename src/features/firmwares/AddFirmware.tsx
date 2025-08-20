@@ -1,6 +1,6 @@
 import Header from "@/components/Header"
 import { Box, Button, useTheme } from "@mui/material"
-import React, { useState } from "react"
+import React, { JSX, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAddFirmwareMutation } from "../api/apiSlice"
 import { MuiFileInput } from "mui-file-input"

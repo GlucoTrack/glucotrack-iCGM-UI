@@ -7,7 +7,7 @@ import {
   TextField,
   useTheme,
 } from "@mui/material"
-import React, { useState } from "react"
+import React, { JSX, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAddUserMutation } from "../api/apiSlice"
 
@@ -212,7 +212,7 @@ const AddUser: React.FC = () => {
                 onChange={(event) => {
                   setFormValues((prevValues) => ({
                     ...prevValues,
-                    "blinded": event.target.checked,
+                    blinded: event.target.checked,
                   }))
                 }}
               />

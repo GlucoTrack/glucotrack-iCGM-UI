@@ -1,6 +1,6 @@
 import Header from "@/components/Header"
 import { Box, Button, useTheme } from "@mui/material"
-import React, { useEffect, useState } from "react"
+import React, { JSX, useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import {
   useGetDeviceQuery,
