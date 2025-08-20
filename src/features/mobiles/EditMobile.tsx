@@ -1,5 +1,5 @@
 import Header from "@/components/Header"
-import { Box, Button, TextField, useTheme } from "@mui/material"
+import { Box, Button, useTheme } from "@mui/material"
 import React, { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import {
@@ -7,6 +7,7 @@ import {
   useEditMobileMutation,
   useDeleteMobileMutation,
 } from "@/features/api/apiSlice"
+import TrimmedTextField from "@/components/TrimmedTextField"
 
 interface FormValues {
   mobileName: string
@@ -214,7 +215,7 @@ const EditMobile: React.FC = () => {
       {getMobileContent}
       <Box flexGrow={1} overflow="auto" maxWidth="400px" width="100%">
         <form onSubmit={handleSubmit}>
-          <TextField
+          <TrimmedTextField
             name="mobileName"
             label="Mobile Name(s)"
             type="text"
@@ -224,7 +225,7 @@ const EditMobile: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          <TextField
+          <TrimmedTextField
             name="baseUri"
             label="Base URI"
             type="text"
@@ -234,7 +235,7 @@ const EditMobile: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          <TextField
+          <TrimmedTextField
             name="sensorId"
             label="Sensor ID"
             type="text"
@@ -244,7 +245,7 @@ const EditMobile: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          <TextField
+          <TrimmedTextField
             name="sensorName"
             label="Sensor Name"
             type="text"
@@ -254,7 +255,7 @@ const EditMobile: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          <TextField
+          <TrimmedTextField
             name="measurementInterval"
             label="Measurement Interval"
             type="number"
@@ -264,7 +265,7 @@ const EditMobile: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          <TextField
+          <TrimmedTextField
             name="reportInterval"
             label="Report Interval"
             type="number"
@@ -274,7 +275,7 @@ const EditMobile: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          <TextField
+          <TrimmedTextField
             name="refMillivolts"
             label="Ref Millivolts"
             type="number"
@@ -284,7 +285,7 @@ const EditMobile: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          <TextField
+          <TrimmedTextField
             name="weMillivolts"
             label="WE Millivolts"
             type="number"
@@ -294,7 +295,7 @@ const EditMobile: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          <TextField
+          <TrimmedTextField
             name="filterLength"
             label="Filter Length"
             type="number"
@@ -304,7 +305,7 @@ const EditMobile: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          <TextField
+          <TrimmedTextField
             name="checkParametersInterval"
             label="Check Parameters Interval"
             type="number"
@@ -314,7 +315,7 @@ const EditMobile: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          <TextField
+          <TrimmedTextField
             name="gain"
             label="Gain"
             type="number"
@@ -323,7 +324,7 @@ const EditMobile: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          <TextField
+          <TrimmedTextField
             name="slope"
             label="Slope"
             type="number"
@@ -332,7 +333,7 @@ const EditMobile: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          <TextField
+          <TrimmedTextField
             name="bias"
             label="Bias"
             type="number"
@@ -341,7 +342,7 @@ const EditMobile: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          <TextField
+          <TrimmedTextField
             name="comment"
             label="Comment"
             type="text"
