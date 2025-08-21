@@ -186,7 +186,6 @@ const MeasurementForm = ({
       formValues.realtime
     ) {
       let newLocalStorageFilters = {
-        ...localStorageKey,
         deviceNames: formValues.deviceNames,
         groupName: formValues.groupName,
         startTime: formValues.startTime,
@@ -202,7 +201,7 @@ const MeasurementForm = ({
         new Event("submit") as unknown as React.FormEvent<HTMLFormElement>,
       )*/
     }
-  }, [formValues, pageKey, localStorageKey])
+  }, [formValues, pageKey, setLocalStorageKey])
 
   useEffect(() => {
     setCurrentSelectedOptions(
@@ -357,6 +356,7 @@ const MeasurementForm = ({
         )
         closeSnackbar(event)
       } catch (error) {
+        console.log("Failed to set filter", error)
         openSnackbar("Failed to set filter...", "error")
       }
     }
@@ -390,6 +390,7 @@ const MeasurementForm = ({
       closeSnackbar(event)
       setFilterName("")
     } catch (error) {
+      console.log("Failed to save filter", error)
       openSnackbar("Failed to save filter...", "error")
     }
   }
@@ -411,6 +412,7 @@ const MeasurementForm = ({
         setSelectedFilter(filterName)
       }
     } catch (error) {
+      console.log("Failed to load filter", error)
       openSnackbar("Failed to load filter...", "error")
     }
   }
