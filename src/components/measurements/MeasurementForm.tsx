@@ -16,7 +16,7 @@ import {
   ChevronRight,
   ChevronLeft,
 } from "@mui/icons-material"
-import { Grid } from "@mui/material"
+import Grid from "@mui/material/Grid2"
 import { setFilter } from "@/components/measurements/measurementsSlice"
 import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
@@ -186,7 +186,6 @@ const MeasurementForm = ({
       formValues.realtime
     ) {
       let newLocalStorageFilters = {
-        ...localStorageKey,
         deviceNames: formValues.deviceNames,
         groupName: formValues.groupName,
         startTime: formValues.startTime,
@@ -202,7 +201,7 @@ const MeasurementForm = ({
         new Event("submit") as unknown as React.FormEvent<HTMLFormElement>,
       )*/
     }
-  }, [formValues, pageKey, localStorageKey])
+  }, [formValues, pageKey, setLocalStorageKey])
 
   useEffect(() => {
     setCurrentSelectedOptions(
@@ -347,8 +346,8 @@ const MeasurementForm = ({
               deviceNamesFromGroup.length > 0
                 ? deviceNamesFromGroup
                 : deviceNames && deviceNames.length > 0
-                  ? deviceNames
-                  : [],
+                ? deviceNames
+                : [],
             groupName: groupName ? groupName : "",
             startTime: utcStartTime,
             endTime: utcEndTime,
@@ -357,6 +356,7 @@ const MeasurementForm = ({
         )
         closeSnackbar(event)
       } catch (error) {
+        console.log("Failed to set filter", error)
         openSnackbar("Failed to set filter...", "error")
       }
     }
@@ -390,6 +390,7 @@ const MeasurementForm = ({
       closeSnackbar(event)
       setFilterName("")
     } catch (error) {
+      console.log("Failed to save filter", error)
       openSnackbar("Failed to save filter...", "error")
     }
   }
@@ -411,6 +412,7 @@ const MeasurementForm = ({
         setSelectedFilter(filterName)
       }
     } catch (error) {
+      console.log("Failed to load filter", error)
       openSnackbar("Failed to load filter...", "error")
     }
   }
@@ -425,8 +427,8 @@ const MeasurementForm = ({
   return (
     <Box sx={{ flexGrow: 1 }}>
       <form onSubmit={handleSaveFilter} style={{ marginBottom: 20 }}>
-        <Grid container xs={12}>
-          <Grid xs={9}>
+        <Grid container size={12}>
+          <Grid size={9}>
             <Grid alignItems={"center"} container>
               <TextField
                 label="Save filter as"
@@ -440,7 +442,7 @@ const MeasurementForm = ({
             </Grid>
           </Grid>
 
-          <Grid xs={3}>
+          <Grid size={3}>
             <Autocomplete
               options={savedFilters ? savedFilters : []}
               value={selectedFilter}
@@ -485,8 +487,8 @@ const MeasurementForm = ({
 
       <form onSubmit={handleSubmit}>
         <Grid container spacing={4} alignItems={"start"}>
-          <Grid container xs={8} spacing={2}>
-            <Grid xs={groupData ? 5 : 12}>
+          <Grid container size={8} spacing={2}>
+            <Grid size={groupData ? 5 : 12}>
               <Autocomplete
                 multiple
                 loading={deviceIsLoading || deviceIsFetching}
@@ -508,7 +510,7 @@ const MeasurementForm = ({
             </Grid>
             {groupData && (
               <>
-                <Grid xs={2}>
+                <Grid size={2}>
                   <Box
                     sx={{
                       display: "flex",
@@ -520,7 +522,7 @@ const MeasurementForm = ({
                     OR
                   </Box>
                 </Grid>
-                <Grid xs={5}>
+                <Grid size={5}>
                   <Autocomplete
                     loading={groupIsLoading || groupIsFetching}
                     options={groupName ? groupName : []}
@@ -541,12 +543,12 @@ const MeasurementForm = ({
               </>
             )}
 
-            <Grid xs={1} alignContent={"center"}>
+            <Grid size={1} alignContent={"center"}>
               <IconButton onClick={handleBack}>
                 <ChevronLeft />
               </IconButton>
             </Grid>
-            <Grid xs={5}>
+            <Grid size={5}>
               <TextField
                 label="Start Time"
                 type="datetime-local"
@@ -564,7 +566,7 @@ const MeasurementForm = ({
                 }}
               />
             </Grid>
-            <Grid xs={5}>
+            <Grid size={5}>
               {!formValues.realtime && (
                 <TextField
                   label="End Time"
@@ -583,15 +585,13 @@ const MeasurementForm = ({
                 />
               )}
             </Grid>
-            <Grid xs={1} alignContent={"center"}>
+            <Grid size={1} alignContent={"center"}>
               <IconButton onClick={handleForward}>
                 <ChevronRight />
               </IconButton>
             </Grid>
-
-            <Grid xs={12}></Grid>
           </Grid>
-          <Grid xs={4}>
+          <Grid size={4}>
             <Grid container spacing={1}>
               <Grid>
                 <Button
