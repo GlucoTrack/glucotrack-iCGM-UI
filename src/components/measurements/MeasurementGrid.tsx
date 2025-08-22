@@ -34,10 +34,10 @@ const MeasurementGrid = ({ measurements, fields, dateField }: any) => {
       const allData = measurements.map((measurement: any) => {
         let dd = measurement.data.map((data: any) => {
           rowId++
-          let d:any = {            
+          let d: any = {
             date: data[dateField],
             _id: rowId,
-            deviceName: measurement.name,
+            name: measurement.name,
           }
           for (let field of fields) {
             d[field.field] = data[field.field]
@@ -52,16 +52,17 @@ const MeasurementGrid = ({ measurements, fields, dateField }: any) => {
 
       setData(mergedMesurements)
     }
-  }, [measurements])
+  }, [measurements, dateField, fields])
 
   const columns = [
-    { field: "deviceName", headerName: "Name", flex: 0.5 },
+    { field: "name", headerName: "Name", flex: 0.5 },
     {
       field: "date",
       headerName: "Date",
       flex: 1,
-      valueFormatter: (params: any) =>
-        dayjs(params?.value).format("YYYY-MM-DD HH:mm:ss"),
+      valueFormatter: (params: any) => {
+        return params ? dayjs(params).format("YYYY-MM-DD HH:mm:ss") : "N/A"
+      },
     },
   ]
 
