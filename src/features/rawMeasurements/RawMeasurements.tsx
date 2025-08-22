@@ -49,7 +49,6 @@ const RawMeasurements: React.FC = () => {
         pageKey={"mobile"}
         groupsField={"mobileGroups"}
         groupNameField={"mobileGroupName"}
-        devicesField={"mobileDevices"}
         deviceNameField={"mobileName"}
         deviceNamesField={"mobileNames"}
       />
@@ -58,7 +57,6 @@ const RawMeasurements: React.FC = () => {
         eventName={"new_raw_measurement__"}
         pageKey={"mobile"}
         fields={fields}
-        dateField={"time"}
       />
     </Box>
   )
