@@ -38,6 +38,9 @@ const initialValues: FormValues = {
   filterLength: 10,
   checkParametersInterval: 60,
   comment: " ",
+  gain: 0,
+  slope: 0,
+  bias: 0,
 }
 
 const EditMobile: React.FC = () => {
