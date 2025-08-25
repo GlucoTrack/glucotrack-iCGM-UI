@@ -61,7 +61,7 @@ const MeasurementGrid = ({ measurements, fields, dateField }: any) => {
       headerName: "Date",
       flex: 1,
       valueFormatter: (params: any) => {
-        return params ? dayjs(params).format("YYYY-MM-DD HH:mm:ss") : "N/A"
+        return params.value ? dayjs(params.value).format("YYYY-MM-DD HH:mm:ss") : "N/A"
       },
     },
   ]
