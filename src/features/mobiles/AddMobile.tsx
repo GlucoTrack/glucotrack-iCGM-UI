@@ -1,5 +1,5 @@
 import Header from "@/components/Header"
-import { Box, Button, useTheme } from "@mui/material"
+import { Box, Button, MenuItem, TextField, useTheme } from "@mui/material"
 import React, { JSX, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAddMobileMutation } from "../api/apiSlice"
@@ -34,6 +34,7 @@ const initialValues: FormValues = {
   filterLength: 10,
   checkParametersInterval: 60,
   comment: "test",
+  gain: 0,
 }
 
 const AddMobile: React.FC = () => {
@@ -211,19 +212,22 @@ const AddMobile: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          <TrimmedTextField
+          <TextField
             name="gain"
             label="Gain"
-            type="number"
+            select
             value={formValues.gain}
             onChange={handleChange}
             fullWidth
             margin="normal"
-          />
+          >
+            <MenuItem value={0}>0</MenuItem>
+            <MenuItem value={1}>1</MenuItem>
+            <MenuItem value={2}>2</MenuItem>
+          </TextField>
           <TrimmedTextField
             name="slope"
             label="Slope"
-            type="number"
             value={formValues.slope}
             onChange={handleChange}
             fullWidth
