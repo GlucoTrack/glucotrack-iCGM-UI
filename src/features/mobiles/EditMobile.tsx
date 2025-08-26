@@ -342,7 +342,6 @@ const EditMobile: React.FC = () => {
           <TrimmedTextField
             name="bias"
             label="Bias"
-            type="number"
             value={formValues.bias}
             onChange={handleChange}
             fullWidth
