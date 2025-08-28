@@ -11,4 +11,7 @@ export default interface Mobile {
   filterLength: number
   checkParametersInterval: number
   comment?: string
+  lastSeen?: string | null
+  remoteCommand?: string | null
+  remoteCommandReply?: string | null
 }
