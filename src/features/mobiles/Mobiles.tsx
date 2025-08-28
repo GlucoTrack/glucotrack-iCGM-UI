@@ -67,13 +67,10 @@ const Mobiles = () => {
   }
 
   const submitRemoteCommand = async () => {
-    console.log("remoteCommand ->", {
-      mobileId: selectedMobileId,
-      remoteCommand,
-    })
     const response = await editMobiles({
       mobileIds: [selectedMobileId],
       remoteCommand: remoteCommand,
+      remoteCommandReply: "",
     })
     console.log("response ->", response)
     setRemoteDialogOpen(false)
@@ -150,10 +147,17 @@ const Mobiles = () => {
           const { remoteCommand, remoteCommandReply } = params.row as Mobile
           const isPending =
             Boolean(remoteCommand) &&
-            (remoteCommandReply === null || remoteCommandReply === undefined || remoteCommandReply === "")
+            (remoteCommandReply === null ||
+              remoteCommandReply === undefined ||
+              remoteCommandReply === "")
 
           if (isPending) {
-            return <AccessTimeIcon color="action" titleAccess="In attesa di risposta" />
+            return (
+              <AccessTimeIcon
+                color="action"
+                titleAccess="In attesa di risposta"
+              />
+            )
           }
 
           return <span>{remoteCommandReply ?? ""}</span>
