@@ -4,7 +4,10 @@ import Header from "@/components/Header"
 import MeasurementForm from "@/components/measurements/MeasurementForm"
 import { useAppSelector } from "@/hooks/useStore"
 import MeasurementChart from "@/components/measurements/MeasurementChart"
-import { useGetRawUserMeasurementsByUserIdsQuery, useGetUserGroupsQuery, useGetUsersQuery } from "@/features/api/apiSlice"
+import {
+  useGetRawDataByPatientIdsQuery,
+  useGetRawDataPatientIdsQuery,
+} from "@/features/api/apiSlice"
 
 const fields = [
   { label: "Current", field: "weCurrent" },
@@ -15,51 +18,40 @@ const fields = [
   { label: "RSSI", field: "rssi" },
 ]
 
-const RawUserMeasurements: React.FC = () => {
-  const userIds = useAppSelector((state) => state.measurements.deviceNames)
+const RawDataMeasurements: React.FC = () => {
+  const patientIds = useAppSelector((state) => state.measurements.deviceNames)
   const startTime = useAppSelector((state) => state.measurements.startTime)
   const endTime = useAppSelector((state) => state.measurements.endTime)
 
-  const userIdsString: string = userIds.join(",")
+  const patientIdsString: string = patientIds.join(",")
 
-  const query = useGetRawUserMeasurementsByUserIdsQuery(
+  const query = useGetRawDataByPatientIdsQuery(
     {
-      userIds: userIdsString,
+      patientIds: patientIdsString,
       startTime: startTime,
       endTime: endTime,
     },
-    { skip: userIdsString.length === 0 },
+    { skip: patientIdsString.length === 0 },
   )
 
-  const userQuery = useGetUsersQuery({})
-
-  const groupQuery = useGetUserGroupsQuery({});
+  const userQuery = useGetRawDataPatientIdsQuery({})
 
   return (
     <Box display="flex" flexDirection="column" height="85vh">
       <Header
-        title="Raw User Measurements"
+        title="Raw Data"
         subtitle={`Fill out your criteria and hit submit to see measurements`}
       />
       <MeasurementForm
         query={userQuery}
-        groupQuery={groupQuery}
-        label={"Users"}
-        pageKey={"user"}
-        groupsField={"userGroups"}
-        groupNameField={"groupName"}        
-        deviceNameField={"userId"}
-        deviceNameLabelField={"email"}
-        deviceNamesField={"userIds"}
+        label={"Patients"}
+        pageKey={"rawData"}
+        deviceNameField={"patientId"}
+        deviceNameLabelField={"patientId"}
       />
-      <MeasurementChart
-        query={query}
-        eventName={"new_raw_user_measurement__"}
-        pageKey={"user"}
-        fields={fields}
-      />
+      <MeasurementChart query={query} pageKey={"rawData"} fields={fields} />
     </Box>
   )
 }
 
-export default RawUserMeasurements
+export default RawDataMeasurements

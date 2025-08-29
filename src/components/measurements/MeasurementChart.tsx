@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, JSX } from "react"
 import {
   Box,
   FormControl,
@@ -9,7 +9,6 @@ import {
   useTheme,
 } from "@mui/material"
 import { useAppSelector } from "@/hooks/useStore"
-import chroma from "chroma-js"
 import MeasurementGrid from "./MeasurementGrid"
 import Grid from "@mui/system/Unstable_Grid"
 import { socket } from "../../utils/socket"
@@ -18,11 +17,15 @@ import utc from "dayjs/plugin/utc"
 import distinctColors from "distinct-colors"
 import Highcharts from "highcharts"
 import HighchartsReact from "highcharts-react-official"
-import Boost from "highcharts/modules/boost"
+import BoostModule from "highcharts/modules/boost"
 
 dayjs.extend(utc)
 
-Boost(Highcharts)
+const Boost = BoostModule as unknown as (hc: typeof Highcharts) => void
+
+if (typeof Boost === "function") {
+  Boost(Highcharts)
+}
 
 const MeasurementChart = ({
   query,
@@ -56,7 +59,7 @@ const MeasurementChart = ({
       quality: 50,
       samples: 10000,
     })
-    return palette.map((color) => chroma(color).hex())
+    return palette.map((color) => color.hex())
   }
 
   const [measurements, setMeasurements] = useState<any>([])
@@ -366,7 +369,7 @@ const MeasurementChart = ({
         <Box style={{ userSelect: "none", marginTop: 30 }}>
           <HighchartsReact highcharts={Highcharts} options={chartOptions} />
 
-          <Grid container spacing={3} lg={9}>
+          <Grid container spacing={3} xs={12} lg={9}>
             <Grid xs={4}>
               <FormControl fullWidth>
                 <InputLabel id="xAxisFormat">X-Axis Format</InputLabel>

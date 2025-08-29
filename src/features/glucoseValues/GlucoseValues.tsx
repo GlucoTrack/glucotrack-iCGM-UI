@@ -49,7 +49,6 @@ const GlucoseValues: React.FC = () => {
         pageKey={"mobile"}
         groupsField={"mobileGroups"}
         groupNameField={"mobileGroupName"}
-        devicesField={"mobileDevices"}
         deviceNameField={"mobileName"}
         deviceNamesField={"mobileNames"}
       />

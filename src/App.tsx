@@ -39,7 +39,8 @@ import { ClerkProvider } from "@clerk/clerk-react"
 import { dark } from "@clerk/themes"
 import ProtectedRoute from "@/components/ProtectedRoute"
 import AuthAsync from "@/components/AuthAsync"
-import GlucoseValues from "./features/glucoseValues/GlucoseValues"
+import GlucoseValues from "@/features/glucoseValues/GlucoseValues"
+import RawDataMeasurements from "@/features/rawData/RawDataMeasurements"
 
 import "./index.css"
 
@@ -168,6 +169,14 @@ function App() {
                     element={
                       <ProtectedRoute allowedRoles={["org:admin"]}>
                         <EditUserGroup />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/raw-data-measurements"
+                    element={
+                      <ProtectedRoute allowedRoles={["org:admin"]}>
+                        <RawDataMeasurements />
                       </ProtectedRoute>
                     }
                   />
