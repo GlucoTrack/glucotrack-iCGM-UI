@@ -9,6 +9,7 @@ import {
   DialogContent,
   DialogActions,
   TextField,
+  InputAdornment,
 } from "@mui/material"
 import { formatDistanceToNow } from "date-fns"
 import {
@@ -38,7 +39,9 @@ const Mobiles = () => {
   const [selectedMobileName, setSelectedMobileName] = useState<string | null>(
     null,
   )
-  const [remoteCommand, setRemoteCommand] = useState<string>("")
+  const [commandCode, setCommandCode] = useState<string>("")
+  const [commandArgument, setCommandArgument] = useState<string>("")
+  const [commandPayload, setCommandPayload] = useState<string>("")
 
   const [editMobiles] = useEditMobilesMutation()
 
@@ -58,7 +61,9 @@ const Mobiles = () => {
   const openRemoteDialog = (row: Mobile) => {
     setSelectedMobileId(row._id)
     setSelectedMobileName(row.mobileName)
-    setRemoteCommand("")
+    setCommandCode("")
+    setCommandArgument("")
+    setCommandPayload("")
     setRemoteDialogOpen(true)
   }
 
@@ -67,12 +72,20 @@ const Mobiles = () => {
   }
 
   const submitRemoteCommand = async () => {
-    const response = await editMobiles({
+    // Normalize hex fields: 2 chars, uppercase
+    const code = commandCode.toUpperCase()
+    const arg = commandArgument.toUpperCase()
+    const validHex = /^[0-9A-F]{2}$/
+    if (!validHex.test(code) || !validHex.test(arg)) return
+
+    const payload = commandPayload.trim()
+    const composed = code + arg + (payload ? ` ${payload}` : "")
+
+    await editMobiles({
       mobileIds: [selectedMobileId],
-      remoteCommand: remoteCommand,
+      remoteCommand: composed,
       remoteCommandReply: "",
     })
-    console.log("response ->", response)
     setRemoteDialogOpen(false)
   }
 
@@ -112,7 +125,6 @@ const Mobiles = () => {
       },
       { field: "refMillivolts", headerName: "ref", flex: 0.5 },
       { field: "weMillivolts", headerName: "we", flex: 0.5 },
-      { field: "filterLength", headerName: "Filter", flex: 0.5 },
       {
         field: "checkParametersInterval",
         headerName: "Check",
@@ -133,7 +145,7 @@ const Mobiles = () => {
               e.stopPropagation()
               openRemoteDialog(params.row)
             }}
-            title="Invia remoteCommand"
+            title="Send remote command"
           >
             <SendIcon />
           </IconButton>
@@ -155,7 +167,7 @@ const Mobiles = () => {
             return (
               <AccessTimeIcon
                 color="action"
-                titleAccess="In attesa di risposta"
+                titleAccess={"Waiting for reply: " + remoteCommand}
               />
             )
           }
@@ -196,13 +208,72 @@ const Mobiles = () => {
           Send command {selectedMobileName ? `to ${selectedMobileName}` : ""}
         </DialogTitle>
         <DialogContent>
+          <Box display="flex" gap={2} mt={1} mb={1}>
+            <TextField
+              autoFocus
+              margin="dense"
+              label="Code"
+              placeholder="00"
+              value={commandCode}
+              onChange={(e) => {
+                const v = e.target.value
+                  .toUpperCase()
+                  .replace(/[^0-9A-F]/g, "")
+                  .slice(0, 2)
+                setCommandCode(v)
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">0x</InputAdornment>
+                ),
+              }}
+              inputProps={{ maxLength: 2, inputMode: "text" }}
+              error={commandCode.length > 0 && commandCode.length !== 2}
+              helperText={
+                commandCode.length > 0 && commandCode.length !== 2
+                  ? "2 hex digits"
+                  : "\u00A0"
+              }
+              sx={{ width: 140 }}
+            />
+            <TextField
+              margin="dense"
+              label="Argument"
+              placeholder="00"
+              value={commandArgument}
+              onChange={(e) => {
+                const v = e.target.value
+                  .toUpperCase()
+                  .replace(/[^0-9A-F]/g, "")
+                  .slice(0, 2)
+                setCommandArgument(v)
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">0x</InputAdornment>
+                ),
+              }}
+              inputProps={{ maxLength: 2, inputMode: "text" }}
+              error={commandArgument.length > 0 && commandArgument.length !== 2}
+              helperText={
+                commandArgument.length > 0 && commandArgument.length !== 2
+                  ? "2 hex digits"
+                  : "\u00A0"
+              }
+              sx={{ width: 180 }}
+            />
+          </Box>
           <TextField
-            autoFocus
             margin="dense"
-            label="Remote command"
+            label="Payload (optional)"
             fullWidth
-            value={remoteCommand}
-            onChange={(e) => setRemoteCommand(e.target.value)}
+            value={commandPayload}
+            onChange={(e) => setCommandPayload(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">0x</InputAdornment>
+              ),
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault()
@@ -212,13 +283,15 @@ const Mobiles = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={closeRemoteDialog}>Annulla</Button>
+          <Button onClick={closeRemoteDialog}>Cancel</Button>
           <Button
             variant="contained"
             onClick={submitRemoteCommand}
-            disabled={!remoteCommand.trim()}
+            disabled={
+              !(commandCode.length === 2 && commandArgument.length === 2)
+            }
           >
-            Invia
+            Send
           </Button>
         </DialogActions>
       </Dialog>
