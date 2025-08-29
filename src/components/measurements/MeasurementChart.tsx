@@ -10,7 +10,7 @@ import {
 } from "@mui/material"
 import { useAppSelector } from "@/hooks/useStore"
 import MeasurementGrid from "./MeasurementGrid"
-import { Grid } from "@mui/material"
+import Grid from "@mui/system/Unstable_Grid"
 import { socket } from "../../utils/socket"
 import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
@@ -369,7 +369,7 @@ const MeasurementChart = ({
         <Box style={{ userSelect: "none", marginTop: 30 }}>
           <HighchartsReact highcharts={Highcharts} options={chartOptions} />
 
-          <Grid container spacing={3} lg={9}>
+          <Grid container spacing={3} xs={12} lg={9}>
             <Grid xs={4}>
               <FormControl fullWidth>
                 <InputLabel id="xAxisFormat">X-Axis Format</InputLabel>

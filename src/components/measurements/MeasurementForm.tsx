@@ -16,7 +16,7 @@ import {
   ChevronRight,
   ChevronLeft,
 } from "@mui/icons-material"
-import { Grid } from "@mui/material"
+import Grid from "@mui/system/Unstable_Grid"
 import { setFilter } from "@/components/measurements/measurementsSlice"
 import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
@@ -186,7 +186,6 @@ const MeasurementForm = ({
       formValues.realtime
     ) {
       let newLocalStorageFilters = {
-        ...localStorageKey,
         deviceNames: formValues.deviceNames,
         groupName: formValues.groupName,
         startTime: formValues.startTime,
@@ -202,7 +201,7 @@ const MeasurementForm = ({
         new Event("submit") as unknown as React.FormEvent<HTMLFormElement>,
       )*/
     }
-  }, [formValues, pageKey, localStorageKey])
+  }, [formValues, pageKey, setLocalStorageKey])
 
   useEffect(() => {
     setCurrentSelectedOptions(
@@ -347,8 +346,8 @@ const MeasurementForm = ({
               deviceNamesFromGroup.length > 0
                 ? deviceNamesFromGroup
                 : deviceNames && deviceNames.length > 0
-                  ? deviceNames
-                  : [],
+                ? deviceNames
+                : [],
             groupName: groupName ? groupName : "",
             startTime: utcStartTime,
             endTime: utcEndTime,
@@ -357,6 +356,7 @@ const MeasurementForm = ({
         )
         closeSnackbar(event)
       } catch (error) {
+        console.log("Failed to set filter", error)
         openSnackbar("Failed to set filter...", "error")
       }
     }
@@ -390,6 +390,7 @@ const MeasurementForm = ({
       closeSnackbar(event)
       setFilterName("")
     } catch (error) {
+      console.log("Failed to save filter", error)
       openSnackbar("Failed to save filter...", "error")
     }
   }
@@ -411,6 +412,7 @@ const MeasurementForm = ({
         setSelectedFilter(filterName)
       }
     } catch (error) {
+      console.log("Failed to load filter", error)
       openSnackbar("Failed to load filter...", "error")
     }
   }
@@ -588,8 +590,6 @@ const MeasurementForm = ({
                 <ChevronRight />
               </IconButton>
             </Grid>
-
-            <Grid xs={12}></Grid>
           </Grid>
           <Grid xs={4}>
             <Grid container spacing={1}>

@@ -7,7 +7,7 @@ import {
   Select,
   useTheme,
 } from "@mui/material"
-import { Grid } from "@mui/material"
+import Grid from "@mui/system/Unstable_Grid"
 import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
 import distinctColors from "distinct-colors"
@@ -122,7 +122,18 @@ const PerformanceChart = ({ query, pageKey, dateField = "date" }: any) => {
 
   useEffect(() => {
     if (data) {
-      setMeasurements(data)
+      const reorderedData = []
+      for (const measurement of data) {
+        let sortedData = Array.from(measurement.data)
+        sortedData.sort((a: any, b: any) => {
+          return (
+            new Date(a["createdAt"]).getTime() -
+            new Date(b["createdAt"]).getTime()
+          )
+        })
+        reorderedData.push({ ...measurement, data: sortedData })
+      }
+      setMeasurements(reorderedData)
     }
   }, [data])
 

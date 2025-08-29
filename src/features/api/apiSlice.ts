@@ -21,6 +21,9 @@ export const apiSlice = createApi({
         "editUserGroup",
         "deleteUserGroup",
         "addUserGroup",
+        "getRawDataPatientIds",
+        "getRawDataMsns",
+        "getRawDataByPatientIds",
       ])
 
       if (endpointsWithAuth.has(endpoint) && token) {
@@ -40,6 +43,7 @@ export const apiSlice = createApi({
     "Users",
     "UserGroups",
     "GlucoseValues",
+    "RawData",
   ],
   endpoints: (builder) => ({
     //TODO maybe code split per feature
@@ -373,6 +377,33 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["UserGroups"],
     }),
+    // RAW DATA
+    getRawDataPatientIds: builder.query({
+      query: () => "raw-data/distinct/patient-ids",
+      providesTags: ["RawData"],
+    }),
+    getRawDataMsns: builder.query({
+      query: () => "raw-data/distinct/msns",
+      providesTags: ["RawData"],
+    }),
+    getRawDataByPatientIds: builder.query({
+      query: (args) => {
+        const { patientIds, startTime, endTime } = args
+        return {
+          url: `raw-data/by-patient-ids/${patientIds}?startTime=${startTime}&endTime=${endTime}`,
+        }
+      },
+      providesTags: ["RawData"],
+    }),
+    getRawDataByMsns: builder.query({
+      query: (args) => {
+        const { msns, startTime, endTime } = args
+        return {
+          url: `raw-data/by-patient-msns/${msns}?startTime=${startTime}&endTime=${endTime}`,
+        }
+      },
+      providesTags: ["RawData"],
+    }),
   }),
 })
 
@@ -419,4 +450,8 @@ export const {
   useEditUserGroupMutation,
   useDeleteUserGroupMutation,
   useAddUserGroupMutation,
+  useGetRawDataPatientIdsQuery,
+  useGetRawDataMsnsQuery,
+  useGetRawDataByPatientIdsQuery,
+  useGetRawDataByMsnsQuery,
 } = apiSlice

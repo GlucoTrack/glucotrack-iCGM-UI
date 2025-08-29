@@ -44,7 +44,6 @@ const RawMeasurements: React.FC = () => {
         pageKey={"raw_performance"}
         groupsField={"mobileGroups"}
         groupNameField={"mobileGroupName"}
-        devicesField={"mobileDevices"}
         deviceNameField={"mobileName"}
         deviceNamesField={"mobileNames"}
         disableRealtime={true}
@@ -52,7 +51,6 @@ const RawMeasurements: React.FC = () => {
       <PerformanceChart
         query={query}
         pageKey={"raw_performance"}
-        dateField={"time"}
       />
     </Box>
   )

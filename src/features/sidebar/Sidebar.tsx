@@ -115,6 +115,17 @@ const navItems = [
     path: "raw-user-measurements",
     requireRole: ["org:admin"],
   },
+  {
+    text: "Divider",
+    icon: null,
+    requireRole: ["org:admin"],
+  },
+  {
+    text: "Raw Data Measurements",
+    icon: <TimelineOutlined />,
+    path: "raw-data-measurements",
+    requireRole: ["org:admin"],
+  },
 ]
 
 interface SidebarProps {

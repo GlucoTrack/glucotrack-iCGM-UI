@@ -1,5 +1,5 @@
 import Header from "@/components/Header"
-import { Box, Button, useTheme } from "@mui/material"
+import { Box, Button, MenuItem, TextField, useTheme } from "@mui/material"
 import React, { JSX, useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import {
@@ -38,6 +38,9 @@ const initialValues: FormValues = {
   filterLength: 10,
   checkParametersInterval: 60,
   comment: " ",
+  gain: 0,
+  slope: 0,
+  bias: 0,
 }
 
 const EditMobile: React.FC = () => {
@@ -315,19 +318,22 @@ const EditMobile: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          <TrimmedTextField
+          <TextField
             name="gain"
             label="Gain"
-            type="number"
+            select
             value={formValues.gain}
             onChange={handleChange}
             fullWidth
             margin="normal"
-          />
+          >
+            <MenuItem value={0}>0</MenuItem>
+            <MenuItem value={1}>1</MenuItem>
+            <MenuItem value={2}>2</MenuItem>
+          </TextField>
           <TrimmedTextField
             name="slope"
             label="Slope"
-            type="number"
             value={formValues.slope}
             onChange={handleChange}
             fullWidth
@@ -336,7 +342,6 @@ const EditMobile: React.FC = () => {
           <TrimmedTextField
             name="bias"
             label="Bias"
-            type="number"
             value={formValues.bias}
             onChange={handleChange}
             fullWidth
