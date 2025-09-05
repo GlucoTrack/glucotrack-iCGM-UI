@@ -114,6 +114,9 @@ const PerformanceChart = ({ query, pageKey, dateField = "date" }: any) => {
     chart: {
       height: 700,
       backgroundColor: null,
+      zoomType: "xy",
+      panKey: "alt",
+      panning: true,
     },
     legend: {
       itemStyle: {},
